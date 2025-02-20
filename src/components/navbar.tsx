@@ -1,3 +1,5 @@
+'use client';
+
 import { navbarMenu } from "@/config/app";
 import { cn } from "@/lib/utils";
 import { TwitterIcon } from "lucide-react";

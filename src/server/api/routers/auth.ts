@@ -1,12 +1,9 @@
-import { createTRPCRouter, publicProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const authRouter = createTRPCRouter({
-  me: publicProcedure.query(async () => {
-    // TODO: implement me
-
-    return {
-      id: 1,
-      username: "test",
-    };
+  me: protectedProcedure.query(async ({
+    ctx
+  }) => {
+    return ctx.session
   }),
 });
