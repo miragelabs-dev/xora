@@ -17,6 +17,15 @@ pnpm install
 npx chopd
 ```
 
+## 🛠️ Development Guidelines
+This project includes Cursor AI rules (`.mdc` files) for consistent development practices:
+- TypeScript best practices and style guidelines
+- Next.js App Router specific guidelines
+- Performance optimization rules
+- Tailwind CSS styling conventions
+- Shadcn UI and Radix UI component conventions
+- General project conventions and standards
+
 ## 📜 License
 MIT License. Use, modify, and contribute freely. 📝
 
