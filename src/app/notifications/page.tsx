@@ -1,5 +1,6 @@
 'use client';
 
+import { PageHeader } from "@/components/page-header";
 import { UserAvatar } from "@/components/user-avatar";
 import { NotificationView } from "@/lib/db/schema";
 import { api } from "@/utils/api";
@@ -38,9 +39,7 @@ export default function NotificationsPage() {
 
   return (
     <div>
-      <div className="sticky top-0 z-[25] flex h-[53px] items-center justify-between border-b border-border bg-background/80 px-4 backdrop-blur">
-        <h1 className="text-xl font-bold">Notifications</h1>
-      </div>
+      <PageHeader title="Notifications" />
 
       {isLoading ? (
         <div className="flex justify-center p-4">

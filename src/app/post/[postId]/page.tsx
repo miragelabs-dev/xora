@@ -1,18 +1,17 @@
 'use client';
 
 import { useSession } from "@/app/session-provider";
+import { PageHeader } from "@/components/page-header";
 import { Post } from "@/components/post";
-import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
-import { ArrowLeftIcon, Loader2 } from "lucide-react";
-import { notFound, useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
+import { notFound } from "next/navigation";
 
 export default function PostPage({
   params
 }: {
   params: { postId: string }
 }) {
-  const router = useRouter();
   const session = useSession();
   const { data: post, isLoading } = api.post.getById.useQuery({
     postId: parseInt(params.postId)
@@ -32,17 +31,7 @@ export default function PostPage({
 
   return (
     <div>
-      <div className="sticky top-0 z-[25] flex h-[53px] items-center gap-4 border-b border-border bg-background/80 px-4 backdrop-blur">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => router.back()}
-        >
-          <ArrowLeftIcon className="size-5" />
-        </Button>
-        <h1 className="text-xl font-bold">Post</h1>
-      </div>
-
+      <PageHeader title="Post" />
       <Post post={post} showReplies />
     </div>
   );
