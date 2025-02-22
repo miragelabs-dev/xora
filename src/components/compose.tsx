@@ -7,14 +7,15 @@ import { api } from "@/utils/api";
 import { ImageIcon, Loader2, SmileIcon } from "lucide-react";
 import { useState } from "react";
 
-export function Compose() {
+export function Compose({ onSuccess }: { onSuccess?: () => void }) {
   const [content, setContent] = useState('');
   const utils = api.useUtils();
 
   const { mutate: createPost, isPending } = api.post.create.useMutation({
     onSuccess: () => {
-      setContent('');
       utils.post.feed.invalidate();
+      setContent('');
+      onSuccess?.();
     },
   });
 
@@ -24,7 +25,7 @@ export function Compose() {
   };
 
   return (
-    <div className="flex gap-4 p-4">
+    <div className="flex gap-4 p-4 border-b">
       <UserAvatar />
 
       <div className="flex-1 space-y-4">

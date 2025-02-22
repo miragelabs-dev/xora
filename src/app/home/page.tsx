@@ -23,9 +23,7 @@ export default function Page() {
         </Tabs>
       </div>
 
-      <div className="border-b border-border">
-        <Compose />
-      </div>
+      <Compose />
 
       {activeTab === 'for-you' ? (
         <Feed />
