@@ -1,6 +1,5 @@
 'use client';
 
-import { useSession } from "@/app/session-provider";
 import { PageHeader } from "@/components/page-header";
 import { Post } from "@/components/post";
 import { api } from "@/utils/api";
@@ -12,7 +11,6 @@ export default function PostPage({
 }: {
   params: { postId: string }
 }) {
-  const session = useSession();
   const { data: post, isLoading } = api.post.getById.useQuery({
     postId: parseInt(params.postId)
   });

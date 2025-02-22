@@ -8,8 +8,6 @@ import Link from "next/link";
 interface ProfileHeaderProps {
   username: string;
   name?: string;
-  avatarSrc?: string;
-  coverSrc?: string;
   followersCount?: number;
   followingCount?: number;
   isCurrentUser?: boolean;
@@ -21,8 +19,6 @@ interface ProfileHeaderProps {
 export function ProfileHeader({
   username,
   name,
-  avatarSrc,
-  coverSrc = "",
   followersCount = 0,
   followingCount = 0,
   isCurrentUser = false,
@@ -48,7 +44,7 @@ export function ProfileHeader({
     <div className={cn("relative space-y-3", className)}>
       <div className="relative h-32 w-full overflow-hidden sm:h-48">
         <Image
-          src={coverSrc}
+          src='' // TODO: Add cover image
           alt={`${username}'s cover`}
           className="object-cover"
           fill
@@ -60,7 +56,6 @@ export function ProfileHeader({
         <div className="flex justify-between">
           <UserAvatar
             className="size-24 text-3xl"
-            src={avatarSrc}
             fallback={username[0]}
           />
 

@@ -1,12 +1,11 @@
 'use client';
 
 import { Feed } from "@/components/feed";
+import { PageHeader } from "@/components/page-header";
 import { ProfileHeader } from "@/components/profile-header";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/utils/api";
-import { ArrowLeft, Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
 
 export default function UserProfilePage({
@@ -14,9 +13,7 @@ export default function UserProfilePage({
 }: {
   params: { userId: string }
 }) {
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState<'posts' | 'replies'>('posts');
-
   const { data: profile, isLoading } = api.user.getProfile.useQuery({
     userId: parseInt(params.userId)
   });
@@ -39,26 +36,15 @@ export default function UserProfilePage({
 
   return (
     <div>
-      <div className="sticky top-0 z-[25] flex h-[53px] items-center gap-4 border-b border-border bg-background/80 px-4 backdrop-blur">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => router.back()}
-        >
-          <ArrowLeft className="size-5" />
-        </Button>
-        <div className="flex flex-col">
-          <h1 className="text-xl font-bold">{profile.name || `@${profile.username}`}</h1>
-          <p className="text-sm text-muted-foreground">{profile.postsCount} posts</p>
-        </div>
-      </div>
+      <PageHeader
+        title={profile.name || `@${profile.username}`}
+        subtitle={`${profile.postsCount} posts`}
+      />
 
       <ProfileHeader
         userId={profile.id}
         username={profile.username}
         name={profile.name}
-        avatarSrc={profile.avatarUrl}
-        coverSrc={profile.coverUrl}
         followersCount={profile.followersCount}
         followingCount={profile.followingCount}
         isCurrentUser={profile.isCurrentUser}

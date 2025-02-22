@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
 import { UserAvatar } from "@/components/user-avatar";
+import { PostView } from "@/lib/db/schema/post";
 import { api } from "@/utils/api";
 import { formatDistanceToNow } from "date-fns";
 import { Loader2, MoreHorizontal, Repeat2, Trash } from "lucide-react";
@@ -11,23 +12,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 interface PostProps {
-  post: {
-    id: number;
-    content: string;
-    createdAt: string;
-    authorId: number;
-    authorUsername: string;
-    commentsCount: number;
-    repostsCount: number;
-    likesCount: number;
-    savesCount: number;
-    isLiked: boolean;
-    isReposted: boolean;
-    isSaved: boolean;
-    reposterUsername: string | null;
-    replyToId: number | null;
-    repliesCount: number;
-  }
+  post: PostView;
   showReplies?: boolean;
 }
 
@@ -45,9 +30,8 @@ export function Post({
     isLiked,
     isReposted,
     isSaved,
-    reposterUsername,
-    replyToId,
     repliesCount,
+    reposterUsername,
   },
   showReplies = false
 }: PostProps) {

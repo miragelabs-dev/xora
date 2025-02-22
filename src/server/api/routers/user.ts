@@ -45,8 +45,6 @@ export const userRouter = createTRPCRouter({
         id: user.id,
         username: user.username,
         name: user.username,
-        avatarUrl: undefined,
-        coverUrl: undefined,
         followersCount: followersCount[0].value,
         followingCount: followingCount[0].value,
         postsCount: postsCountResult[0].value,

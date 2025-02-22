@@ -1,8 +1,8 @@
 import { desc, eq, relations, sql } from "drizzle-orm";
-import { alias, integer, pgTable, pgView, serial, text, timestamp, type PgTableWithColumns } from "drizzle-orm/pg-core";
+import { alias, integer, pgTable, pgView, serial, text, timestamp } from "drizzle-orm/pg-core";
 import { users } from "./user";
 
-export const posts: PgTableWithColumns<any> = pgTable("posts", {
+export const posts = pgTable("posts", {
   id: serial("id").primaryKey(),
   content: text("content").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
