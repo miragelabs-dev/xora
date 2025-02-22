@@ -23,6 +23,7 @@
     "@trpc/server": "11.0.0-rc.795",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
     "dotenv": "^16.4.7",
     "drizzle-orm": "^0.39.3",
     "jsonwebtoken": "^9.0.2",
