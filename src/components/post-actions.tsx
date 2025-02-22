@@ -28,6 +28,7 @@ export function PostActions({ stats, interactions, postId, className }: PostActi
     onSuccess: () => {
       utils.post.feed.invalidate();
       utils.post.getById.invalidate({ postId });
+      utils.post.bookmarks.invalidate();
     },
   });
 
@@ -35,6 +36,7 @@ export function PostActions({ stats, interactions, postId, className }: PostActi
     onSuccess: () => {
       utils.post.feed.invalidate();
       utils.post.getById.invalidate({ postId });
+      utils.post.bookmarks.invalidate();
     },
   });
 
@@ -42,6 +44,7 @@ export function PostActions({ stats, interactions, postId, className }: PostActi
     onSuccess: () => {
       utils.post.feed.invalidate();
       utils.post.getById.invalidate({ postId });
+      utils.post.bookmarks.invalidate();
     },
   });
 
@@ -49,6 +52,7 @@ export function PostActions({ stats, interactions, postId, className }: PostActi
     onSuccess: () => {
       utils.post.feed.invalidate();
       utils.post.getById.invalidate({ postId });
+      utils.post.bookmarks.invalidate();
     },
   });
 
