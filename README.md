@@ -9,9 +9,11 @@ Existing social networks are either centralized (X) or don't fully inherit block
 - 🔹 Chopin Framework 🛠️ (Modular blockchain infra)
 - 🔹 Celestia 🌐 (Data availability & security)
 - 🔹 Next.js ⚡ (Frontend framework)
-- 🔹 SQL 🗄️ (Database for structured data)
+- 🔹 PostgreSQL 🗄️ (Database)
+- 🔹 Drizzle ORM 🎯 (TypeScript ORM)
 - 🔹 TailwindCSS 🎨 (Styling)
 - 🔹 Shadcn/UI 🎯 (UI Components)
+- 🔹 tRPC 🎯 (API layer)
 
 ## 📋 TODO List
 
@@ -24,9 +26,9 @@ Existing social networks are either centralized (X) or don't fully inherit block
   - [ ] Copy text
   - [ ] Copy post URL
 - [ ] Notification system:
-  - [ ] Retweet notifications
-  - [ ] Comment notifications
-  - [ ] Like notifications
+  - [x] Retweet notifications
+  - [x] Comment notifications
+  - [x] Like notifications
   - [ ] Follow notifications
 
 ### Layout Enhancements

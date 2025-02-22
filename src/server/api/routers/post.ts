@@ -1,6 +1,7 @@
 import { likes, posts, reposts, saves } from "@/lib/db/schema";
 import { postView } from "@/lib/db/schema/post";
 import { setUserId } from "@/server/utils/db";
+import { createNotification, deleteNotification } from "@/server/utils/notifications";
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, lt, sql } from "drizzle-orm";
 import { z } from "zod";
@@ -55,10 +56,28 @@ export const postRouter = createTRPCRouter({
       postId: z.number(),
     }))
     .mutation(async ({ ctx, input }) => {
+      const post = await ctx.db.query.posts.findFirst({
+        where: eq(posts.id, input.postId),
+      });
+
+      if (!post) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
       await ctx.db.insert(likes).values({
         postId: input.postId,
         userId: ctx.session.id,
       });
+
+      if (post.authorId !== ctx.session.id) {
+        await createNotification(ctx.db, {
+          userId: post.authorId,
+          actorId: ctx.session.id,
+          type: "like",
+          targetId: input.postId,
+          targetType: "post",
+        });
+      }
     }),
 
   unlike: protectedProcedure
@@ -72,6 +91,13 @@ export const postRouter = createTRPCRouter({
           eq(likes.postId, input.postId),
           eq(likes.userId, ctx.session.id)
         ));
+
+      await deleteNotification(ctx.db, {
+        actorId: ctx.session.id,
+        type: "like",
+        targetId: input.postId,
+        targetType: "post",
+      });
     }),
 
   delete: protectedProcedure
@@ -104,10 +130,28 @@ export const postRouter = createTRPCRouter({
       postId: z.number(),
     }))
     .mutation(async ({ ctx, input }) => {
+      const post = await ctx.db.query.posts.findFirst({
+        where: eq(posts.id, input.postId),
+      });
+
+      if (!post) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
       await ctx.db.insert(reposts).values({
         postId: input.postId,
         userId: ctx.session.id,
       });
+
+      if (post.authorId !== ctx.session.id) {
+        await createNotification(ctx.db, {
+          userId: post.authorId,
+          actorId: ctx.session.id,
+          type: "repost",
+          targetId: input.postId,
+          targetType: "post",
+        });
+      }
     }),
 
   unrepost: protectedProcedure
@@ -121,6 +165,13 @@ export const postRouter = createTRPCRouter({
           eq(reposts.postId, input.postId),
           eq(reposts.userId, ctx.session.id)
         ));
+
+      await deleteNotification(ctx.db, {
+        actorId: ctx.session.id,
+        type: "repost",
+        targetId: input.postId,
+        targetType: "post",
+      });
     }),
 
   getById: protectedProcedure
@@ -147,6 +198,14 @@ export const postRouter = createTRPCRouter({
       postId: z.number(),
     }))
     .mutation(async ({ ctx, input }) => {
+      const post = await ctx.db.query.posts.findFirst({
+        where: eq(posts.id, input.postId),
+      });
+
+      if (!post) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
       await ctx.db.insert(saves).values({
         postId: input.postId,
         userId: ctx.session.id,
@@ -164,6 +223,13 @@ export const postRouter = createTRPCRouter({
           eq(saves.postId, input.postId),
           eq(saves.userId, ctx.session.id)
         ));
+
+      await deleteNotification(ctx.db, {
+        actorId: ctx.session.id,
+        type: "save",
+        targetId: input.postId,
+        targetType: "post",
+      });
     }),
 
   bookmarks: protectedProcedure
