@@ -4,7 +4,9 @@ import { Session } from "@/types";
 import { createContext, useContext } from "react";
 
 const initialState = {
-  address: '' as string
+  id: 0,
+  address: '' as string,
+  username: '' as string,
 }
 
 export const SessionContext = createContext<Session | null>(
