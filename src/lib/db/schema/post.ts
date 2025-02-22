@@ -1,8 +1,8 @@
 import { desc, eq, relations, sql } from "drizzle-orm";
-import { alias, integer, pgTable, pgView, serial, text, timestamp } from "drizzle-orm/pg-core";
+import { alias, integer, pgTable, pgView, serial, text, timestamp, type PgTableWithColumns } from "drizzle-orm/pg-core";
 import { users } from "./user";
 
-export const posts = pgTable("posts", {
+export const posts: PgTableWithColumns<any> = pgTable("posts", {
   id: serial("id").primaryKey(),
   content: text("content").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -10,12 +10,25 @@ export const posts = pgTable("posts", {
   authorId: integer("author_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
+  replyToId: integer("reply_to_id")
+    .references(() => posts.id, { onDelete: "cascade" }),
 });
 
-export const postsRelations = relations(posts, ({ one }) => ({
+export const postsRelations = relations(posts, ({ one, many }) => ({
   author: one(users, {
+    relationName: "posts_author",
     fields: [posts.authorId],
     references: [users.id],
+  }),
+  replyTo: one(posts, {
+    relationName: "posts_reply_to",
+    fields: [posts.replyToId],
+    references: [posts.id],
+  }),
+  replies: many(posts, {
+    relationName: "posts_replies",
+    fields: [posts.id],
+    references: [posts.replyToId],
   }),
 }));
 
@@ -73,6 +86,8 @@ export const postView = pgView("post_view").as((qb) =>
       isSaved: sql<boolean>`COALESCE(bool_or(${saves.userId} = current_setting('app.user_id')::integer), false)`.as('is_saved'),
       isReposted: sql<boolean>`COALESCE(bool_or(${reposts.userId} = current_setting('app.user_id')::integer), false)`.as('is_reposted'),
       isOwner: sql<boolean>`${posts.authorId} = current_setting('app.user_id')::integer`.as('is_owner'),
+      replyToId: posts.replyToId,
+      repliesCount: sql<number>`COUNT(DISTINCT replies.id)`.as('replies_count'),
     })
     .from(posts)
     .innerJoin(users, eq(users.id, posts.authorId))
@@ -92,6 +107,10 @@ export const postView = pgView("post_view").as((qb) =>
     .leftJoin(reposts, eq(reposts.postId, posts.id))
     .leftJoin(likes, eq(likes.postId, posts.id))
     .leftJoin(saves, eq(saves.postId, posts.id))
+    .leftJoin(
+      alias(posts, 'replies'),
+      eq(alias(posts, 'replies').replyToId, posts.id)
+    )
     .groupBy(
       posts.id,
       posts.content,
@@ -102,7 +121,8 @@ export const postView = pgView("post_view").as((qb) =>
       sql`first_repost.id`,
       sql`first_repost.user_id`,
       sql`first_repost.created_at`,
-      sql`ru.username`
+      sql`ru.username`,
+      posts.replyToId,
     )
 );
 

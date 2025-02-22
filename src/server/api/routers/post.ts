@@ -245,4 +245,70 @@ export const postRouter = createTRPCRouter({
 
       return posts.map(({ post_view: post }) => post);
     }),
+
+  reply: protectedProcedure
+    .input(z.object({
+      content: z.string().min(1).max(280),
+      replyToId: z.number(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const parentPost = await ctx.db.query.posts.findFirst({
+        where: eq(posts.id, input.replyToId),
+      });
+
+      if (!parentPost) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      const [post] = await ctx.db.insert(posts).values({
+        content: input.content,
+        authorId: ctx.session.id,
+        replyToId: input.replyToId,
+      }).returning();
+
+      if (parentPost.authorId !== ctx.session.id) {
+        await createNotification(ctx.db, {
+          userId: parentPost.authorId,
+          actorId: ctx.session.id,
+          type: "comment",
+          targetId: input.replyToId,
+          targetType: "post",
+        });
+      }
+
+      return post;
+    }),
+
+  getReplies: protectedProcedure
+    .input(z.object({
+      postId: z.number(),
+      limit: z.number().min(1).max(100).default(20),
+      cursor: z.number().nullish(),
+    }))
+    .query(async ({ ctx, input }) => {
+      await setUserId(ctx.db, ctx.session.id);
+
+      const items = await ctx.db
+        .select()
+        .from(postView)
+        .where(
+          and(
+            eq(postView.replyToId, input.postId),
+            input.cursor ? lt(postView.id, input.cursor) : undefined
+          )
+        )
+        .orderBy(desc(postView.createdAt))
+        .limit(input.limit + 1);
+
+      let nextCursor: typeof input.cursor = undefined;
+      if (items.length > input.limit) {
+        const nextItem = items.pop();
+        nextCursor = nextItem!.id;
+      }
+
+      return {
+        items,
+        nextCursor,
+      };
+    }),
 }); 

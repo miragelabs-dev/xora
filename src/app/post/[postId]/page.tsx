@@ -43,7 +43,7 @@ export default function PostPage({
         <h1 className="text-xl font-bold">Post</h1>
       </div>
 
-      <Post post={post} />
+      <Post post={post} showReplies />
     </div>
   );
 } 

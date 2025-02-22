@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { api } from "@/utils/api";
 import { Bookmark, Heart, MessageCircle, Repeat2 } from "lucide-react";
+import Link from "next/link";
 
 interface PostActionsProps {
   stats: {
@@ -11,6 +12,7 @@ interface PostActionsProps {
     repostsCount: number;
     likesCount: number;
     savesCount: number;
+    repliesCount: number;
   };
   interactions: {
     isLiked: boolean;
@@ -29,6 +31,7 @@ export function PostActions({ stats, interactions, postId, className }: PostActi
       utils.post.feed.invalidate();
       utils.post.getById.invalidate({ postId });
       utils.post.bookmarks.invalidate();
+      utils.post.getReplies.invalidate();
     },
   });
 
@@ -37,6 +40,7 @@ export function PostActions({ stats, interactions, postId, className }: PostActi
       utils.post.feed.invalidate();
       utils.post.getById.invalidate({ postId });
       utils.post.bookmarks.invalidate();
+      utils.post.getReplies.invalidate();
     },
   });
 
@@ -45,6 +49,7 @@ export function PostActions({ stats, interactions, postId, className }: PostActi
       utils.post.feed.invalidate();
       utils.post.getById.invalidate({ postId });
       utils.post.bookmarks.invalidate();
+      utils.post.getReplies.invalidate();
     },
   });
 
@@ -53,6 +58,7 @@ export function PostActions({ stats, interactions, postId, className }: PostActi
       utils.post.feed.invalidate();
       utils.post.getById.invalidate({ postId });
       utils.post.bookmarks.invalidate();
+      utils.post.getReplies.invalidate();
     },
   });
 
@@ -61,6 +67,7 @@ export function PostActions({ stats, interactions, postId, className }: PostActi
       utils.post.feed.invalidate();
       utils.post.getById.invalidate({ postId });
       utils.post.bookmarks.invalidate();
+      utils.post.getReplies.invalidate({ postId });
     },
   });
 
@@ -69,19 +76,26 @@ export function PostActions({ stats, interactions, postId, className }: PostActi
       utils.post.feed.invalidate();
       utils.post.getById.invalidate({ postId });
       utils.post.bookmarks.invalidate();
+      utils.post.getReplies.invalidate({ postId });
     },
   });
 
   return (
     <div className={cn("mt-2 flex justify-between text-muted-foreground", className)}>
-      <Button variant="ghost" size="icon" className="gap-2" onClick={(e) => {
-        e.preventDefault();
-
-        // TODO: Implement comment post
-      }}>
-        <MessageCircle className="h-5 w-5" />
-        <span className="text-sm">{stats.commentsCount}</span>
-      </Button>
+      <Link
+        href={`/post/${postId}`}
+        className="gap-2"
+      >
+        <Button
+          variant="ghost"
+          size="icon"
+          className="gap-2"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <MessageCircle className="h-5 w-5" />
+          <span className="text-sm">{stats.repliesCount}</span>
+        </Button>
+      </Link>
 
       <Button
         variant="ghost"
@@ -136,6 +150,6 @@ export function PostActions({ stats, interactions, postId, className }: PostActi
         <Bookmark className={cn("h-5 w-5", interactions.isSaved && "text-blue-500")} />
         <span className="text-sm">{stats.savesCount}</span>
       </Button>
-    </div >
+    </div>
   );
 } 

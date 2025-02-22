@@ -2,10 +2,13 @@ import { useSession } from "@/app/session-provider";
 import { PostActions } from "@/components/post-actions";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Textarea } from "@/components/ui/textarea";
 import { UserAvatar } from "@/components/user-avatar";
 import { api } from "@/utils/api";
+import { formatDistanceToNow } from "date-fns";
 import { Loader2, MoreHorizontal, Repeat2, Trash } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
 interface PostProps {
   post: {
@@ -22,7 +25,10 @@ interface PostProps {
     isReposted: boolean;
     isSaved: boolean;
     reposterUsername: string | null;
+    replyToId: number | null;
+    repliesCount: number;
   }
+  showReplies?: boolean;
 }
 
 export function Post({
@@ -40,8 +46,13 @@ export function Post({
     isReposted,
     isSaved,
     reposterUsername,
-  }
+    replyToId,
+    repliesCount,
+  },
+  showReplies = false
 }: PostProps) {
+  const [replyContent, setReplyContent] = useState("");
+
   const utils = api.useUtils();
   const session = useSession();
 
@@ -53,68 +64,151 @@ export function Post({
     },
   });
 
-  return (
-    <div className="group relative p-4 block border-b border-border">
-      <Link
-        href={`/post/${postId}`}
-        className="absolute inset-0 z-0"
-      />
+  const { mutate: reply } = api.post.reply.useMutation({
+    onSuccess: () => {
+      setReplyContent("");
+      utils.post.getReplies.invalidate({ postId: postId });
+      utils.post.getById.invalidate({ postId: postId });
+    },
+  });
 
-      {reposterUsername && (
-        <div className="ml-2 top-[-8px] relative flex items-center gap-1 px-4 pt-2 text-xs text-muted-foreground">
-          <Repeat2 className="h-4 w-4" />
-          <span>@{reposterUsername} reposted</span>
+  const { data: replies, hasNextPage, fetchNextPage, isFetchingNextPage } =
+    api.post.getReplies.useInfiniteQuery(
+      {
+        postId: postId,
+        limit: 10,
+      },
+      {
+        enabled: showReplies,
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+      }
+    );
+
+  return (
+    <div className="group relative block border-b border-border">
+      <div className="relative p-4">
+        <Link
+          href={`/post/${postId}`}
+          className="absolute inset-0 z-0"
+        />
+
+        {reposterUsername && (
+          <div className="ml-2 top-[-8px] relative flex items-center gap-1 px-4 pt-2 text-xs text-muted-foreground">
+            <Repeat2 className="h-4 w-4" />
+            <span>@{reposterUsername} reposted</span>
+          </div>
+        )}
+
+        <article className="flex gap-4">
+          <UserAvatar />
+
+          <div className="flex-1 space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <div className="text-sm">
+                <span className="font-bold">@{authorUsername}</span>
+                <span className="ml-2 text-muted-foreground">· {
+                  formatDistanceToNow(new Date(timestamp), { addSuffix: true })
+                }</span>
+              </div>
+
+              {isPostOwner && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="relative z-10 h-8 w-8"
+                    >
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      disabled={isPending}
+                      onClick={() => deletePost({ postId })}
+                    >
+                      {isPending ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash className="mr-2 h-4 w-4" />
+                      )}
+                      Delete Post
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </div>
+
+            <p className="text-sm">{content}</p>
+
+            <PostActions
+              stats={{ commentsCount, repostsCount, likesCount, savesCount, repliesCount }}
+              interactions={{ isLiked, isReposted, isSaved }}
+              postId={postId}
+              className="relative z-10"
+            />
+          </div>
+        </article>
+      </div>
+
+      {showReplies && (
+        <div className="mt-4 border-t border-b border-border">
+          <div className="flex gap-4 p-4">
+            <UserAvatar />
+
+            <div className="flex-1 space-y-4">
+              <Textarea
+                value={replyContent}
+                onChange={(e) => setReplyContent(e.target.value)}
+                placeholder="Tweet your reply"
+                className="min-h-[100px] resize-none border-none bg-transparent p-0 pt-1.5 !text-lg focus-visible:ring-0"
+              />
+
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">
+                  {replyContent.length}/280
+                </div>
+
+                <Button
+                  onClick={() => {
+                    if (!replyContent.trim()) return;
+                    reply({
+                      content: replyContent.trim(),
+                      replyToId: postId,
+                    });
+                  }}
+                  disabled={!replyContent.trim() || replyContent.length > 280}
+                >
+                  Reply
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
-      <article className="flex gap-4">
-        <UserAvatar />
-
-        <div className="flex-1 space-y-2">
-          <div className="flex items-center justify-between gap-2">
-            <div className="text-sm">
-              <span className="font-bold">@{authorUsername}</span>
-              <span className="ml-2 text-muted-foreground">· {timestamp}</span>
-            </div>
-
-            {isPostOwner && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="relative z-10 h-8 w-8"
-                  >
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    disabled={isPending}
-                    onClick={() => deletePost({ postId })}
-                  >
-                    {isPending ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <Trash className="mr-2 h-4 w-4" />
-                    )}
-                    Delete Post
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-          </div>
-
-          <p className="text-sm">{content}</p>
-
-          <PostActions
-            stats={{ commentsCount, repostsCount, likesCount, savesCount }}
-            interactions={{ isLiked, isReposted, isSaved }}
-            postId={postId}
-            className="relative z-10"
-          />
+      {showReplies && replies?.pages.map((page, i) => (
+        <div key={i}>
+          {page.items.map((reply) => (
+            <Post key={reply.id} post={reply} />
+          ))}
         </div>
-      </article>
+      ))}
+
+      {hasNextPage && (
+        <Button
+          variant="ghost"
+          className="mt-4 w-full"
+          onClick={() => fetchNextPage()}
+          disabled={isFetchingNextPage}
+        >
+          {isFetchingNextPage ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            "Load more replies"
+          )}
+        </Button>
+      )}
     </div>
   );
 } 
