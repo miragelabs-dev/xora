@@ -95,7 +95,15 @@ export function Post({
         {reposterUsername && (
           <div className="ml-2 top-[-8px] relative flex items-center gap-1 px-4 pt-2 text-xs text-muted-foreground">
             <Repeat2 className="h-4 w-4" />
-            <span>@{reposterUsername} reposted</span>
+            <span>
+              <Link
+                href={`/users/${authorId}`}
+                className="relative z-10 hover:underline"
+              >
+                @{reposterUsername}
+              </Link>
+              {" "}reposted
+            </span>
           </div>
         )}
 
@@ -105,7 +113,12 @@ export function Post({
           <div className="flex-1 space-y-2">
             <div className="flex items-center justify-between gap-2">
               <div className="text-sm">
-                <span className="font-bold">@{authorUsername}</span>
+                <Link
+                  href={`/users/${authorId}`}
+                  className="relative z-10 font-bold hover:underline"
+                >
+                  @{authorUsername}
+                </Link>
                 <span className="ml-2 text-muted-foreground">· {
                   formatDistanceToNow(new Date(timestamp), { addSuffix: true })
                 }</span>

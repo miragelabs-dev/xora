@@ -1,6 +1,5 @@
 'use client';
 
-import { useSession } from "@/app/session-provider";
 import { Post } from "@/components/post";
 import { api } from "@/utils/api";
 import { Loader2 } from "lucide-react";
@@ -8,12 +7,11 @@ import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 
 interface FeedProps {
-  type?: 'for-you' | 'following';
+  type?: 'for-you' | 'following' | 'user' | 'replies';
+  userId?: number;
 }
 
-export function Feed({ type = 'for-you' }: FeedProps) {
-  const session = useSession();
-
+export function Feed({ type = 'for-you', userId }: FeedProps) {
   const { ref, inView } = useInView();
 
   const {
@@ -25,6 +23,7 @@ export function Feed({ type = 'for-you' }: FeedProps) {
   } = api.post.feed.useInfiniteQuery(
     {
       type,
+      userId,
       limit: 20,
     },
     {

@@ -23,19 +23,37 @@ export const postRouter = createTRPCRouter({
 
   feed: protectedProcedure
     .input(z.object({
-      type: z.enum(["for-you", "following"]).default("for-you"),
+      type: z.enum(["for-you", "following", "user", "replies"]).default("for-you"),
+      userId: z.number().optional(),
       limit: z.number().min(1).max(100).default(20),
       cursor: z.number().nullish(),
     }))
     .query(async ({ ctx, input }) => {
-      const { limit, cursor } = input;
+      const { type, limit, cursor, userId } = input;
 
       await setUserId(ctx.db, ctx.session.id);
 
-      const items = await ctx.db
+      const baseQuery = ctx.db
         .select()
-        .from(postView)
-        .where(cursor ? lt(postView.id, cursor) : undefined)
+        .from(postView);
+
+      const conditions = [];
+
+      if (type === 'user' && userId) {
+        conditions.push(eq(postView.authorId, userId));
+      }
+
+      if (type === 'replies' && userId) {
+        conditions.push(eq(postView.authorId, userId));
+        conditions.push(sql`${postView.replyToId} IS NOT NULL`);
+      }
+
+      if (cursor) {
+        conditions.push(lt(postView.id, cursor));
+      }
+
+      const items = await baseQuery
+        .where(and(...conditions))
         .orderBy(desc(sql`COALESCE(${postView.repostCreatedAt}, ${postView.createdAt})`))
         .limit(limit + 1);
 
