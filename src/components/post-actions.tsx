@@ -52,6 +52,22 @@ export function PostActions({ stats, interactions, postId, className }: PostActi
     },
   });
 
+  const { mutate: save } = api.post.save.useMutation({
+    onSuccess: () => {
+      utils.post.feed.invalidate();
+      utils.post.getById.invalidate({ postId });
+      utils.post.bookmarks.invalidate();
+    },
+  });
+
+  const { mutate: unsave } = api.post.unsave.useMutation({
+    onSuccess: () => {
+      utils.post.feed.invalidate();
+      utils.post.getById.invalidate({ postId });
+      utils.post.bookmarks.invalidate();
+    },
+  });
+
   return (
     <div className={cn("mt-2 flex justify-between text-muted-foreground", className)}>
       <Button variant="ghost" size="icon" className="gap-2" onClick={(e) => {
@@ -106,7 +122,11 @@ export function PostActions({ stats, interactions, postId, className }: PostActi
         onClick={(e) => {
           e.preventDefault();
 
-          // TODO: Implement save post
+          if (interactions.isSaved) {
+            unsave({ postId });
+          } else {
+            save({ postId });
+          }
         }}
       >
         <Bookmark className={cn("h-5 w-5", interactions.isSaved && "text-blue-500")} />

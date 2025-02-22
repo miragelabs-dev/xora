@@ -1,4 +1,4 @@
-import { likes, posts, reposts } from "@/lib/db/schema";
+import { likes, posts, reposts, saves } from "@/lib/db/schema";
 import { postView } from "@/lib/db/schema/post";
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, lt, sql } from "drizzle-orm";
@@ -122,7 +122,6 @@ export const postRouter = createTRPCRouter({
         ));
     }),
 
-
   getById: protectedProcedure
     .input(z.object({
       postId: z.number(),
@@ -141,5 +140,42 @@ export const postRouter = createTRPCRouter({
 
       return post[0];
     }),
-  // Benzer şekilde save/unsave ve repost/unrepost mutasyonları
+
+  save: protectedProcedure
+    .input(z.object({
+      postId: z.number(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.insert(saves).values({
+        postId: input.postId,
+        userId: ctx.session.id,
+      });
+    }),
+
+  unsave: protectedProcedure
+    .input(z.object({
+      postId: z.number(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .delete(saves)
+        .where(and(
+          eq(saves.postId, input.postId),
+          eq(saves.userId, ctx.session.id)
+        ));
+    }),
+
+  bookmarks: protectedProcedure
+    .query(async ({ ctx }) => {
+      await ctx.db.execute(sql`SET app.user_id = ${sql.raw(ctx.session.id.toString())}`);
+
+      const posts = await ctx.db
+        .select()
+        .from(postView)
+        .innerJoin(saves, eq(saves.postId, postView.id))
+        .where(eq(saves.userId, ctx.session.id))
+        .orderBy(desc(postView.createdAt));
+
+      return posts.map(({ post_view: post }) => post);
+    }),
 }); 
