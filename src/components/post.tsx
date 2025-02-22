@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { UserAvatar } from "@/components/user-avatar";
 import { api } from "@/utils/api";
-import { Loader2, MoreHorizontal, Trash } from "lucide-react";
+import { Loader2, MoreHorizontal, Repeat2, Trash } from "lucide-react";
 
 interface PostProps {
   username: string;
@@ -23,6 +23,9 @@ interface PostProps {
   isSaved: boolean;
   postId: number;
   isOwner?: boolean;
+  repostedBy?: {
+    username: string;
+  };
 }
 
 export function Post({
@@ -37,7 +40,8 @@ export function Post({
   isReposted,
   isSaved,
   postId,
-  isOwner
+  isOwner,
+  repostedBy
 }: PostProps) {
   const utils = api.useUtils();
   const { mutate: deletePost, isPending } = api.post.delete.useMutation({
@@ -47,44 +51,53 @@ export function Post({
   });
 
   return (
-    <article className="flex gap-4 border-b border-border p-4">
-      <UserAvatar />
+    <div className='p-4 block border-b border-border'>
+      {repostedBy && (
+        <div className="ml-2 top-[-8px] relative flex items-center gap-1 px-4 pt-2 text-xs text-muted-foreground">
+          <Repeat2 className="h-4 w-4" />
+          <span>@{repostedBy.username} reposted</span>
+        </div>
+      )}
 
-      <div className="flex-1 space-y-2">
-        <div className="flex items-center justify-between gap-2">
-          <div className="text-sm">
-            <span className="font-bold">@{username}</span>
-            <span className="ml-2 text-muted-foreground">· {timestamp}</span>
+      <article className="flex gap-4">
+        <UserAvatar />
+
+        <div className="flex-1 space-y-2">
+          <div className="flex items-center justify-between gap-2">
+            <div className="text-sm">
+              <span className="font-bold">@{username}</span>
+              <span className="ml-2 text-muted-foreground">· {timestamp}</span>
+            </div>
+
+            {isOwner && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    disabled={isPending}
+                    onClick={() => deletePost({ postId })}
+                  >
+                    {isPending ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash className="mr-2 h-4 w-4" />
+                    )}
+                    Delete Post
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
 
-          {isOwner && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  disabled={isPending}
-                  onClick={() => deletePost({ postId })}
-                >
-                  {isPending ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Trash className="mr-2 h-4 w-4" />
-                  )}
-                  Delete Post
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
+          <p className="text-sm">{content}</p>
+
+          <PostActions stats={{ commentsCount, repostsCount, likesCount, savesCount }} interactions={{ isLiked, isReposted, isSaved }} postId={postId} />
         </div>
-
-        <p className="text-sm">{content}</p>
-
-        <PostActions stats={{ commentsCount, repostsCount, likesCount, savesCount }} interactions={{ isLiked, isReposted, isSaved }} postId={postId} />
-      </div>
-    </article>
+      </article>
+    </div>
   );
 } 

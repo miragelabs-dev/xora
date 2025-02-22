@@ -73,6 +73,9 @@ export function Feed({ type = 'for-you' }: FeedProps) {
               isSaved={item.isSaved}
               postId={item.post.id}
               isOwner={item.author.id === session?.id}
+              repostedBy={item.repostedBy?.username ? {
+                username: item.repostedBy.username
+              } : undefined}
             />
           ))}
         </div>

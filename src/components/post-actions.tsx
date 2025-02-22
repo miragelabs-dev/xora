@@ -35,6 +35,18 @@ export function PostActions({ stats, interactions, postId }: PostActionsProps) {
     },
   });
 
+  const { mutate: repost } = api.post.repost.useMutation({
+    onSuccess: () => {
+      utils.post.feed.invalidate();
+    },
+  });
+
+  const { mutate: unrepost } = api.post.unrepost.useMutation({
+    onSuccess: () => {
+      utils.post.feed.invalidate();
+    },
+  });
+
   return (
     <div className="mt-2 flex justify-between text-muted-foreground">
       <Button variant="ghost" size="icon" className="gap-2">
@@ -42,7 +54,12 @@ export function PostActions({ stats, interactions, postId }: PostActionsProps) {
         <span className="text-sm">{stats.commentsCount}</span>
       </Button>
 
-      <Button variant="ghost" size="icon" className="gap-2">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="gap-2"
+        onClick={() => interactions.isReposted ? unrepost({ postId }) : repost({ postId })}
+      >
         <Repeat2 className={cn("h-5 w-5", interactions.isReposted && "text-green-500")} />
         <span className="text-sm">{stats.repostsCount}</span>
       </Button>

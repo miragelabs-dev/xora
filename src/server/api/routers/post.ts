@@ -1,6 +1,7 @@
 import { likes, posts, reposts, saves, users } from "@/lib/db/schema";
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, lt, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
@@ -27,15 +28,28 @@ export const postRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const { type, limit, cursor } = input;
 
-      const query = ctx.db
+      const items = await ctx.db
         .select({
-          post: posts,
+          post: {
+            id: posts.id,
+            content: posts.content,
+            createdAt: posts.createdAt,
+            authorId: posts.authorId
+          },
           author: {
             id: users.id,
             username: users.username,
             address: users.address,
           },
-          commentsCount: sql<number>`'0'`, // TODO: Add comments count
+          repostedBy: {
+            id: alias(users, "reposters").id,
+            username: alias(users, "reposters").username,
+          },
+          repost: {
+            id: reposts.id,
+            createdAt: reposts.createdAt
+          },
+          commentsCount: sql<number>`'0'`,
           repostsCount: sql<number>`count(distinct ${reposts.id})`,
           likesCount: sql<number>`count(distinct ${likes.id})`,
           savesCount: sql<number>`count(distinct ${saves.id})`,
@@ -44,24 +58,30 @@ export const postRouter = createTRPCRouter({
           isReposted: sql<boolean>`bool_or(${reposts.userId} = ${ctx.session.id})`,
         })
         .from(posts)
-        .innerJoin(users, eq(posts.authorId, users.id))
+        .leftJoin(reposts, eq(reposts.postId, posts.id))
+        .innerJoin(users, eq(users.id, posts.authorId))
+        .leftJoin(
+          alias(users, "reposters"),
+          eq(reposts.userId, alias(users, "reposters").id)
+        )
         .leftJoin(likes, eq(likes.postId, posts.id))
         .leftJoin(saves, eq(saves.postId, posts.id))
-        .leftJoin(reposts, eq(reposts.postId, posts.id))
-        .groupBy(posts.id, users.id, users.username, users.address)
-        .orderBy(desc(posts.createdAt));
-
-      if (type === "following") {
-        // TODO: Add following filter
-      }
-
-      if (cursor) {
-        query.where(lt(posts.id, cursor));
-      }
-
-      query.limit(limit + 1);
-
-      const items = await query;
+        .groupBy(
+          posts.id,
+          posts.content,
+          posts.createdAt,
+          posts.authorId,
+          users.id,
+          users.username,
+          users.address,
+          alias(users, "reposters").id,
+          alias(users, "reposters").username,
+          reposts.id,
+          reposts.createdAt
+        )
+        .orderBy(desc(sql`COALESCE(${reposts.createdAt}, ${posts.createdAt})`))
+        .where(cursor ? lt(posts.id, cursor) : undefined)
+        .limit(limit + 1);
 
       let nextCursor: typeof cursor = undefined;
       if (items.length > limit) {
@@ -122,6 +142,30 @@ export const postRouter = createTRPCRouter({
       }
 
       return deletedPost;
+    }),
+
+  repost: protectedProcedure
+    .input(z.object({
+      postId: z.number(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.insert(reposts).values({
+        postId: input.postId,
+        userId: ctx.session.id,
+      });
+    }),
+
+  unrepost: protectedProcedure
+    .input(z.object({
+      postId: z.number(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .delete(reposts)
+        .where(and(
+          eq(reposts.postId, input.postId),
+          eq(reposts.userId, ctx.session.id)
+        ));
     }),
 
   // Benzer şekilde save/unsave ve repost/unrepost mutasyonları
