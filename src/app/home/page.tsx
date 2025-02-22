@@ -1,11 +1,17 @@
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+'use client';
 
-export default async function Page() {
+import { Compose } from "@/components/compose";
+import { Feed } from "@/components/feed";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState } from "react";
+
+export default function Page() {
+  const [activeTab, setActiveTab] = useState<'for-you' | 'following'>('for-you');
 
   return (
     <div>
-      <div className="sticky top-0 z-[25] h-auto w-full">
-        <Tabs defaultValue="for-you">
+      <div className="sticky top-0 z-[25] h-auto w-full bg-background/80 backdrop-blur">
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'for-you' | 'following')}>
           <TabsList className="w-full">
             <TabsTrigger value="for-you" className="flex-1">
               For You
@@ -16,9 +22,16 @@ export default async function Page() {
           </TabsList>
         </Tabs>
       </div>
-      {
-        // TODO: Implement for you feed
-      }
+
+      <div className="border-b border-border">
+        <Compose />
+      </div>
+
+      {activeTab === 'for-you' ? (
+        <Feed />
+      ) : (
+        <Feed type="following" />
+      )}
     </div>
   );
 }
