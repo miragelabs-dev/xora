@@ -10,10 +10,44 @@ Existing social networks are either centralized (X) or don't fully inherit block
 - 🔹 Celestia 🌐 (Data availability & security)
 - 🔹 Next.js ⚡ (Frontend framework)
 - 🔹 SQL 🗄️ (Database for structured data)
+- 🔹 TailwindCSS 🎨 (Styling)
+- 🔹 Shadcn/UI 🎯 (UI Components)
+
+## 📋 TODO List
+
+### Core Features
+- [ ] Retweet functionality
+- [ ] Save/Bookmark posts
+- [ ] Comments and replies system
+- [ ] Enhanced user profiles
+- [ ] Bookmarks management
+- [ ] Post dropdown menu improvements:
+  - [ ] Copy text
+  - [ ] Copy post URL
+- [ ] Notification system:
+  - [ ] Retweet notifications
+  - [ ] Comment notifications
+  - [ ] Like notifications
+  - [ ] Follow notifications
+
+### Layout Enhancements
+- [ ] Right sidebar search functionality
+- [ ] "Who to follow" section:
+  - [ ] Random user suggestions
 
 ## 🚀 Getting Started
+
+### Prerequisites
+- Node.js 18+
+- PNPM package manager
+- Chopin Framework CLI
+
+### Installation
 ```bash
+# Install dependencies
 pnpm install
+
+# Start Chopin node & Development server
 npx chopd
 ```
 
