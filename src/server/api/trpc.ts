@@ -1,41 +1,30 @@
+import { db } from "@/lib/db";
 import { validateRequest } from "@/lib/session";
-import { initTRPC, TRPCError } from "@trpc/server";
-import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
-import superjson from "superjson";
-import { ZodError } from "zod";
+import { TRPCError, initTRPC } from "@trpc/server";
 
-export const createTRPCContext = async (
-  opts: Omit<CreateNextContextOptions, "info">
-) => {
-  const session = await validateRequest()
+export const createTRPCContext = async () => {
+  const session = await validateRequest();
 
   return {
     session,
+    db,
   };
 };
 
-const t = initTRPC.context<typeof createTRPCContext>().create({
-  transformer: superjson,
-  errorFormatter({ shape, error }) {
-    return {
-      ...shape,
-      data: {
-        ...shape.data,
-        zodError:
-          error.cause instanceof ZodError ? error.cause.flatten() : null,
-      },
-    };
-  },
-});
+const t = initTRPC.context<typeof createTRPCContext>().create();
 
 export const createTRPCRouter = t.router;
 
 export const publicProcedure = t.procedure;
 
-export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
+export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
   if (!ctx.session) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
-
-  return next();
+  return next({
+    ctx: {
+      ...ctx,
+      session: ctx.session,
+    },
+  });
 });
