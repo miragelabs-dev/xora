@@ -17,10 +17,9 @@ Existing social networks are either centralized (X) or don't fully inherit block
 
 ### Core Features
 - [x] Retweet functionality
-- [ ] Save/Bookmark posts
+- [x] Bookmarks management
 - [ ] Comments and replies system
 - [ ] Enhanced user profiles
-- [ ] Bookmarks management
 - [ ] Post dropdown menu improvements:
   - [ ] Copy text
   - [ ] Copy post URL

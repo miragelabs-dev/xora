@@ -1,5 +1,6 @@
 import { likes, posts, reposts, saves } from "@/lib/db/schema";
 import { postView } from "@/lib/db/schema/post";
+import { setUserId } from "@/server/utils/db";
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, lt, sql } from "drizzle-orm";
 import { z } from "zod";
@@ -28,7 +29,7 @@ export const postRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const { limit, cursor } = input;
 
-      await ctx.db.execute(sql`SET app.user_id = ${sql.raw(ctx.session.id.toString())}`);
+      await setUserId(ctx.db, ctx.session.id);
 
       const items = await ctx.db
         .select()
@@ -127,7 +128,7 @@ export const postRouter = createTRPCRouter({
       postId: z.number(),
     }))
     .query(async ({ ctx, input }) => {
-      await ctx.db.execute(sql`SET app.user_id = ${sql.raw(ctx.session.id.toString())}`);
+      await setUserId(ctx.db, ctx.session.id);
 
       const post = await ctx.db.select().from(postView).where(eq(postView.id, input.postId));
 
@@ -167,7 +168,7 @@ export const postRouter = createTRPCRouter({
 
   bookmarks: protectedProcedure
     .query(async ({ ctx }) => {
-      await ctx.db.execute(sql`SET app.user_id = ${sql.raw(ctx.session.id.toString())}`);
+      await setUserId(ctx.db, ctx.session.id);
 
       const posts = await ctx.db
         .select()
