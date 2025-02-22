@@ -54,6 +54,7 @@ export default function UserProfilePage({
       </div>
 
       <ProfileHeader
+        userId={profile.id}
         username={profile.username}
         name={profile.name}
         avatarSrc={profile.avatarUrl}
@@ -61,6 +62,7 @@ export default function UserProfilePage({
         followersCount={profile.followersCount}
         followingCount={profile.followingCount}
         isCurrentUser={profile.isCurrentUser}
+        isFollowing={profile.isFollowing}
       />
 
       <Tabs

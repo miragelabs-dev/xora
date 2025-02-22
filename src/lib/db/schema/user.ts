@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
+import { integer, pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
 import { likes, posts, reposts, saves } from "./post";
 
 export const users = pgTable("users", {
@@ -10,11 +10,32 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const follows = pgTable("follows", {
+  id: serial("id").primaryKey(),
+  followerId: integer("follower_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  followingId: integer("following_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const usersRelations = relations(users, ({ many }) => ({
   posts: many(posts),
   likes: many(likes),
   saves: many(saves),
   reposts: many(reposts),
+  followers: many(follows, {
+    relationName: "user_followers",
+    fields: [users.id],
+    references: [follows.followingId],
+  }),
+  following: many(follows, {
+    relationName: "user_following",
+    fields: [users.id],
+    references: [follows.followerId],
+  }),
 }));
 
 export type User = typeof users.$inferSelect;

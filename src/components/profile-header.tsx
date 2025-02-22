@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/user-avatar";
 import { cn } from "@/lib/utils";
+import { api } from "@/utils/api";
 import Image from "next/image";
+import Link from "next/link";
 
 interface ProfileHeaderProps {
   username: string;
@@ -11,6 +13,8 @@ interface ProfileHeaderProps {
   followersCount?: number;
   followingCount?: number;
   isCurrentUser?: boolean;
+  isFollowing?: boolean;
+  userId: number;
   className?: string;
 }
 
@@ -22,8 +26,24 @@ export function ProfileHeader({
   followersCount = 0,
   followingCount = 0,
   isCurrentUser = false,
+  isFollowing = false,
+  userId,
   className
 }: ProfileHeaderProps) {
+  const utils = api.useUtils();
+
+  const { mutate: follow, isPending: isFollowPending } = api.user.follow.useMutation({
+    onSuccess: () => {
+      utils.user.getProfile.invalidate();
+    },
+  });
+
+  const { mutate: unfollow, isPending: isUnfollowPending } = api.user.unfollow.useMutation({
+    onSuccess: () => {
+      utils.user.getProfile.invalidate();
+    },
+  });
+
   return (
     <div className={cn("relative space-y-3", className)}>
       <div className="relative h-32 w-full overflow-hidden sm:h-48">
@@ -47,7 +67,19 @@ export function ProfileHeader({
           {isCurrentUser ? (
             <Button variant="outline">Edit Profile</Button>
           ) : (
-            <Button>Follow</Button>
+            <Button
+              variant={isFollowing ? "outline" : "default"}
+              onClick={() => {
+                if (isFollowing) {
+                  unfollow({ userId });
+                } else {
+                  follow({ userId });
+                }
+              }}
+              disabled={isFollowPending || isUnfollowPending}
+            >
+              {isFollowing ? "Following" : "Follow"}
+            </Button>
           )}
         </div>
 
@@ -57,12 +89,18 @@ export function ProfileHeader({
         </div>
 
         <div className="flex gap-4 text-sm text-muted-foreground">
-          <span>
+          <Link
+            href={`/users/${userId}/following`}
+            className="hover:underline"
+          >
             <strong className="text-foreground">{followingCount}</strong> Following
-          </span>
-          <span>
+          </Link>
+          <Link
+            href={`/users/${userId}/followers`}
+            className="hover:underline"
+          >
             <strong className="text-foreground">{followersCount}</strong> Followers
-          </span>
+          </Link>
         </div>
       </div>
     </div>
