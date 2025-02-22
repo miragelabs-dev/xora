@@ -1,7 +1,7 @@
-import { likes, posts, reposts, saves, users } from "@/lib/db/schema";
+import { likes, posts, reposts } from "@/lib/db/schema";
+import { postView } from "@/lib/db/schema/post";
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, lt, sql } from "drizzle-orm";
-import { alias } from "drizzle-orm/pg-core";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
@@ -26,67 +26,21 @@ export const postRouter = createTRPCRouter({
       cursor: z.number().nullish(),
     }))
     .query(async ({ ctx, input }) => {
-      const { type, limit, cursor } = input;
+      const { limit, cursor } = input;
+
+      await ctx.db.execute(sql`SET app.user_id = ${sql.raw(ctx.session.id.toString())}`);
 
       const items = await ctx.db
-        .select({
-          post: {
-            id: posts.id,
-            content: posts.content,
-            createdAt: posts.createdAt,
-            authorId: posts.authorId
-          },
-          author: {
-            id: users.id,
-            username: users.username,
-            address: users.address,
-          },
-          repostedBy: {
-            id: alias(users, "reposters").id,
-            username: alias(users, "reposters").username,
-          },
-          repost: {
-            id: reposts.id,
-            createdAt: reposts.createdAt
-          },
-          commentsCount: sql<number>`'0'`,
-          repostsCount: sql<number>`count(distinct ${reposts.id})`,
-          likesCount: sql<number>`count(distinct ${likes.id})`,
-          savesCount: sql<number>`count(distinct ${saves.id})`,
-          isLiked: sql<boolean>`bool_or(${likes.userId} = ${ctx.session.id})`,
-          isSaved: sql<boolean>`bool_or(${saves.userId} = ${ctx.session.id})`,
-          isReposted: sql<boolean>`bool_or(${reposts.userId} = ${ctx.session.id})`,
-        })
-        .from(posts)
-        .leftJoin(reposts, eq(reposts.postId, posts.id))
-        .innerJoin(users, eq(users.id, posts.authorId))
-        .leftJoin(
-          alias(users, "reposters"),
-          eq(reposts.userId, alias(users, "reposters").id)
-        )
-        .leftJoin(likes, eq(likes.postId, posts.id))
-        .leftJoin(saves, eq(saves.postId, posts.id))
-        .groupBy(
-          posts.id,
-          posts.content,
-          posts.createdAt,
-          posts.authorId,
-          users.id,
-          users.username,
-          users.address,
-          alias(users, "reposters").id,
-          alias(users, "reposters").username,
-          reposts.id,
-          reposts.createdAt
-        )
-        .orderBy(desc(sql`COALESCE(${reposts.createdAt}, ${posts.createdAt})`))
-        .where(cursor ? lt(posts.id, cursor) : undefined)
+        .select()
+        .from(postView)
+        .where(cursor ? lt(postView.id, cursor) : undefined)
+        .orderBy(desc(sql`COALESCE(${postView.repostCreatedAt}, ${postView.createdAt})`))
         .limit(limit + 1);
 
       let nextCursor: typeof cursor = undefined;
       if (items.length > limit) {
         const nextItem = items.pop();
-        nextCursor = nextItem!.post.id;
+        nextCursor = nextItem!.id;
       }
 
       return {
@@ -168,5 +122,24 @@ export const postRouter = createTRPCRouter({
         ));
     }),
 
+
+  getById: protectedProcedure
+    .input(z.object({
+      postId: z.number(),
+    }))
+    .query(async ({ ctx, input }) => {
+      await ctx.db.execute(sql`SET app.user_id = ${sql.raw(ctx.session.id.toString())}`);
+
+      const post = await ctx.db.select().from(postView).where(eq(postView.id, input.postId));
+
+      if (!post[0]) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Post not found",
+        });
+      }
+
+      return post[0];
+    }),
   // Benzer şekilde save/unsave ve repost/unrepost mutasyonları
 }); 

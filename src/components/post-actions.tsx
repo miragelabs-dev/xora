@@ -18,38 +18,47 @@ interface PostActionsProps {
     isSaved: boolean;
   };
   postId: number;
+  className?: string;
 }
 
-export function PostActions({ stats, interactions, postId }: PostActionsProps) {
+export function PostActions({ stats, interactions, postId, className }: PostActionsProps) {
   const utils = api.useUtils();
 
   const { mutate: like } = api.post.like.useMutation({
     onSuccess: () => {
       utils.post.feed.invalidate();
+      utils.post.getById.invalidate({ postId });
     },
   });
 
   const { mutate: unlike } = api.post.unlike.useMutation({
     onSuccess: () => {
       utils.post.feed.invalidate();
+      utils.post.getById.invalidate({ postId });
     },
   });
 
   const { mutate: repost } = api.post.repost.useMutation({
     onSuccess: () => {
       utils.post.feed.invalidate();
+      utils.post.getById.invalidate({ postId });
     },
   });
 
   const { mutate: unrepost } = api.post.unrepost.useMutation({
     onSuccess: () => {
       utils.post.feed.invalidate();
+      utils.post.getById.invalidate({ postId });
     },
   });
 
   return (
-    <div className="mt-2 flex justify-between text-muted-foreground">
-      <Button variant="ghost" size="icon" className="gap-2">
+    <div className={cn("mt-2 flex justify-between text-muted-foreground", className)}>
+      <Button variant="ghost" size="icon" className="gap-2" onClick={(e) => {
+        e.preventDefault();
+
+        // TODO: Implement comment post
+      }}>
         <MessageCircle className="h-5 w-5" />
         <span className="text-sm">{stats.commentsCount}</span>
       </Button>
@@ -58,7 +67,15 @@ export function PostActions({ stats, interactions, postId }: PostActionsProps) {
         variant="ghost"
         size="icon"
         className="gap-2"
-        onClick={() => interactions.isReposted ? unrepost({ postId }) : repost({ postId })}
+        onClick={(e) => {
+          e.preventDefault();
+
+          if (interactions.isReposted) {
+            unrepost({ postId });
+          } else {
+            repost({ postId });
+          }
+        }}
       >
         <Repeat2 className={cn("h-5 w-5", interactions.isReposted && "text-green-500")} />
         <span className="text-sm">{stats.repostsCount}</span>
@@ -68,16 +85,33 @@ export function PostActions({ stats, interactions, postId }: PostActionsProps) {
         variant="ghost"
         size="icon"
         className="gap-2"
-        onClick={() => interactions.isLiked ? unlike({ postId }) : like({ postId })}
+        onClick={(e) => {
+          e.preventDefault();
+
+          if (interactions.isLiked) {
+            unlike({ postId });
+          } else {
+            like({ postId });
+          }
+        }}
       >
         <Heart className={cn("h-5 w-5", interactions.isLiked && "text-red-500")} />
         <span className="text-sm">{stats.likesCount}</span>
       </Button>
 
-      <Button variant="ghost" size="icon" className="gap-2">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="gap-2"
+        onClick={(e) => {
+          e.preventDefault();
+
+          // TODO: Implement save post
+        }}
+      >
         <Bookmark className={cn("h-5 w-5", interactions.isSaved && "text-blue-500")} />
         <span className="text-sm">{stats.savesCount}</span>
       </Button>
-    </div>
+    </div >
   );
 } 

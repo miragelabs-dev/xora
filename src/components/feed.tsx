@@ -60,22 +60,8 @@ export function Feed({ type = 'for-you' }: FeedProps) {
         <div key={i}>
           {page.items.map((item) => (
             <Post
-              key={item.post.id}
-              username={item.author.username}
-              timestamp={new Date(item.post.createdAt).toLocaleString()}
-              content={item.post.content}
-              commentsCount={item.commentsCount}
-              repostsCount={item.repostsCount}
-              likesCount={item.likesCount}
-              savesCount={item.savesCount}
-              isLiked={item.isLiked}
-              isReposted={item.isReposted}
-              isSaved={item.isSaved}
-              postId={item.post.id}
-              isOwner={item.author.id === session?.id}
-              repostedBy={item.repostedBy?.username ? {
-                username: item.repostedBy.username
-              } : undefined}
+              key={item.id}
+              post={item}
             />
           ))}
         </div>

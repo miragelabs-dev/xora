@@ -1,49 +1,52 @@
+import { useSession } from "@/app/session-provider";
 import { PostActions } from "@/components/post-actions";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { UserAvatar } from "@/components/user-avatar";
 import { api } from "@/utils/api";
 import { Loader2, MoreHorizontal, Repeat2, Trash } from "lucide-react";
+import Link from "next/link";
 
 interface PostProps {
-  username: string;
-  timestamp: string;
-  content: string;
-  commentsCount: number;
-  repostsCount: number;
-  likesCount: number;
-  savesCount: number;
-  isLiked: boolean;
-  isReposted: boolean;
-  isSaved: boolean;
-  postId: number;
-  isOwner?: boolean;
-  repostedBy?: {
-    username: string;
-  };
+  post: {
+    id: number;
+    content: string;
+    createdAt: string;
+    authorId: number;
+    authorUsername: string;
+    commentsCount: number;
+    repostsCount: number;
+    likesCount: number;
+    savesCount: number;
+    isLiked: boolean;
+    isReposted: boolean;
+    isSaved: boolean;
+    reposterUsername: string | null;
+  }
 }
 
 export function Post({
-  username,
-  timestamp,
-  content,
-  commentsCount,
-  repostsCount,
-  likesCount,
-  savesCount,
-  isLiked,
-  isReposted,
-  isSaved,
-  postId,
-  isOwner,
-  repostedBy
+  post: {
+    id: postId,
+    content,
+    createdAt: timestamp,
+    authorId,
+    authorUsername,
+    commentsCount,
+    repostsCount,
+    likesCount,
+    savesCount,
+    isLiked,
+    isReposted,
+    isSaved,
+    reposterUsername,
+  }
 }: PostProps) {
   const utils = api.useUtils();
+  const session = useSession();
+
+  const isPostOwner = authorId === session?.id;
+
   const { mutate: deletePost, isPending } = api.post.delete.useMutation({
     onSuccess: () => {
       utils.post.feed.invalidate();
@@ -51,11 +54,16 @@ export function Post({
   });
 
   return (
-    <div className='p-4 block border-b border-border'>
-      {repostedBy && (
+    <div className="group relative p-4 block border-b border-border">
+      <Link
+        href={`/post/${postId}`}
+        className="absolute inset-0 z-0"
+      />
+
+      {reposterUsername && (
         <div className="ml-2 top-[-8px] relative flex items-center gap-1 px-4 pt-2 text-xs text-muted-foreground">
           <Repeat2 className="h-4 w-4" />
-          <span>@{repostedBy.username} reposted</span>
+          <span>@{reposterUsername} reposted</span>
         </div>
       )}
 
@@ -65,14 +73,18 @@ export function Post({
         <div className="flex-1 space-y-2">
           <div className="flex items-center justify-between gap-2">
             <div className="text-sm">
-              <span className="font-bold">@{username}</span>
+              <span className="font-bold">@{authorUsername}</span>
               <span className="ml-2 text-muted-foreground">· {timestamp}</span>
             </div>
 
-            {isOwner && (
+            {isPostOwner && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="relative z-10 h-8 w-8"
+                  >
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -95,7 +107,12 @@ export function Post({
 
           <p className="text-sm">{content}</p>
 
-          <PostActions stats={{ commentsCount, repostsCount, likesCount, savesCount }} interactions={{ isLiked, isReposted, isSaved }} postId={postId} />
+          <PostActions
+            stats={{ commentsCount, repostsCount, likesCount, savesCount }}
+            interactions={{ isLiked, isReposted, isSaved }}
+            postId={postId}
+            className="relative z-10"
+          />
         </div>
       </article>
     </div>
