@@ -6,6 +6,7 @@ import { UserAvatar } from "@/components/user-avatar";
 import { api } from "@/utils/api";
 import { ImageIcon, Loader2, SmileIcon } from "lucide-react";
 import { useState } from "react";
+import { EmojiPicker } from "./emoji-picker";
 
 export function Compose({ onSuccess }: { onSuccess?: () => void }) {
   const [content, setContent] = useState('');
@@ -22,6 +23,10 @@ export function Compose({ onSuccess }: { onSuccess?: () => void }) {
   const handleSubmit = () => {
     if (!content.trim()) return;
     createPost({ content: content.trim() });
+  };
+
+  const handleEmojiSelect = (emoji: string) => {
+    setContent(prev => prev + emoji);
   };
 
   return (
@@ -42,9 +47,11 @@ export function Compose({ onSuccess }: { onSuccess?: () => void }) {
             <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9" disabled={isPending}>
               <ImageIcon className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9" disabled={isPending}>
-              <SmileIcon className="h-4 w-4 sm:h-5 sm:w-5" />
-            </Button>
+            <EmojiPicker onEmojiSelect={handleEmojiSelect}>
+              <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9" disabled={isPending}>
+                <SmileIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+              </Button>
+            </EmojiPicker>
           </div>
 
           <div className="flex items-center gap-2">
