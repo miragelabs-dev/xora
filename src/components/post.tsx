@@ -70,7 +70,7 @@ export function Post({
 
   return (
     <div className="group relative block border-b border-border">
-      <div className="relative p-4">
+      <div className="relative px-4 py-2">
         <Link
           href={`/post/${postId}`}
           className="absolute inset-0 z-0"
@@ -149,7 +149,7 @@ export function Post({
       </div>
 
       {showReplies && (
-        <div className="mt-4 border-t border-b border-border">
+        <div className="border-t border-b border-border">
           <div className="flex gap-4 p-4">
             <UserAvatar />
 

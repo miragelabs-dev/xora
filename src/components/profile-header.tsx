@@ -41,8 +41,8 @@ export function ProfileHeader({
   });
 
   return (
-    <div className={cn("relative space-y-3", className)}>
-      <div className="relative h-32 w-full overflow-hidden sm:h-48">
+    <div className={cn("relative", className)}>
+      <div className="relative h-32 border-b w-full overflow-hidden sm:h-48">
         <Image
           src='' // TODO: Add cover image
           alt={`${username}'s cover`}
@@ -52,10 +52,10 @@ export function ProfileHeader({
         />
       </div>
 
-      <div className="space-y-3 px-4">
-        <div className="flex justify-between">
+      <div className="space-y-3 px-4 -mt-12">
+        <div className="flex justify-between items-end">
           <UserAvatar
-            className="size-24 text-3xl"
+            className="size-[100px] text-3xl"
             fallback={username[0]}
           />
 
