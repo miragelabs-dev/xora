@@ -3,13 +3,18 @@
 import { Compose } from "@/components/compose";
 import { Feed } from "@/components/feed";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { motion } from "framer-motion";
 import { useState } from "react";
 
 export default function Page() {
   const [activeTab, setActiveTab] = useState<'for-you' | 'following'>('for-you');
 
   return (
-    <div>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
       <div className="sticky top-0 z-[25] h-auto w-full bg-background/80 backdrop-blur">
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'for-you' | 'following')}>
           <TabsList className="w-full">
@@ -23,13 +28,25 @@ export default function Page() {
         </Tabs>
       </div>
 
-      <Compose />
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        <Compose />
+      </motion.div>
 
-      {activeTab === 'for-you' ? (
-        <Feed />
-      ) : (
-        <Feed type="following" />
-      )}
-    </div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.2 }}
+      >
+        {activeTab === 'for-you' ? (
+          <Feed />
+        ) : (
+          <Feed type="following" />
+        )}
+      </motion.div>
+    </motion.div>
   );
 }

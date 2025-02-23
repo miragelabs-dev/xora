@@ -5,6 +5,7 @@ import { UserAvatar } from "@/components/user-avatar";
 import { NotificationView } from "@/lib/db/schema";
 import { api } from "@/utils/api";
 import { formatDistanceToNow } from "date-fns";
+import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -23,7 +24,9 @@ export default function NotificationsPage() {
   });
 
   const handleNotificationClick = (notification: NotificationView) => {
-    markAsRead({ notificationId: notification.id });
+    if (!notification.read) {
+      markAsRead({ notificationId: notification.id });
+    }
 
     if (!notification.targetId) return;
 
@@ -37,23 +40,59 @@ export default function NotificationsPage() {
     }
   };
 
+  function getNotificationText(type: string) {
+    switch (type) {
+      case 'follow':
+        return 'followed you';
+      case 'like':
+        return 'liked your post';
+      case 'repost':
+        return 'reposted your post';
+      case 'reply':
+        return 'replied to your post';
+      default:
+        return 'interacted with you';
+    }
+  }
+
   return (
-    <div>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
       <PageHeader title="Notifications" />
 
       {isLoading ? (
-        <div className="flex justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex justify-center p-4"
+        >
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
-        </div>
+        </motion.div>
       ) : !data?.items.length ? (
-        <div className="flex justify-center p-4 text-muted-foreground">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="flex justify-center p-4 text-muted-foreground"
+        >
           No notifications yet
-        </div>
+        </motion.div>
       ) : (
-        <div className="divide-y divide-border">
-          {data.items.map((notification) => (
-            <div
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4 }}
+          className="divide-y divide-border"
+        >
+          {data.items.map((notification, index) => (
+            <motion.div
               key={notification.id}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, delay: index * 0.05 }}
               onClick={() => handleNotificationClick(notification)}
               className={`flex gap-4 p-4 hover:bg-accent/50 cursor-pointer transition-colors ${notification.read ? 'opacity-60' : ''
                 }`}
@@ -61,35 +100,19 @@ export default function NotificationsPage() {
               <UserAvatar fallback={notification.actorUsername[0]} />
               <div className="flex flex-col gap-1">
                 <p className="text-sm">
-                  <span className="font-bold">@{notification.actorUsername}</span>
-                  {' '}
+                  <span className="font-bold">@{notification.actorUsername}</span>{' '}
                   {getNotificationText(notification.type)}
                 </p>
                 <span className="text-xs text-muted-foreground">
-                  {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                  {formatDistanceToNow(new Date(notification.createdAt), {
+                    addSuffix: true,
+                  })}
                 </span>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   );
-}
-
-function getNotificationText(type: string) {
-  switch (type) {
-    case 'follow':
-      return 'started following you';
-    case 'like':
-      return 'liked your post';
-    case 'repost':
-      return 'reposted your post';
-    case 'comment':
-      return 'commented on your post';
-    case 'save':
-      return 'saved your post';
-    default:
-      return 'interacted with you';
-  }
 }
