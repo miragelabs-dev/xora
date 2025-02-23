@@ -31,7 +31,7 @@ export function Compose({ onSuccess }: { onSuccess?: () => void }) {
       <div className="flex-1 space-y-3 sm:space-y-4">
         <Textarea
           placeholder="What's happening?"
-          className="min-h-[80px] sm:min-h-[100px] resize-none border-none bg-transparent p-0 focus-visible:ring-0 pt-1.5 text-base sm:text-lg"
+          className="min-h-[80px] sm:min-h-[100px] resize-none border-none bg-transparent p-0 focus-visible:ring-0 pt-1.5 !text-lg"
           value={content}
           onChange={(e) => setContent(e.target.value)}
           disabled={isPending}

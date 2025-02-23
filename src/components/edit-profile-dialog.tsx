@@ -34,6 +34,7 @@ export function EditProfileDialog({
   const { mutate: updateProfile, isPending } = api.user.updateProfile.useMutation({
     onSuccess: () => {
       utils.user.getProfile.invalidate();
+
       onOpenChange(false);
     },
   });

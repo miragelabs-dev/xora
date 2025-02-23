@@ -24,6 +24,7 @@ export function Post({
     createdAt: timestamp,
     authorId,
     authorUsername,
+    authorName,
     commentsCount,
     repostsCount,
     likesCount,
@@ -35,7 +36,6 @@ export function Post({
     reposterUsername,
   },
   showReplies = false,
-  className
 }: PostProps) {
   const [replyContent, setReplyContent] = useState("");
 
@@ -74,7 +74,7 @@ export function Post({
     <div className="group relative block border-b border-border">
       <div className="relative px-4 py-2">
         <Link
-          href={`/post/${postId}`}
+          href={`/${authorUsername}/status/${postId}`}
           className="absolute inset-0 z-0"
         />
 
@@ -83,7 +83,7 @@ export function Post({
             <Repeat2 className="h-4 w-4" />
             <span>
               <Link
-                href={`/users/${authorId}`}
+                href={`/${reposterUsername}`}
                 className="relative z-10 hover:underline"
               >
                 @{reposterUsername}
@@ -100,8 +100,14 @@ export function Post({
             <div className="flex items-center justify-between gap-2">
               <div className="text-sm">
                 <Link
-                  href={`/users/${authorId}`}
+                  href={`/${authorUsername}`}
                   className="relative z-10 font-bold hover:underline"
+                >
+                  {authorName || `@${authorUsername}`}
+                </Link>
+                <Link
+                  href={`/${authorUsername}`}
+                  className="relative z-10 ml-1 text-muted-foreground hover:underline"
                 >
                   @{authorUsername}
                 </Link>

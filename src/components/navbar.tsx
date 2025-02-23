@@ -13,12 +13,10 @@ import { UserAvatar } from "./user-avatar";
 export function Navbar() {
   const pathname = usePathname();
 
-  // Sadece anasayfada gösterilecek
   const showMobileHeader = pathname === '/home';
 
   return (
     <>
-      {/* Mobile Top Header */}
       {showMobileHeader && (
         <header className="fixed top-0 left-0 right-0 z-50 flex h-14 items-center justify-between border-b bg-background/80 backdrop-blur-lg px-4 sm:hidden">
           <Sheet>
@@ -67,11 +65,10 @@ export function Navbar() {
             <TwitterIcon size={24} />
           </Link>
 
-          <div className="w-9" /> {/* Spacer for centering logo */}
+          <div className="w-9" />
         </header>
       )}
 
-      {/* Desktop Sidebar */}
       <header className="relative z-[3] hidden sm:flex sm:flex-shrink-0 sm:flex-grow sm:flex-col sm:items-end">
         <div className="flex select-none flex-col items-end w-[250px]">
           <div className="fixed top-0 h-full w-[250px]">
@@ -81,7 +78,7 @@ export function Navbar() {
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.3 }}
               >
-                <Link href="/" className="flex size-12 items-center justify-center text-primary">
+                <Link href="/home" className="flex size-12 items-center justify-center text-primary">
                   <TwitterIcon size={24} />
                 </Link>
               </motion.div>
@@ -137,7 +134,6 @@ export function Navbar() {
         </div>
       </header>
 
-      {/* Mobile Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 flex h-14 border-t bg-background/80 backdrop-blur-lg sm:hidden">
         {navbarMenu.map((link) => (
           <Link

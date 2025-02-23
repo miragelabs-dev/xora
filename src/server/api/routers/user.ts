@@ -201,4 +201,52 @@ export const userRouter = createTRPCRouter({
 
       return updatedUser;
     }),
+
+  getProfileByUsername: protectedProcedure
+    .input(z.object({
+      username: z.string(),
+    }))
+    .query(async ({ ctx, input }) => {
+      const user = await ctx.db.query.users.findFirst({
+        where: eq(users.username, input.username),
+      });
+
+      if (!user) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      const postsCountResult = await ctx.db
+        .select({ value: count() })
+        .from(posts)
+        .where(eq(posts.authorId, user.id));
+
+      const followersCount = await ctx.db
+        .select({ value: count() })
+        .from(follows)
+        .where(eq(follows.followingId, user.id));
+
+      const followingCount = await ctx.db
+        .select({ value: count() })
+        .from(follows)
+        .where(eq(follows.followerId, user.id));
+
+      const isFollowing = await ctx.db.query.follows.findFirst({
+        where: and(
+          eq(follows.followerId, ctx.session.id),
+          eq(follows.followingId, user.id)
+        ),
+      });
+
+      return {
+        id: user.id,
+        username: user.username,
+        name: user.name,
+        bio: user.bio,
+        followersCount: followersCount[0].value,
+        followingCount: followingCount[0].value,
+        postsCount: postsCountResult[0].value,
+        isCurrentUser: user.id === ctx.session.id,
+        isFollowing: !!isFollowing,
+      };
+    }),
 }); 
