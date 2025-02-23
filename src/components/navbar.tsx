@@ -1,11 +1,12 @@
 'use client';
 
+import { Logo } from "@/components/icons/logo";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetClose, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { navbarMenu } from "@/config/app";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { LogOut, Menu, PenSquare, TwitterIcon } from "lucide-react";
+import { LogOut, Menu, PenSquare } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserAvatar } from "./user-avatar";
@@ -62,7 +63,7 @@ export function Navbar() {
           </Sheet>
 
           <Link href="/" className="flex items-center justify-center text-primary">
-            <TwitterIcon size={24} />
+            <Logo className="h-6 w-6" />
           </Link>
 
           <div className="w-9" />
@@ -78,8 +79,8 @@ export function Navbar() {
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.3 }}
               >
-                <Link href="/home" className="flex size-12 items-center justify-center text-primary">
-                  <TwitterIcon size={24} />
+                <Link href="/home" className="flex size-10 items-center justify-center text-primary">
+                  <Logo className="size-10" />
                 </Link>
               </motion.div>
 
@@ -99,7 +100,7 @@ export function Navbar() {
                     <Link
                       href={link.link}
                       className={cn(
-                        "flex items-center gap-3 rounded p-[10px] transition-colors xl:justify-start hover:bg-neutral-800",
+                        "flex items-center gap-3 rounded p-[10px] transition-colors xl:justify-start hover:bg-muted",
                         pathname === link.link ? "opacity-100" : "opacity-50"
                       )}
                     >

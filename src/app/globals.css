@@ -4,30 +4,43 @@
 
 @layer base {
   :root {
-    --background: 0 0% 7.67%;
-    --foreground: 210 20% 98%;
-    --card: 224 71.4% 4.1%;
-    --card-foreground: 210 20% 98%;
-    --popover: 220 10% 12%;
-    --popover-foreground: 210 20% 98%;
-    --primary: 250 70% 57%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 215 27.9% 16.9%;
-    --secondary-foreground: 210 20% 98%;
-    --muted: 220 10% 12%;
-    --muted-foreground: 217.9 10.6% 64.9%;
-    --accent: 215 27.9% 16.9%;
-    --accent-foreground: 210 20% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 20% 98%;
-    --border: 0 0% 20%;
-    --input: 215 27.9% 16.9%;
-    --ring: 216 12.2% 83.9%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    /* Ana arka plan ve metin renkleri */
+    --background: 220 40% 8%;
+    --foreground: 60 30% 98%;
+
+    /* Primary - Turuncu ana renk */
+    --primary: 24 95% 64%;
+    --primary-foreground: 220 40% 8%;
+
+    /* Kart ve Popover bileşenleri */
+    --card: 220 40% 10%;
+    --card-foreground: 60 30% 98%;
+    --popover: 220 40% 8%;
+    --popover-foreground: 60 30% 98%;
+
+    /* İkincil ve Aksent renkler */
+    --secondary: 220 35% 15%;
+    --secondary-foreground: 60 30% 98%;
+    --accent: 220 35% 18%;
+    --accent-foreground: 60 30% 98%;
+
+    /* Diğer UI elementleri */
+    --muted: 220 35% 15%;
+    --muted-foreground: 220 20% 65%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 60 30% 98%;
+
+    /* Border, Input ve Ring renkleri */
+    --border: 220 35% 18%;
+    --input: 220 35% 18%;
+    --ring: 24 95% 64%;
+
+    /* Grafik renkleri */
+    --chart-1: 24 95% 64%;
+    --chart-2: 36 95% 64%;
+    --chart-3: 12 95% 64%;
+    --chart-4: 45 95% 64%;
+    --chart-5: 30 95% 64%;
 
     --radius: 0.5rem;
   }
@@ -42,8 +55,6 @@
     color-scheme: dark;
   }
 }
-
-
 
 @layer base {
   * {

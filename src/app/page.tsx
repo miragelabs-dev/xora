@@ -1,9 +1,9 @@
 "use client";
 
+import { Logo } from "@/components/icons/logo";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 
 export default function Page() {
@@ -28,12 +28,9 @@ export default function Page() {
               animate={{ scale: 1 }}
               transition={{ duration: 0.5, delay: 0.3 }}
             >
-              <Image
-                src="/logo.png"
-                alt="Logo"
-                width={80}
-                height={80}
-                className="rounded-full bg-background/10 p-2 shadow-xl ring-2 ring-primary-foreground/20"
+              <Logo
+                className="size-20 p-2 rounded-full bg-background/20 shadow-xl ring-2 ring-primary-foreground/20"
+                pathClassName="stroke-primary-foreground fill-primary-foreground"
               />
             </motion.div>
             <motion.h1
@@ -42,9 +39,9 @@ export default function Page() {
               transition={{ duration: 0.5, delay: 0.5 }}
               className="text-5xl font-bold leading-tight tracking-tight drop-shadow-lg"
             >
-              Explore the World<br />
+              Share Your<br />
               <span className="bg-gradient-to-r from-primary-foreground to-primary-foreground/80 bg-clip-text text-transparent">
-                Anytime, Anywhere
+                Story With Us
               </span>
             </motion.h1>
             <motion.p
@@ -53,7 +50,7 @@ export default function Page() {
               transition={{ duration: 0.5, delay: 0.7 }}
               className="text-xl font-medium text-primary-foreground/80"
             >
-              Follow trends, stay connected with the world!
+              What's happening? Join us and find out!
             </motion.p>
           </div>
         </div>
@@ -73,25 +70,24 @@ export default function Page() {
               transition={{ duration: 0.5 }}
               className="lg:hidden"
             >
-              <Image
-                src="/logo.png"
-                alt="Logo"
-                width={40}
-                height={40}
-                className="rounded-full bg-background/90 p-2 shadow-md"
+              <Logo
+                className="size-10 p-2 rounded-full bg-background/90 shadow-md"
+                pathClassName="stroke-primary fill-primary"
               />
             </motion.div>
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="text-4xl font-bold leading-tight tracking-tight text-primary-foreground"
+              className="text-4xl font-bold leading-tight tracking-tight text-foreground"
             >
               <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-                Start Your Story
+                Join Us Today
               </span>
               <br />
-              Join the Community
+              <span className="text-foreground">
+                We&apos;re Waiting For You
+              </span>
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
@@ -99,7 +95,7 @@ export default function Page() {
               transition={{ duration: 0.5, delay: 0.5 }}
               className="text-lg font-medium text-muted-foreground"
             >
-              Take your place among millions and discover the world!
+              Connect and share with millions!
             </motion.p>
           </div>
 
