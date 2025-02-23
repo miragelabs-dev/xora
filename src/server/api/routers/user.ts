@@ -1,7 +1,7 @@
 import { follows, posts, users } from "@/lib/db/schema";
 import { createNotification, deleteNotification } from "@/server/utils/notifications";
 import { TRPCError } from "@trpc/server";
-import { and, count, desc, eq, lt } from "drizzle-orm";
+import { and, count, desc, eq, lt, sql } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
@@ -248,5 +248,53 @@ export const userRouter = createTRPCRouter({
         isCurrentUser: user.id === ctx.session.id,
         isFollowing: !!isFollowing,
       };
+    }),
+
+  search: protectedProcedure
+    .input(z.object({
+      query: z.string().min(1).max(50),
+      limit: z.number().min(1).max(10).default(5),
+    }))
+    .query(async ({ ctx, input }) => {
+      const { query, limit } = input;
+
+      const searchResults = await ctx.db
+        .select({
+          id: users.id,
+          username: users.username,
+          name: users.name,
+        })
+        .from(users)
+        .where(
+          sql`(${users.username} ILIKE ${`%${query}%`} OR ${users.name} ILIKE ${`%${query}%`})`
+        )
+        .limit(limit);
+
+      return searchResults;
+    }),
+
+  getRandomSuggestions: protectedProcedure
+    .input(z.object({
+      limit: z.number().min(1).max(10).default(3),
+    }))
+    .query(async ({ ctx, input }) => {
+      const suggestions = await ctx.db
+        .select({
+          id: users.id,
+          username: users.username,
+          name: users.name,
+        })
+        .from(users)
+        .where(
+          sql`${users.id} != ${ctx.session.id} AND NOT EXISTS (
+            SELECT 1 FROM ${follows}
+            WHERE ${follows.followerId} = ${ctx.session.id}
+            AND ${follows.followingId} = ${users.id}
+          )`
+        )
+        .orderBy(sql`RANDOM()`)
+        .limit(input.limit);
+
+      return suggestions;
     }),
 }); 

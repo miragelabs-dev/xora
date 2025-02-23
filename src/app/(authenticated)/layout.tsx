@@ -1,14 +1,15 @@
 'use client';
 
 import { Navbar } from "@/components/navbar";
+import { RightSidebar } from "@/components/right-sidebar";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 
 export default function Layout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   const pathname = usePathname();
   const showMobileHeader = pathname === '/home';
 
@@ -18,10 +19,11 @@ export default function Layout({
       showMobileHeader ? "pt-14 sm:pt-0" : "pt-0"
     )}>
       <Navbar />
-      <main className="flex flex-grow-[2]">
-        <div className="relative w-full border-x border-dark-gray sm:w-[610px]">
+      <main className="flex flex-grow">
+        <div className="relative w-full border-x border-border sm:w-[610px]">
           {children}
         </div>
+        <RightSidebar />
       </main>
     </div>
   );
