@@ -44,7 +44,8 @@ export const userRouter = createTRPCRouter({
       return {
         id: user.id,
         username: user.username,
-        name: user.username,
+        name: user.name,
+        bio: user.bio,
         followersCount: followersCount[0].value,
         followingCount: followingCount[0].value,
         postsCount: postsCountResult[0].value,
@@ -173,5 +174,31 @@ export const userRouter = createTRPCRouter({
         items,
         nextCursor,
       };
+    }),
+
+  updateProfile: protectedProcedure
+    .input(z.object({
+      name: z.string().min(1).max(50).optional(),
+      bio: z.string().max(160).optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const [updatedUser] = await ctx.db
+        .update(users)
+        .set({
+          name: input.name,
+          bio: input.bio,
+          updatedAt: new Date(),
+        })
+        .where(eq(users.id, ctx.session.id))
+        .returning();
+
+      if (!updatedUser) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "User not found"
+        });
+      }
+
+      return updatedUser;
     }),
 }); 

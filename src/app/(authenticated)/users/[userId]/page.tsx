@@ -45,6 +45,7 @@ export default function UserProfilePage({
         userId={profile.id}
         username={profile.username}
         name={profile.name}
+        bio={profile.bio}
         followersCount={profile.followersCount}
         followingCount={profile.followingCount}
         isCurrentUser={profile.isCurrentUser}
