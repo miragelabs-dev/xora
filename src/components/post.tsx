@@ -1,19 +1,20 @@
 import { useSession } from "@/app/session-provider";
-import { PostActions } from "@/components/post-actions";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
 import { UserAvatar } from "@/components/user-avatar";
 import { PostView } from "@/lib/db/schema/post";
+import { cn } from "@/lib/utils";
 import { api } from "@/utils/api";
 import { formatDistanceToNow } from "date-fns";
-import { Loader2, MoreHorizontal, Repeat2, Trash } from "lucide-react";
+import { Loader2, MessageCircle, MoreHorizontal, Repeat2, Trash } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
 interface PostProps {
   post: PostView;
   showReplies?: boolean;
+  className?: string;
 }
 
 export function Post({
@@ -33,7 +34,8 @@ export function Post({
     repliesCount,
     reposterUsername,
   },
-  showReplies = false
+  showReplies = false,
+  className
 }: PostProps) {
   const [replyContent, setReplyContent] = useState("");
 
@@ -138,12 +140,22 @@ export function Post({
 
             <p className="text-sm">{content}</p>
 
-            <PostActions
-              stats={{ commentsCount, repostsCount, likesCount, savesCount, repliesCount }}
-              interactions={{ isLiked, isReposted, isSaved }}
-              postId={postId}
-              className="relative z-10"
-            />
+            <div className={cn("mt-2 flex justify-between text-muted-foreground px-2 sm:px-0", className)}>
+              <Link
+                href={`/post/${postId}`}
+                className="flex items-center gap-1 sm:gap-2"
+              >
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 sm:h-9 sm:w-9"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <span className="text-xs sm:text-sm">{repliesCount}</span>
+                </Button>
+              </Link>
+            </div>
           </div>
         </article>
       </div>
