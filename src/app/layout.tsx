@@ -1,4 +1,3 @@
-import { Navbar } from "@/components/navbar";
 import { validateRequest } from "@/lib/session";
 import { Inter } from "next/font/google";
 import "./globals.css";
@@ -22,22 +21,12 @@ async function RootLayout({
       <body className={`${inter.variable} antialiased`}>
         <SessionProvider session={session}>
           <TRPCProvider>
-            <div className="mx-auto flex min-h-[100svh] max-w-[1350px] flex-col flex-nowrap items-stretch justify-center sm:flex-row">
-              <Navbar />
-              <main className={"flex flex-grow-[2]"}>
-                <div className="relative w-full sm:w-[610px] sm:border-x sm:border-dark-gray">
-                  {children}
-                </div>
-              </main>
-            </div>
+            {children}
           </TRPCProvider>
         </SessionProvider>
       </body>
     </html>
   );
 }
-
-// TODO: Add TRPC provider
-// export default api.withTRPC(RootLayout)
 
 export default RootLayout
