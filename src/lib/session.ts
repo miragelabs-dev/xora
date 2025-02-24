@@ -10,12 +10,15 @@ export async function validateRequest(): Promise<Session | null> {
   try {
     const token = cookies().get("chopin_jwt")?.value;
 
+    console.log("token", token);
+
     if (!token) {
       return null;
     }
 
     const decoded = jwt.verify(token, CHOPIN_PUBLIC_KEY, { algorithms: ["none"] });
     const address = decoded.sub as string;
+    console.log("address", address);
 
     const [user] = await db
       .insert(users)
@@ -38,7 +41,7 @@ export async function validateRequest(): Promise<Session | null> {
     return user;
   } catch (error) {
     if (error instanceof Error) {
-      console.error("JWT validation error:", error.message);
+      console.error("JWT validation error:", error);
     }
     return null;
   }

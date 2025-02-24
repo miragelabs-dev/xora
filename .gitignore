@@ -44,3 +44,7 @@ next-env.d.ts
 .pnpm-store
 
 .chopin.config.json
+
+certs/
+
+.vscode/sftp.json

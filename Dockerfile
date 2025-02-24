@@ -29,5 +29,7 @@ COPY --from=builder /app/.npmrc ./
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/drizzle.config.ts ./
+COPY --from=builder /app/src/lib/db ./src/lib/db
 
 CMD ["sh", "-c", "echo '{\"command\":\"pnpm start\",\"proxyPort\":4000,\"targetPort\":3000,\"env\":{\"NODE_ENV\":\"production\"}}' > chopin.config.json && npx chopd"]

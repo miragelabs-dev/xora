@@ -10,9 +10,19 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./certs:/etc/nginx/certs:ro
-      - ./nginx.prod.conf:/etc/nginx/nginx.conf:ro
-      - ./certbot/www:/var/www/certbot:ro
+      - ssl_certs:/etc/nginx/certs:ro
+      - ./nginx.prod.conf:/etc/nginx/nginx.prod.conf:ro
+      - ./nginx.certbot.conf:/etc/nginx/nginx.certbot.conf:ro
+      - certbot_www:/var/www/certbot:ro
+      - ./scripts/nginx-entrypoint.sh:/docker-entrypoint.sh:ro
+    environment:
+      - DOMAIN=${DOMAIN}
+    entrypoint: ["/docker-entrypoint.sh"]
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   nextjs:
     extends:
@@ -34,14 +44,40 @@ services:
     image: certbot/certbot:latest
     container_name: certbot
     volumes:
-      - ./certs:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
-    command: renew
+      - ssl_certs:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+    environment:
+      - DOMAIN=${DOMAIN}
+    entrypoint: [
+      "/bin/sh", 
+      "-c", 
+      "if [ ! -f /etc/letsencrypt/live/$DOMAIN/fullchain.pem ] || [ ! -f /etc/letsencrypt/live/$DOMAIN/privkey.pem ]; then \
+        echo \"Requesting new SSL certificate for $DOMAIN...\" && \
+        certbot certonly --webroot \
+          --webroot-path /var/www/certbot \
+          --email admin@$DOMAIN \
+          --agree-tos \
+          --no-eff-email \
+          --force-renewal \
+          -d $DOMAIN || exit 1; \
+      fi && \
+      echo \"Starting certbot renewal service...\" && \
+      trap exit TERM && \
+      while :; do \
+        certbot renew --quiet && \
+        sleep 12h & wait $!; \
+      done"
+    ]
     depends_on:
-      - nginx
+      nginx:
+        condition: service_healthy
 
 volumes:
   postgres_data:
+  ssl_certs:
+    name: ${DOMAIN}_ssl_certs
+  certbot_www:
+    name: ${DOMAIN}_certbot_www
 
 networks:
   app_network:
