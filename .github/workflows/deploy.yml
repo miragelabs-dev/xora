@@ -23,6 +23,7 @@ jobs:
             export POSTGRES_USER=${{ vars.POSTGRES_USER }}
             export POSTGRES_PASSWORD=${{ vars.POSTGRES_PASSWORD }}
             export POSTGRES_DATABASE=${{ vars.POSTGRES_DATABASE }}
+            export DATABASE_URL=${{ vars.DATABASE_URL }}
             export NODE_ENV=production
 
             DEPLOY_DIR=/home/${{ secrets.VPS_USERNAME }}/nextjs-app
