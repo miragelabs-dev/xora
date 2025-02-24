@@ -1,0 +1,46 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main 
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }} 
+          username: ${{ secrets.VPS_USERNAME }} 
+          key: ${{ secrets.VPS_SSH_KEY }} 
+          port: 22 
+          script: |
+            export POSTGRES_USER=${{ vars.POSTGRES_USER }}
+            export POSTGRES_PASSWORD=${{ vars.POSTGRES_PASSWORD }}
+            export POSTGRES_DATABASE=${{ vars.POSTGRES_DATABASE }}
+            export NODE_ENV=production
+
+            DEPLOY_DIR=/home/${{ secrets.VPS_USERNAME }}/nextjs-app
+
+            if [ ! -d "$DEPLOY_DIR" ]; then
+              mkdir -p $DEPLOY_DIR
+              cd $DEPLOY_DIR
+              git clone ${{ secrets.REPO_URL }} .
+            else
+              cd $DEPLOY_DIR
+              git pull origin main
+            fi
+
+            docker-compose -f docker-compose.prod.yml down
+
+            if [ ! -f "$DEPLOY_DIR/certs/live/${{ secrets.DOMAIN }}/fullchain.pem" ]; then
+              chmod +x $DEPLOY_DIR/scripts/init-ssl.sh
+              $DEPLOY_DIR/scripts/init-ssl.sh ${{ secrets.DOMAIN }}
+            fi
+
+            docker-compose -f docker-compose.prod.yml up -d --build 

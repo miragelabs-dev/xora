@@ -1,73 +1,48 @@
 ---
-version: "3"
-
-volumes:
-  postgres:
-  next_build:
-  next_cache:
+version: "3.9"
 
 services:
-  postgres:
-    command: postgres -c max_connections=200 -c listen_addresses='*'
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DATABASE: ${POSTGRES_DATABASE}
-    image: postgres:16-alpine
-    volumes:
-      - postgres:/var/lib/postgresql/data
-    networks:
-      - app_network
-    restart: unless-stopped
-
-  nextjs:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    volumes:
-      - next_build:/app/.next
-      - next_cache:/app/.cache
-    environment:
-      - NODE_ENV=production
-      - DATABASE_URL=${DATABASE_URL}
-    networks:
-      - app_network
-    depends_on:
-      - postgres
-    restart: unless-stopped
-
   nginx:
-    image: nginx:alpine
+    extends:
+      file: docker-compose.base.yml
+      service: nginx
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - next_build:/usr/share/nginx/html/_next:ro
-    depends_on:
-      - nextjs
-    networks:
-      - app_network
-    restart: unless-stopped
+      - ./certs:/etc/nginx/certs:ro
+      - ./nginx.prod.conf:/etc/nginx/nginx.conf:ro
+      - ./certbot/www:/var/www/certbot:ro
 
-  chopin:
+  nextjs:
+    extends:
+      file: docker-compose.base.yml
+      service: nextjs
     build:
       context: .
-      dockerfile: Dockerfile.chopin
-    ports:
-      - "${PROXY_PORT}:${PROXY_PORT}"
-    environment:
-      - NODE_ENV=production
-      - PROXY_PORT=${PROXY_PORT}
-      - TARGET_PORT=${TARGET_PORT}
-      - PROXY_TARGET=http://nextjs:${TARGET_PORT}
+      dockerfile: Dockerfile
+      target: production
+      args:
+        DATABASE_URL: ${DATABASE_URL}
+
+  postgres:
+    extends:
+      file: docker-compose.base.yml
+      service: postgres
+
+  certbot:
+    image: certbot/certbot:latest
+    container_name: certbot
     volumes:
-      - ./.chopin:/app/.chopin
-    networks:
-      - app_network
+      - ./certs:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    command: renew
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --deploy-hook \"nginx -s reload\"; sleep 12h & wait $${!}; done;'"
     depends_on:
-      - nextjs
-    restart: unless-stopped
+      - nginx
+
+volumes:
+  postgres_data:
 
 networks:
   app_network:

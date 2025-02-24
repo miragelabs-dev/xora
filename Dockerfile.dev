@@ -1,0 +1,15 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+RUN apk add --no-cache libc6-compat
+RUN corepack enable && corepack prepare pnpm@10.4.1 --activate
+
+COPY package.json pnpm-lock.yaml ./
+COPY .npmrc ./
+
+RUN pnpm install
+
+COPY . .
+
+CMD ["sh", "-c", "echo '{\"command\":\"pnpm dev\",\"proxyPort\":4000,\"targetPort\":3000,\"env\":{\"NODE_ENV\":\"development\"}}' > chopin.config.json && npx chopd"]

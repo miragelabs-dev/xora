@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
   try {
-    const response = await fetch('http://localhost:4000/_chopin/login');
+    const response = await fetch('http://nextjs:4000/_chopin/login');
 
     if (!response.ok) {
       return NextResponse.json({ error: 'Login failed' }, { status: 400 });
@@ -10,7 +10,7 @@ export async function GET(request: Request) {
 
     const data = await response.json();
 
-    const res = NextResponse.redirect(new URL('/home', request.url))
+    const res = NextResponse.redirect(new URL('/home', request.headers.get('referer') || request.url));
 
     res.cookies.set('chopin_jwt', data.token, {
       httpOnly: true,
@@ -24,4 +24,4 @@ export async function GET(request: Request) {
   } catch (error) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-} 
+}
