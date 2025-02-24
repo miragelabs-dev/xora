@@ -29,7 +29,7 @@ Existing social networks are either centralized (X) or don't fully inherit block
 pnpm install
 
 # Start all development services
-docker-compose -f docker-compose.dev.yml up -d
+docker compose -f docker-compose.dev.yml up -d
 ```
 
 The development environment will be available at:
@@ -42,13 +42,13 @@ The development environment will be available at:
 ### Production Environment
 ```bash
 # Build and start all services
-docker-compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml up -d
 
 # View logs
-docker-compose -f docker-compose.prod.yml logs -f
+docker compose -f docker-compose.prod.yml logs -f
 
 # Stop services
-docker-compose -f docker-compose.prod.yml down
+docker compose -f docker-compose.prod.yml down
 ```
 
 The production environment will be available at:
@@ -132,8 +132,8 @@ The project includes a GitHub Actions workflow for automatic deployment to a VPS
    git pull origin main
 
    # Rebuild and restart containers
-   docker-compose -f docker-compose.prod.yml down
-   docker-compose -f docker-compose.prod.yml up -d --build
+   docker compose -f docker-compose.prod.yml down
+   docker compose -f docker-compose.prod.yml up -d --build
    ```
 
 ## 📋 TODO List

@@ -36,11 +36,11 @@ jobs:
               git pull origin main
             fi
 
-            docker-compose -f docker-compose.prod.yml down
+            docker compose -f docker-compose.prod.yml down
 
             if [ ! -f "$DEPLOY_DIR/certs/live/${{ secrets.DOMAIN }}/fullchain.pem" ]; then
               chmod +x $DEPLOY_DIR/scripts/init-ssl.sh
               $DEPLOY_DIR/scripts/init-ssl.sh ${{ secrets.DOMAIN }}
             fi
 
-            docker-compose -f docker-compose.prod.yml up -d --build 
+            docker compose -f docker-compose.prod.yml up -d --build 
