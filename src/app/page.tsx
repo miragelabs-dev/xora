@@ -71,7 +71,6 @@ export default function Page() {
             >
               <Logo
                 className="size-10 p-2 rounded-full bg-background/90 shadow-md"
-                pathClassName="stroke-primary fill-primary"
               />
             </motion.div>
             <motion.h2

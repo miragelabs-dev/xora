@@ -1,0 +1,49 @@
+---
+version: "3.9"
+
+services:
+  nginx:
+    extends:
+      file: docker-compose.base.yml
+      service: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./certs:/etc/nginx/certs:ro
+      - ./nginx.prod.conf:/etc/nginx/nginx.conf:ro
+      - ./certbot/www:/var/www/certbot:ro
+
+  nextjs:
+    extends:
+      file: docker-compose.base.yml
+      service: nextjs
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+      args:
+        DATABASE_URL: ${DATABASE_URL}
+
+  postgres:
+    extends:
+      file: docker-compose.base.yml
+      service: postgres
+
+  certbot:
+    image: certbot/certbot:latest
+    container_name: certbot
+    volumes:
+      - ./certs:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    command: renew
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --deploy-hook \"nginx -s reload\"; sleep 12h & wait $${!}; done;'"
+    depends_on:
+      - nginx
+
+volumes:
+  postgres_data:
+
+networks:
+  app_network:
+    driver: bridge 
