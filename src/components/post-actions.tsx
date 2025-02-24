@@ -12,7 +12,6 @@ interface PostActionsProps {
     repostsCount: number;
     likesCount: number;
     savesCount: number;
-    repliesCount: number;
   };
   interactions: {
     isLiked: boolean;

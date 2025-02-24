@@ -25,7 +25,6 @@ export function Post({
     authorId,
     authorUsername,
     authorName,
-    commentsCount,
     repostsCount,
     likesCount,
     savesCount,
@@ -147,7 +146,7 @@ export function Post({
             <p className="text-sm">{content}</p>
 
             <PostActions
-              stats={{ commentsCount, repostsCount, likesCount, savesCount, repliesCount }}
+              stats={{ repostsCount, likesCount, savesCount, repliesCount }}
               interactions={{ isLiked, isReposted, isSaved }}
               postId={postId}
               className="relative z-10"

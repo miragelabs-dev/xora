@@ -79,7 +79,6 @@ export const postView = pgView("post_view").as((qb) =>
       reposterUsername: sql<string | null>`ru.username`.as('reposter_username'),
       repostId: sql<number | null>`first_repost.id`.as('repost_id'),
       repostCreatedAt: sql<Date | null>`first_repost.created_at`.as('repost_created_at'),
-      commentsCount: sql<number>`0`.as('comments_count'), // TODO: add comments count
       repostsCount: sql<number>`COUNT(DISTINCT ${reposts.id})`.as('reposts_count'),
       likesCount: sql<number>`COUNT(DISTINCT ${likes.id})`.as('likes_count'),
       savesCount: sql<number>`COUNT(DISTINCT ${saves.id})`.as('saves_count'),
