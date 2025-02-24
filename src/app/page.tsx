@@ -30,7 +30,6 @@ export default function Page() {
             >
               <Logo
                 className="size-20 p-2 rounded-full bg-background/20 shadow-xl ring-2 ring-primary-foreground/20"
-                pathClassName="stroke-primary-foreground fill-primary-foreground"
               />
             </motion.div>
             <motion.h1
@@ -72,7 +71,6 @@ export default function Page() {
             >
               <Logo
                 className="size-10 p-2 rounded-full bg-background/90 shadow-md"
-                pathClassName="stroke-primary fill-primary"
               />
             </motion.div>
             <motion.h2
