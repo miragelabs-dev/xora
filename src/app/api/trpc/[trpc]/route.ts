@@ -1,10 +1,6 @@
-import { appRouter } from "@/server/api/routers"
-import { createTRPCContext } from "@/server/api/trpc"
-import { fetchRequestHandler } from "@trpc/server/adapters/fetch"
-
-export const config = {
-  runtime: "edge",
-}
+import { appRouter } from "@/server/api/routers";
+import { createTRPCContext } from "@/server/api/trpc";
+import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 
 const handler = (req: Request) =>
   fetchRequestHandler({
@@ -14,4 +10,5 @@ const handler = (req: Request) =>
     createContext: () => createTRPCContext(),
   })
 
-export { handler as GET, handler as POST }
+export { handler as GET, handler as POST };
+

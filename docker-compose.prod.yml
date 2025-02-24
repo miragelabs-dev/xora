@@ -1,0 +1,74 @@
+---
+version: "3"
+
+volumes:
+  postgres:
+  next_build:
+  next_cache:
+
+services:
+  postgres:
+    command: postgres -c max_connections=200 -c listen_addresses='*'
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DATABASE: ${POSTGRES_DATABASE}
+    image: postgres:16-alpine
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    networks:
+      - app_network
+    restart: unless-stopped
+
+  nextjs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - next_build:/app/.next
+      - next_cache:/app/.cache
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+    networks:
+      - app_network
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - next_build:/usr/share/nginx/html/_next:ro
+    depends_on:
+      - nextjs
+    networks:
+      - app_network
+    restart: unless-stopped
+
+  chopin:
+    build:
+      context: .
+      dockerfile: Dockerfile.chopin
+    ports:
+      - "${PROXY_PORT}:${PROXY_PORT}"
+    environment:
+      - NODE_ENV=production
+      - PROXY_PORT=${PROXY_PORT}
+      - TARGET_PORT=${TARGET_PORT}
+      - PROXY_TARGET=http://nextjs:${TARGET_PORT}
+    volumes:
+      - ./.chopin:/app/.chopin
+    networks:
+      - app_network
+    depends_on:
+      - nextjs
+    restart: unless-stopped
+
+networks:
+  app_network:
+    driver: bridge 

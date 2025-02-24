@@ -15,6 +15,66 @@ Existing social networks are either centralized (X) or don't fully inherit block
 - 🔹 Shadcn/UI 🎯 (UI Components)
 - 🔹 tRPC 🎯 (API layer)
 
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js 18+
+- PNPM package manager
+- Docker & Docker Compose
+- Chopin CLI
+
+### Development Environment
+```bash
+# Install dependencies
+pnpm install
+
+# Start PostgreSQL with Docker
+docker-compose -f docker-compose.dev.yml up -d
+
+# Start Next.js development server
+pnpm dev
+
+# In another terminal, start Chopin proxy
+npx chopd
+```
+
+The development environment will be available at:
+- Next.js: http://localhost:3000
+- Chopin Proxy: http://localhost:4000
+- PostgreSQL: localhost:5432
+
+### Production Environment
+```bash
+# Build and start all services
+docker-compose -f docker-compose.prod.yml up -d
+
+# View logs
+docker-compose -f docker-compose.prod.yml logs -f
+
+# Stop services
+docker-compose -f docker-compose.prod.yml down
+```
+
+The production environment will be available at:
+- Application: http://localhost (Nginx)
+- Chopin Proxy: http://localhost:4000
+- PostgreSQL: Internal network only
+
+### Environment Structure
+- **Development:**
+  - PostgreSQL runs in Docker
+  - Next.js runs locally
+  - Chopin runs locally
+  - Hot-reload enabled
+  - Easy debugging
+
+- **Production:**
+  - All services in Docker
+  - Nginx as reverse proxy
+  - Optimized builds
+  - Container orchestration
+  - Automatic restarts
+
 ## 📋 TODO List
 
 ### Core Features
@@ -35,22 +95,6 @@ Existing social networks are either centralized (X) or don't fully inherit block
 - [ ] Right sidebar search functionality
 - [ ] "Who to follow" section:
   - [ ] Random user suggestions
-
-## 🚀 Getting Started
-
-### Prerequisites
-- Node.js 18+
-- PNPM package manager
-- Chopin Framework CLI
-
-### Installation
-```bash
-# Install dependencies
-pnpm install
-
-# Start Chopin node & Development server
-npx chopd
-```
 
 ## 🛠️ Development Guidelines
 This project includes Cursor AI rules (`.mdc` files) for consistent development practices:
