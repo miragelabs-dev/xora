@@ -24,10 +24,10 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }} 
           port: 22 
           script: |
-            export POSTGRES_USER=${{ vars.POSTGRES_USER }}
-            export POSTGRES_PASSWORD=${{ vars.POSTGRES_PASSWORD }}
-            export POSTGRES_DATABASE=${{ vars.POSTGRES_DATABASE }}
-            export DATABASE_URL=${{ vars.DATABASE_URL }}
+            export POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+            export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+            export POSTGRES_DATABASE=${{ secrets.POSTGRES_DATABASE }}
+            export DATABASE_URL=${{ secrets.DATABASE_URL }}
             export NODE_ENV=production
 
             DEPLOY_DIR=/home/${{ secrets.VPS_USERNAME }}/nextjs-app
