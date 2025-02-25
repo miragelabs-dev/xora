@@ -97,13 +97,13 @@ export function ProfileHeader({
 
           <div className="flex gap-4 text-sm text-muted-foreground">
             <Link
-              href={`/users/${userId}/following`}
+              href={`/${username}/following`}
               className="hover:underline"
             >
               <strong className="text-foreground">{followingCount}</strong> Following
             </Link>
             <Link
-              href={`/users/${userId}/followers`}
+              href={`/${username}/followers`}
               className="hover:underline"
             >
               <strong className="text-foreground">{followersCount}</strong> Followers

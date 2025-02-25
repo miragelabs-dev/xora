@@ -61,7 +61,7 @@ export function RightSidebar() {
                   {searchResults?.map((user) => (
                     <Link
                       key={user.id}
-                      href={`/users/${user.id}`}
+                      href={`/${user.username}`}
                       className="block px-4 py-2 hover:bg-muted"
                     >
                       <p className="font-medium">{user.name || `@${user.username}`}</p>

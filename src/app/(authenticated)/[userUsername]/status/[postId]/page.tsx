@@ -11,8 +11,6 @@ export default function PostPage({
 }: {
   params: { userUsername: string; postId: string }
 }) {
-  const username = decodeURIComponent(params.userUsername);
-
   const { data: post, isLoading } = api.post.getById.useQuery({
     postId: parseInt(params.postId)
   });
@@ -25,7 +23,7 @@ export default function PostPage({
     );
   }
 
-  if (!post || post.authorUsername !== username) {
+  if (!post || post.authorUsername !== params.userUsername) {
     return notFound();
   }
 

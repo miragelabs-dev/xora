@@ -1,5 +1,5 @@
-import { eq, relations } from "drizzle-orm";
-import { boolean, integer, pgTable, pgView, serial, text, timestamp } from "drizzle-orm/pg-core";
+import { eq, relations, sql } from "drizzle-orm";
+import { alias, boolean, integer, pgTable, pgView, serial, text, timestamp } from "drizzle-orm/pg-core";
 import { users } from "./user";
 
 export const notifications = pgTable("notifications", {
@@ -28,13 +28,17 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
   }),
 }));
 
-export const notificationView = pgView("notification_view").as((qb) =>
-  qb
+export const notificationView = pgView("notification_view").as((qb) => {
+  const actorAlias = alias(users, "actor");
+  const userAlias = alias(users, "user");
+
+  return qb
     .select({
       id: notifications.id,
       userId: notifications.userId,
+      userUsername: sql<string>`${userAlias.username}`.as('user_username'),
       actorId: notifications.actorId,
-      actorUsername: users.username,
+      actorUsername: sql<string>`${actorAlias.username}`.as('actor_username'),
       type: notifications.type,
       read: notifications.read,
       createdAt: notifications.createdAt,
@@ -42,8 +46,9 @@ export const notificationView = pgView("notification_view").as((qb) =>
       targetType: notifications.targetType,
     })
     .from(notifications)
-    .innerJoin(users, eq(users.id, notifications.actorId))
-);
+    .innerJoin(actorAlias, eq(notifications.actorId, actorAlias.id))
+    .innerJoin(userAlias, eq(notifications.userId, userAlias.id));
+});
 
 export type Notification = typeof notifications.$inferSelect;
 export type NotificationView = typeof notificationView.$inferSelect;

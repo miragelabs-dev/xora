@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 
 export default function NotificationsPage() {
   const utils = api.useUtils();
+
   const router = useRouter();
 
   const { data, isLoading } = api.notification.list.useQuery({
@@ -32,10 +33,10 @@ export default function NotificationsPage() {
 
     switch (notification.targetType) {
       case 'profile':
-        router.push(`/profile/${notification.actorUsername}`);
+        router.push(`/${notification.actorUsername}`);
         break;
       case 'post':
-        router.push(`/post/${notification.targetId}`);
+        router.push(`/${notification.userUsername}/status/${notification.targetId}`);
         break;
     }
   };

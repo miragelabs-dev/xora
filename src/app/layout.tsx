@@ -1,4 +1,4 @@
-import { validateRequest } from "@/lib/session";
+import { getAddress } from "@chopinframework/next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "./session-provider";
@@ -14,7 +14,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await validateRequest()
+  const address = await getAddress()
 
   return (
     <html lang="en">
@@ -22,7 +22,7 @@ export default async function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
       </head>
       <body className={`${inter.variable} antialiased`}>
-        <SessionProvider session={session}>
+        <SessionProvider address={address}>
           <TRPCProvider>
             {children}
           </TRPCProvider>

@@ -59,7 +59,7 @@ export function UserList({ type, userId }: UserListProps) {
         page.items.map((user) => (
           <Link
             key={user.id}
-            href={`/users/${user.id}`}
+            href={`/${user.username}`}
             className="flex items-center gap-3 border-b border-border p-4 hover:bg-muted/50"
           >
             <UserAvatar

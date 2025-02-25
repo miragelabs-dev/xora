@@ -2,11 +2,66 @@
 
 import { Logo } from "@/components/icons/logo";
 import { Button } from "@/components/ui/button";
+import { useAddress } from "@chopinframework/react";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import React from "react";
 
 export default function Page() {
+  const { login, isLoading, address } = useAddress();
+  const [isLoginLoading, setIsLoginLoading] = React.useState(false);
+  const router = useRouter();
+
+  React.useEffect(() => {
+    if (address) {
+      router.push(`/home`);
+    }
+  }, [address, router]);
+
+  const handleLogin = async () => {
+    setIsLoginLoading(true);
+    try {
+      await login();
+    } finally {
+      setIsLoginLoading(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex flex-col items-center space-y-6"
+        >
+          <motion.div
+            animate={{
+              scale: [1, 1.2, 1],
+              rotate: [0, 180, 360]
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          >
+            <Logo className="size-16 p-3 rounded-full bg-primary/10 shadow-xl ring-2 ring-primary/20" />
+          </motion.div>
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-lg font-medium text-muted-foreground"
+          >
+            Loading your experience...
+          </motion.p>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen bg-background">
       <motion.div
@@ -49,7 +104,7 @@ export default function Page() {
               transition={{ duration: 0.5, delay: 0.7 }}
               className="text-xl font-medium text-primary-foreground/80"
             >
-              What's happening? Join us and find out!
+              What&apos;s happening? Join us and find out!
             </motion.p>
           </div>
         </div>
@@ -105,19 +160,28 @@ export default function Page() {
             whileTap={{ scale: 0.97 }}
           >
             <Button
-              asChild
+              onClick={handleLogin}
               size="lg"
-              className="w-full gap-2 bg-gradient-to-r from-primary to-primary/90 font-semibold shadow-lg transition-all duration-300 hover:from-primary/90 hover:to-primary"
+              disabled={isLoginLoading}
+              className="w-full gap-2 bg-gradient-to-r from-primary to-primary/90 font-semibold shadow-lg transition-all duration-300 hover:from-primary/90 hover:to-primary disabled:opacity-70"
             >
-              <Link href="/api/auth/login">
-                Sign In Now
+              {isLoginLoading ? (
                 <motion.div
-                  animate={{ x: [0, 5, 0] }}
-                  transition={{ repeat: Infinity, duration: 1.5 }}
-                >
-                  <ArrowRight className="h-5 w-5" />
-                </motion.div>
-              </Link>
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  className="size-5 border-2 border-primary-foreground border-t-transparent rounded-full"
+                />
+              ) : (
+                <>
+                  Sign In Now
+                  <motion.div
+                    animate={{ x: [0, 5, 0] }}
+                    transition={{ repeat: Infinity, duration: 1.5 }}
+                  >
+                    <ArrowRight className="h-5 w-5" />
+                  </motion.div>
+                </>
+              )}
             </Button>
           </motion.div>
         </div>

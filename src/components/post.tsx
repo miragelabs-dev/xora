@@ -41,7 +41,8 @@ export function Post({
   const utils = api.useUtils();
   const session = useSession();
 
-  const isPostOwner = authorId === session?.id;
+  const isPostOwner = false
+  // const isPostOwner = authorId === session?.id;
 
   const { mutate: deletePost, isPending } = api.post.delete.useMutation({
     onSuccess: () => {
@@ -149,6 +150,7 @@ export function Post({
               stats={{ repostsCount, likesCount, savesCount, repliesCount }}
               interactions={{ isLiked, isReposted, isSaved }}
               postId={postId}
+              authorUsername={authorUsername}
               className="relative z-10"
             />
           </div>

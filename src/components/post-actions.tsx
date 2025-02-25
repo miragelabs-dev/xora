@@ -8,7 +8,7 @@ import Link from "next/link";
 
 interface PostActionsProps {
   stats: {
-    commentsCount: number;
+    repliesCount: number;
     repostsCount: number;
     likesCount: number;
     savesCount: number;
@@ -19,10 +19,11 @@ interface PostActionsProps {
     isSaved: boolean;
   };
   postId: number;
+  authorUsername: string;
   className?: string;
 }
 
-export function PostActions({ stats, interactions, postId, className }: PostActionsProps) {
+export function PostActions({ stats, interactions, postId, authorUsername, className }: PostActionsProps) {
   const utils = api.useUtils();
 
   const { mutate: like } = api.post.like.useMutation({
@@ -82,7 +83,7 @@ export function PostActions({ stats, interactions, postId, className }: PostActi
   return (
     <div className={cn("mt-2 flex justify-between text-muted-foreground", className)}>
       <Link
-        href={`/post/${postId}`}
+        href={`/${authorUsername}/status/${postId}`}
         className="gap-2"
       >
         <Button

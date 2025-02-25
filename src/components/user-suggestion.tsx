@@ -25,7 +25,7 @@ export function UserSuggestion({ user }: UserSuggestionProps) {
   return (
     <div className="flex items-center justify-between">
       <Link
-        href={`/users/${user.id}`}
+        href={`/${user.username}`}
         className="flex flex-1 items-center gap-2 min-w-0"
       >
         <UserAvatar

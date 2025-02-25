@@ -1,7 +1,5 @@
 export type Session = {
-  id: number;
-  address: string;
-  username: string;
+  address: string | null | undefined;
 };
 
 export type NotificationType =
