@@ -22,34 +22,18 @@ interface PostProps {
 }
 
 export function Post({
-  post: {
-    id: postId,
-    content,
-    image,
-    createdAt: timestamp,
-    authorId,
-    authorImage,
-    authorUsername,
-    repostsCount,
-    likesCount,
-    savesCount,
-    isLiked,
-    isReposted,
-    isSaved,
-    repliesCount,
-    reposterUsername,
-  },
+  post,
   showReplies = false,
 }: PostProps) {
   const [replyContent, setReplyContent] = useState("");
   const [isEditing, setIsEditing] = useState(false);
-  const [editContent, setEditContent] = useState(content);
+  const [editContent, setEditContent] = useState(post.content);
 
   const utils = api.useUtils();
   const { user } = useSession();
   const router = useRouter();
 
-  const isPostOwner = authorId === user?.id;
+  const isPostOwner = post.authorId === user?.id;
 
   const { mutate: deletePost, isPending } = api.post.delete.useMutation({
     onSuccess: () => {
@@ -60,8 +44,8 @@ export function Post({
   const { mutate: reply } = api.post.reply.useMutation({
     onSuccess: () => {
       setReplyContent("");
-      utils.post.getReplies.invalidate({ postId: postId });
-      utils.post.getById.invalidate({ postId: postId });
+      utils.post.getReplies.invalidate({ postId: post.id });
+      utils.post.getById.invalidate({ postId: post.id });
     },
   });
 
@@ -69,15 +53,15 @@ export function Post({
     onSuccess: () => {
       setIsEditing(false);
       utils.post.feed.invalidate();
-      utils.post.getById.invalidate({ postId });
-      utils.post.getReplies.invalidate({ postId });
+      utils.post.getById.invalidate({ postId: post.id });
+      utils.post.getReplies.invalidate({ postId: post.id });
     },
   });
 
   const { data: replies, hasNextPage, fetchNextPage, isFetchingNextPage } =
     api.post.getReplies.useInfiniteQuery(
       {
-        postId: postId,
+        postId: post.id,
         limit: 10,
       },
       {
@@ -97,21 +81,21 @@ export function Post({
           (!selection || selection.toString().length === 0);
 
         if (shouldNavigate) {
-          router.push(`/${authorUsername}/status/${postId}`);
+          router.push(`/${post.author.username}/status/${post.id}`);
         }
       }}
     >
       <div className="relative px-4 py-3">
-        {reposterUsername && (
+        {post.repost && (
           <div className="ml-2 top-[-8px] relative flex items-center gap-1 px-4 pt-2 text-xs text-muted-foreground">
             <Repeat2 className="h-4 w-4" />
             <span>
               <Link
-                href={`/${reposterUsername}`}
+                href={`/${post.repost.user.username}`}
                 className="relative z-10 hover:underline"
                 data-no-navigate
               >
-                @{reposterUsername}
+                @{post.repost.user.username}
               </Link>
               {" "}reposted
             </span>
@@ -119,10 +103,10 @@ export function Post({
         )}
 
         <article className="flex gap-4">
-          <Link href={`/${authorUsername}`} data-no-navigate>
+          <Link href={`/${post.author.username}`} data-no-navigate>
             <UserAvatar
-              src={authorImage}
-              fallback={authorUsername[0]}
+              src={post.author.image}
+              fallback={post.author.username[0]}
               className="h-10 w-10"
               data-no-navigate
             />
@@ -132,14 +116,14 @@ export function Post({
             <div className="flex items-center justify-between gap-2">
               <div className="text-sm">
                 <Link
-                  href={`/${authorUsername}`}
+                  href={`/${post.author.username}`}
                   className="relative z-10 font-bold hover:underline"
                   data-no-navigate
                 >
-                  {`@${authorUsername}`}
+                  {`@${post.author.username}`}
                 </Link>
                 <span className="ml-2 text-muted-foreground">· {
-                  formatDistanceToNow(new Date(timestamp), { addSuffix: true })
+                  formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })
                 }</span>
               </div>
 
@@ -166,7 +150,7 @@ export function Post({
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       disabled={isPending}
-                      onClick={() => deletePost({ postId })}
+                      onClick={() => deletePost({ postId: post.id })}
                       data-no-navigate
                       className="text-destructive focus:text-destructive"
                     >
@@ -201,7 +185,7 @@ export function Post({
                       size="sm"
                       onClick={() => {
                         setIsEditing(false);
-                        setEditContent(content);
+                        setEditContent(post.content);
                       }}
                       disabled={isUpdatePending}
                     >
@@ -210,11 +194,11 @@ export function Post({
                     <Button
                       size="sm"
                       onClick={() => {
-                        if (editContent.trim() && editContent !== content) {
-                          updatePost({ postId, content: editContent.trim() });
+                        if (editContent.trim() && editContent !== post.content) {
+                          updatePost({ postId: post.id, content: editContent.trim() });
                         }
                       }}
-                      disabled={isUpdatePending || !editContent.trim() || editContent === content}
+                      disabled={isUpdatePending || !editContent.trim() || editContent === post.content}
                     >
                       {isUpdatePending ? (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -226,13 +210,13 @@ export function Post({
                 </div>
               </div>
             ) : (
-              <p className="text-sm mt-2 select-text">{content}</p>
+              <p className="text-sm mt-2 select-text">{post.content}</p>
             )}
 
-            {image && (
+            {post.image && (
               <div className="relative mt-5 aspect-[16/9] overflow-hidden rounded-xl">
                 <Image
-                  src={image}
+                  src={post.image}
                   alt="Post image"
                   fill
                   className="object-cover"
@@ -243,10 +227,10 @@ export function Post({
             )}
 
             <PostActions
-              stats={{ repostsCount, likesCount, savesCount, repliesCount }}
-              interactions={{ isLiked, isReposted, isSaved }}
-              postId={postId}
-              authorUsername={authorUsername}
+              stats={post.stats}
+              interactions={post.viewer}
+              postId={post.id}
+              authorUsername={post.author.username}
               className="relative z-10 mt-2"
             />
           </div>
@@ -261,7 +245,7 @@ export function Post({
               reply({
                 content,
                 image,
-                replyToId: postId,
+                replyToId: post.id,
               });
             }}
             placeholder="Tweet your reply"

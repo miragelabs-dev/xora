@@ -45,7 +45,7 @@ export default function PostPage({
     );
   }
 
-  if (!post || post.authorUsername !== params.userUsername) {
+  if (!post || post.author.username !== params.userUsername) {
     return notFound();
   }
 

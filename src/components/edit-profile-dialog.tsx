@@ -112,8 +112,6 @@ export function EditProfileDialog({
     onError: (error) => {
       if (error.data?.code === "CONFLICT") {
         toast.error("This username is already taken");
-      } else if (error.data?.zodError) {
-        toast.error("Please check your input and try again");
       } else {
         toast.error("Something went wrong. Please try again later");
       }
