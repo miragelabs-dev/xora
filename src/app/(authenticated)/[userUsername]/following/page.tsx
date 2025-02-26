@@ -10,7 +10,7 @@ export default function FollowingPage() {
   return (
     <div>
       <PageHeader
-        title={profile.name || `@${profile.username}`}
+        title={`@${profile.username}`}
         subtitle="Following"
       />
       <UserList type="following" userId={profile.id} />

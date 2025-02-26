@@ -22,13 +22,23 @@ import { api } from "@/utils/api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ImageIcon, Loader2 } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 const profileSchema = z.object({
-  name: z.string().max(50, "Name is too long").optional(),
-  bio: z.string().max(160, "Bio must be less than 160 characters"),
+  username: z.string()
+    .min(3, "Username must be at least 3 characters")
+    .max(20, "Username must be less than 20 characters")
+    .regex(
+      /^[a-zA-Z0-9_]+$/,
+      "Username can only contain letters, numbers and underscores"
+    ),
+  bio: z.string()
+    .max(160, "Bio must be less than 160 characters")
+    .nullable(),
   image: z.string().optional(),
   cover: z.string().optional(),
 });
@@ -59,6 +69,7 @@ export function EditProfileDialog({
   onOpenChange,
   user,
 }: EditProfileDialogProps) {
+  const router = useRouter();
   const [isUploading, setIsUploading] = useState(false);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -67,7 +78,7 @@ export function EditProfileDialog({
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      name: user.name || "",
+      username: user.username || "",
       bio: user.bio || "",
       image: user.image || "",
       cover: user.cover || "",
@@ -79,9 +90,33 @@ export function EditProfileDialog({
   const cover = form.watch("cover");
 
   const { mutate: updateProfile, isPending } = api.user.updateProfile.useMutation({
-    onSuccess: () => {
-      utils.user.getProfileByUsername.invalidate();
+    onSuccess: (updatedUser) => {
       onOpenChange(false);
+
+      utils.auth.me.invalidate();
+
+      utils.user.getProfileByUsername.invalidate({
+        username: updatedUser.username
+      });
+
+      if (updatedUser.username !== user.username) {
+        utils.post.feed.invalidate({
+          userId: updatedUser.id
+        });
+
+        router.push(`/${updatedUser.username}`)
+      }
+
+      toast.success("Profile updated successfully");
+    },
+    onError: (error) => {
+      if (error.data?.code === "CONFLICT") {
+        toast.error("This username is already taken");
+      } else if (error.data?.zodError) {
+        toast.error("Please check your input and try again");
+      } else {
+        toast.error("Something went wrong. Please try again later");
+      }
     },
   });
 
@@ -117,7 +152,7 @@ export function EditProfileDialog({
 
   const onSubmit = (data: ProfileFormValues) => {
     updateProfile({
-      name: data.name || null,
+      username: data.username,
       bio: data.bio || null,
       image: data.image || null,
       cover: data.cover || null
@@ -206,12 +241,12 @@ export function EditProfileDialog({
 
               <FormField
                 control={form.control}
-                name="name"
+                name="username"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Name</FormLabel>
+                    <FormLabel>Username</FormLabel>
                     <FormControl>
-                      <Input placeholder="Your name" {...field} maxLength={50} />
+                      <Input placeholder="Your username" {...field} maxLength={20} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

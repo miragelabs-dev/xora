@@ -22,10 +22,9 @@ export function Post({
     id: postId,
     content,
     createdAt: timestamp,
-    authorImage,
     authorId,
+    authorImage,
     authorUsername,
-    authorName,
     repostsCount,
     likesCount,
     savesCount,
@@ -40,10 +39,9 @@ export function Post({
   const [replyContent, setReplyContent] = useState("");
 
   const utils = api.useUtils();
-  const session = useSession();
+  const { user } = useSession();
 
-  const isPostOwner = false
-  // const isPostOwner = authorId === session?.id;
+  const isPostOwner = authorId === user?.id;
 
   const { mutate: deletePost, isPending } = api.post.delete.useMutation({
     onSuccess: () => {
@@ -108,7 +106,7 @@ export function Post({
                   href={`/${authorUsername}`}
                   className="relative z-10 font-bold hover:underline"
                 >
-                  {authorName || `@${authorUsername}`}
+                  {`@${authorUsername}`}
                 </Link>
                 <Link
                   href={`/${authorUsername}`}

@@ -69,10 +69,7 @@ export function UserList({ type, userId }: UserListProps) {
             />
             <div className="flex-1 min-w-0">
               <p className="font-semibold truncate">
-                {user.name || `@${user.username}`}
-              </p>
-              <p className="text-sm text-muted-foreground truncate">
-                @{user.username}
+                {`@${user.username}`}
               </p>
             </div>
           </Link>

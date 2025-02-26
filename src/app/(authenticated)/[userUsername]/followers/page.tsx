@@ -10,7 +10,7 @@ export default function FollowersPage() {
   return (
     <div>
       <PageHeader
-        title={profile.name || `@${profile.username}`}
+        title={`@${profile.username}`}
         subtitle="Followers"
       />
       <UserList type="followers" userId={profile.id} />

@@ -78,9 +78,8 @@ export function ProfileHeader({
           </div>
 
           <div className="space-y-1">
-            <h1 className="text-xl font-bold">{profile.name || `@${profile.username}`}</h1>
-            <p className="text-sm text-muted-foreground">@{profile.username}</p>
-            {profile.bio && <p className="text-sm mt-2">{profile.bio}</p>}
+            <h1 className="text-xl font-bold">{`@${profile.username}`}</h1>
+            <p className="text-sm text-muted-foreground">{profile.bio}</p>
           </div>
 
           <div className="flex gap-4 text-sm text-muted-foreground">

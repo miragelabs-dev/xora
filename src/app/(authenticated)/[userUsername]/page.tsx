@@ -14,7 +14,7 @@ export default function UserProfilePage() {
   return (
     <div>
       <PageHeader
-        title={profile.name || `@${profile.username}`}
+        title={`@${profile.username}`}
         subtitle={`${profile.postsCount} posts`}
       />
 

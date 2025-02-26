@@ -2,16 +2,12 @@
 
 import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/user-avatar";
+import { User } from "@/lib/db/schema";
 import { api } from "@/utils/api";
 import Link from "next/link";
 
 interface UserSuggestionProps {
-  user: {
-    id: number;
-    username: string;
-    name: string | null;
-    image: string | null;
-  };
+  user: Pick<User, 'id' | 'username' | 'image'>
 }
 
 export function UserSuggestion({ user }: UserSuggestionProps) {
@@ -36,10 +32,7 @@ export function UserSuggestion({ user }: UserSuggestionProps) {
         />
         <div className="flex-1 min-w-0 space-y-1">
           <p className="font-semibold text-sm truncate">
-            {user.name || `@${user.username}`}
-          </p>
-          <p className="text-xs text-muted-foreground truncate">
-            @{user.username}
+            {`@${user.username}`}
           </p>
         </div>
       </Link>

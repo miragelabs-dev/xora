@@ -64,8 +64,7 @@ export function RightSidebar() {
                       href={`/${user.username}`}
                       className="block px-4 py-2 hover:bg-muted"
                     >
-                      <p className="font-medium">{user.name || `@${user.username}`}</p>
-                      <p className="text-sm text-muted-foreground">@{user.username}</p>
+                      <p className="font-medium">{`@${user.username}`}</p>
                     </Link>
                   ))}
                 </div>

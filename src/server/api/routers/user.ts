@@ -79,6 +79,7 @@ export const userRouter = createTRPCRouter({
           id: users.id,
           username: users.username,
           name: users.username,
+          image: users.image,
         })
         .from(follows)
         .innerJoin(users, eq(users.id, follows.followerId))
@@ -116,7 +117,7 @@ export const userRouter = createTRPCRouter({
         .select({
           id: users.id,
           username: users.username,
-          name: users.username,
+          image: users.image,
         })
         .from(follows)
         .innerJoin(users, eq(users.id, follows.followingId))
@@ -142,33 +143,67 @@ export const userRouter = createTRPCRouter({
     }),
 
   updateProfile: protectedProcedure
-    .input(z.object({
-      name: z.string().nullable(),
-      bio: z.string().nullable(),
-      image: z.string().url().nullable(),
-      cover: z.string().url().nullable(),
-    }))
+    .input(
+      z.object({
+        username: z.string()
+          .min(3, "Username must be at least 3 characters")
+          .max(20, "Username must be less than 20 characters")
+          .regex(
+            /^[a-zA-Z0-9_]+$/,
+            "Username can only contain letters, numbers and underscores"
+          ),
+        bio: z.string()
+          .max(160, "Bio must be less than 160 characters")
+          .nullable(),
+        image: z.string().nullable(),
+        cover: z.string().nullable(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
-      const [updatedUser] = await ctx.db
-        .update(users)
-        .set({
-          name: input.name,
-          bio: input.bio,
-          image: input.image,
-          cover: input.cover,
-          updatedAt: new Date(),
-        })
-        .where(eq(users.id, ctx.session.user.id))
-        .returning();
+      try {
+        // Check if username is already taken
+        const existingUser = await ctx.db.query.users.findFirst({
+          where: and(
+            eq(users.username, input.username),
+            sql`${users.id} != ${ctx.session.user.id}`
+          ),
+        });
 
-      if (!updatedUser) {
+        if (existingUser) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "This username is already taken"
+          });
+        }
+
+        const updatedUser = await ctx.db
+          .update(users)
+          .set({
+            username: input.username,
+            bio: input.bio,
+            image: input.image,
+            cover: input.cover,
+            updatedAt: new Date(),
+          })
+          .where(eq(users.id, ctx.session.user.id))
+          .returning();
+
+        if (!updatedUser[0]) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "User not found"
+          });
+        }
+
+        return updatedUser[0];
+      } catch (error) {
+        if (error instanceof TRPCError) throw error;
+
         throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "User not found"
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Something went wrong. Please try again later"
         });
       }
-
-      return updatedUser;
     }),
 
   getProfileByUsername: protectedProcedure
@@ -228,11 +263,10 @@ export const userRouter = createTRPCRouter({
         .select({
           id: users.id,
           username: users.username,
-          name: users.name,
         })
         .from(users)
         .where(
-          sql`(${users.username} ILIKE ${`%${query}%`} OR ${users.name} ILIKE ${`%${query}%`})`
+          sql`(${users.username} ILIKE ${`%${query}%`})`
         )
         .limit(limit);
 
@@ -248,7 +282,7 @@ export const userRouter = createTRPCRouter({
         .select({
           id: users.id,
           username: users.username,
-          name: users.name,
+          image: users.image,
         })
         .from(users)
         .where(
