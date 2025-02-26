@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useAddress } from "@chopinframework/react";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import React from "react";
 
 export const dynamic = 'force-dynamic';
@@ -14,8 +14,12 @@ export default function Page() {
   const { login, isLoading, address } = useAddress();
   const [isLoginLoading, setIsLoginLoading] = React.useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const redirected = searchParams.get('redirected');
+  const [redirected, setRedirected] = React.useState<boolean>(false);
+
+  React.useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    setRedirected(searchParams.has('redirected'));
+  }, []);
 
   React.useEffect(() => {
     if (redirected) {
