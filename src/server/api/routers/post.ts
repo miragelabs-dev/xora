@@ -46,8 +46,11 @@ export const postRouter = createTRPCRouter({
       }
 
       if (type === 'user' && userId) {
-        conditions.push(eq(postView.authorId, userId));
-        conditions.push(sql`${postView.replyToId} IS NULL`);
+        const userPostsCondition = sql`(
+          (${postView.authorId} = ${userId} AND ${postView.replyToId} IS NULL) OR 
+          (${postView.reposterId} = ${userId} AND ${postView.replyToId} IS NULL)
+        )`;
+        conditions.push(userPostsCondition);
       }
 
       if (type === 'replies' && userId) {
