@@ -306,7 +306,7 @@ export const postRouter = createTRPCRouter({
       cursor: z.number().nullish(),
     }))
     .query(async ({ ctx, input }) => {
-      await setUserId(ctx.db, ctx.session.id);
+      await setUserId(ctx.db, ctx.session.user.id);
 
       const items = await ctx.db
         .select()
