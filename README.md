@@ -2,6 +2,8 @@
 
 Welcome to our Decentralized Twitter Clone built with Chopin Framework and Celestia! 🌐✨ This project aims to create a censorship-resistant, secure, and scalable social network.
 
+<img width="1267" alt="Screenshot 2025-02-27 at 00 16 18" src="https://github.com/user-attachments/assets/3b9c85a1-2a9d-4ac0-81e0-653716bbbee6" />
+
 ## 🏆 Why This Project?
 Existing social networks are either centralized (X) or don't fully inherit blockchain security (Farcaster). Our solution leverages Chopin Framework + Celestia to ensure true decentralization while remaining scalable.
 
