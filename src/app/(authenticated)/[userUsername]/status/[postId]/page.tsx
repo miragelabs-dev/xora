@@ -11,7 +11,7 @@ function PostPageSkeleton() {
   return (
     <div>
       <PostSkeleton />
-      <div className="mt-8 space-y-4 border-t pt-4 px-4">
+      <div className="space-y-4 border-t pt-4 px-4">
         <div className="flex gap-3">
           <Skeleton className="h-10 w-10 rounded-full" />
           <div className="flex-1">
