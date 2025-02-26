@@ -25,7 +25,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // File type validation
     if (!ALLOWED_FILE_TYPES.includes(file.type)) {
       return NextResponse.json(
         { error: "Unsupported file type. Please upload an image file (JPEG, PNG, WEBP, GIF)" },
@@ -33,7 +32,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // File size validation
     if (file.size > MAX_FILE_SIZE) {
       return NextResponse.json(
         { error: "File size too large. Maximum size is 5MB" },

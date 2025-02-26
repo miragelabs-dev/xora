@@ -1,12 +1,27 @@
 'use client';
 
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { UserSuggestion } from "@/components/user-suggestion";
 import { useDebounce } from "@/hooks/use-debounce";
 import { api } from "@/utils/api";
 import { Loader2, Search } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+
+function UserSuggestionSkeleton() {
+  return (
+    <div className="flex items-center justify-between">
+      <div className="flex flex-1 items-center gap-2 min-w-0">
+        <Skeleton className="h-10 w-10 rounded-full" />
+        <div className="flex-1 min-w-0">
+          <Skeleton className="h-4 w-24" />
+        </div>
+      </div>
+      <Skeleton className="h-9 w-16 rounded-md ml-4" />
+    </div>
+  );
+}
 
 export function RightSidebar() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -77,9 +92,11 @@ export function RightSidebar() {
           <h2 className="mb-4 text-xl font-bold">Who to follow</h2>
           <div className="space-y-4">
             {isSuggestionsLoading ? (
-              <div className="flex justify-center p-4">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
-              </div>
+              <>
+                <UserSuggestionSkeleton />
+                <UserSuggestionSkeleton />
+                <UserSuggestionSkeleton />
+              </>
             ) : suggestions?.length === 0 ? (
               <div className="text-center text-sm text-muted-foreground">
                 No suggestions available
