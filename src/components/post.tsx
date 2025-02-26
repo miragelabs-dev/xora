@@ -7,6 +7,7 @@ import { PostView } from "@/lib/db/schema/post";
 import { api } from "@/utils/api";
 import { formatDistanceToNow } from "date-fns";
 import { Loader2, MoreHorizontal, Repeat2, Trash } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -21,6 +22,7 @@ export function Post({
   post: {
     id: postId,
     content,
+    image,
     createdAt: timestamp,
     authorId,
     authorImage,
@@ -71,7 +73,7 @@ export function Post({
 
   return (
     <div className="group relative block border-b border-border">
-      <div className="relative px-4 py-2">
+      <div className="relative px-4 py-3">
         <Link
           href={`/${authorUsername}/status/${postId}`}
           className="absolute inset-0 z-0"
@@ -99,7 +101,7 @@ export function Post({
             className="h-10 w-10"
           />
 
-          <div className="flex-1 space-y-2">
+          <div className="flex-1">
             <div className="flex items-center justify-between gap-2">
               <div className="text-sm">
                 <Link
@@ -125,7 +127,7 @@ export function Post({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="relative z-10 h-8 w-8"
+                      className="absolute right-0 top-0 z-10 h-8 w-8"
                     >
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
@@ -147,14 +149,26 @@ export function Post({
               )}
             </div>
 
-            <p className="text-sm">{content}</p>
+            <p className="text-sm mt-2">{content}</p>
+
+            {image && (
+              <div className="relative mt-5 aspect-[16/9] overflow-hidden rounded-xl">
+                <Image
+                  src={image}
+                  alt="Post image"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                />
+              </div>
+            )}
 
             <PostActions
               stats={{ repostsCount, likesCount, savesCount, repliesCount }}
               interactions={{ isLiked, isReposted, isSaved }}
               postId={postId}
               authorUsername={authorUsername}
-              className="relative z-10"
+              className="relative z-10 mt-2"
             />
           </div>
         </article>

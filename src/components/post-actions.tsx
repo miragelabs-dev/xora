@@ -89,7 +89,7 @@ export function PostActions({ stats, interactions, postId, authorUsername, class
         <Button
           variant="ghost"
           size="icon"
-          className="gap-2"
+          className="gap-2 py-0 hover:bg-transparent"
           onClick={(e) => e.stopPropagation()}
         >
           <MessageCircle className="h-5 w-5" />
@@ -100,7 +100,7 @@ export function PostActions({ stats, interactions, postId, authorUsername, class
       <Button
         variant="ghost"
         size="icon"
-        className="gap-2"
+        className="gap-2 py-0 hover:bg-transparent"
         onClick={(e) => {
           e.preventDefault();
 
@@ -118,7 +118,7 @@ export function PostActions({ stats, interactions, postId, authorUsername, class
       <Button
         variant="ghost"
         size="icon"
-        className="gap-2"
+        className="gap-2 py-0 hover:bg-transparent"
         onClick={(e) => {
           e.preventDefault();
 
@@ -136,7 +136,7 @@ export function PostActions({ stats, interactions, postId, authorUsername, class
       <Button
         variant="ghost"
         size="icon"
-        className="gap-2"
+        className="gap-2 py-0 hover:bg-transparent"
         onClick={(e) => {
           e.preventDefault();
 

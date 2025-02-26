@@ -1,10 +1,11 @@
 import { desc, eq, relations, sql } from "drizzle-orm";
-import { alias, integer, pgTable, pgView, serial, text, timestamp } from "drizzle-orm/pg-core";
+import { alias, integer, pgTable, pgView, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
 import { users } from "./user";
 
 export const posts = pgTable("posts", {
   id: serial("id").primaryKey(),
   content: text("content").notNull(),
+  image: varchar("image"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   authorId: integer("author_id")
@@ -70,6 +71,7 @@ export const postView = pgView("post_view").as((qb) =>
     .select({
       id: posts.id,
       content: posts.content,
+      image: posts.image,
       createdAt: posts.createdAt,
       authorId: posts.authorId,
       authorUsername: users.username,

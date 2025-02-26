@@ -11,11 +11,13 @@ export const postRouter = createTRPCRouter({
   create: protectedProcedure
     .input(z.object({
       content: z.string().min(1).max(280),
+      image: z.string().nullable().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       const post = await ctx.db.insert(posts).values({
         content: input.content,
         authorId: ctx.session.user.id,
+        image: input.image || null,
       }).returning();
 
       return post[0];
