@@ -11,6 +11,7 @@ Existing social networks are either centralized (X) or don't fully inherit block
 - 🔹 Next.js ⚡ (Frontend framework)
 - 🔹 PostgreSQL 🗄️ (Database)
 - 🔹 Drizzle ORM 🎯 (TypeScript ORM)
+- 🔹 Cloudinary ☁️ (Image storage) 
 - 🔹 TailwindCSS 🎨 (Styling)
 - 🔹 Shadcn/UI 🎯 (UI Components)
 - 🔹 tRPC 🎯 (API layer)
@@ -21,11 +22,21 @@ Existing social networks are either centralized (X) or don't fully inherit block
 - Node.js 18+
 - PNPM package manager
 - Chopin CLI
+- Docker (for local development)
 
 ### Installation
 ```bash
+# Copy .env.example to .env and set the environment variables
+cp .env.example .env
+
+# Database setup
+docker compose up -d
+
 # Install dependencies
 pnpm install
+
+# Migrate database
+pnpm db:push
 
 # Start Chopin node & Development server
 npx chopd
