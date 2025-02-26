@@ -1,5 +1,5 @@
 import { desc, eq, relations, sql } from "drizzle-orm";
-import { alias, integer, pgTable, pgView, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import { alias, integer, pgTable, pgView, serial, text, timestamp, unique, varchar } from "drizzle-orm/pg-core";
 import { users } from "./user";
 
 export const posts = pgTable("posts", {
@@ -42,7 +42,9 @@ export const likes = pgTable("likes", {
     .notNull()
     .references(() => posts.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  uniqueLike: unique().on(table.userId, table.postId),
+}));
 
 export const saves = pgTable("saves", {
   id: serial("id").primaryKey(),
@@ -53,7 +55,9 @@ export const saves = pgTable("saves", {
     .notNull()
     .references(() => posts.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  uniqueSave: unique().on(table.userId, table.postId),
+}));
 
 export const reposts = pgTable("reposts", {
   id: serial("id").primaryKey(),
@@ -64,7 +68,9 @@ export const reposts = pgTable("reposts", {
     .notNull()
     .references(() => posts.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  uniqueRepost: unique().on(table.userId, table.postId),
+}));
 
 export const postView = pgView("post_view").as((qb) =>
   qb
