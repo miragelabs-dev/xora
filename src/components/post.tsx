@@ -1,11 +1,12 @@
 import { useSession } from "@/app/session-provider";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Textarea } from "@/components/ui/textarea";
 import { UserAvatar } from "@/components/user-avatar";
 import { PostView } from "@/lib/db/schema/post";
 import { api } from "@/utils/api";
 import { formatDistanceToNow } from "date-fns";
-import { Loader2, MoreHorizontal, Repeat2, Trash } from "lucide-react";
+import { Loader2, MoreHorizontal, Pencil, Repeat2, Trash } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -41,6 +42,8 @@ export function Post({
   showReplies = false,
 }: PostProps) {
   const [replyContent, setReplyContent] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [editContent, setEditContent] = useState(content);
 
   const utils = api.useUtils();
   const { user } = useSession();
@@ -62,6 +65,15 @@ export function Post({
     },
   });
 
+  const { mutate: updatePost, isPending: isUpdatePending } = api.post.update.useMutation({
+    onSuccess: () => {
+      setIsEditing(false);
+      utils.post.feed.invalidate();
+      utils.post.getById.invalidate({ postId });
+      utils.post.getReplies.invalidate({ postId });
+    },
+  });
+
   const { data: replies, hasNextPage, fetchNextPage, isFetchingNextPage } =
     api.post.getReplies.useInfiniteQuery(
       {
@@ -78,6 +90,8 @@ export function Post({
     <div
       className="group relative block border-b border-border cursor-pointer"
       onClick={(e) => {
+        if (isEditing) return;
+
         const selection = window.getSelection();
         const shouldNavigate = !(e.target as HTMLElement).closest('[data-no-navigate]') &&
           (!selection || selection.toString().length === 0);
@@ -143,9 +157,18 @@ export function Post({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem
+                      onClick={() => setIsEditing(true)}
+                      disabled={isEditing}
+                      data-no-navigate
+                    >
+                      <Pencil className="mr-2 h-4 w-4" />
+                      Edit Post
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
                       disabled={isPending}
                       onClick={() => deletePost({ postId })}
                       data-no-navigate
+                      className="text-destructive focus:text-destructive"
                     >
                       {isPending ? (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -159,7 +182,52 @@ export function Post({
               )}
             </div>
 
-            <p className="text-sm mt-2 select-text">{content}</p>
+            {isEditing ? (
+              <div className="mt-2">
+                <Textarea
+                  value={editContent}
+                  onChange={(e) => setEditContent(e.target.value)}
+                  className="min-h-[100px] resize-none"
+                  maxLength={280}
+                  disabled={isUpdatePending}
+                />
+                <div className="mt-2 flex items-center justify-between">
+                  <div className="text-sm text-muted-foreground">
+                    {editContent.length}/280
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setIsEditing(false);
+                        setEditContent(content);
+                      }}
+                      disabled={isUpdatePending}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        if (editContent.trim() && editContent !== content) {
+                          updatePost({ postId, content: editContent.trim() });
+                        }
+                      }}
+                      disabled={isUpdatePending || !editContent.trim() || editContent === content}
+                    >
+                      {isUpdatePending ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        'Save'
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm mt-2 select-text">{content}</p>
+            )}
 
             {image && (
               <div className="relative mt-5 aspect-[16/9] overflow-hidden rounded-xl">

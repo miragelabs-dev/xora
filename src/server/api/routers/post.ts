@@ -333,4 +333,34 @@ export const postRouter = createTRPCRouter({
         nextCursor,
       };
     }),
+
+  update: protectedProcedure
+    .input(z.object({
+      postId: z.number(),
+      content: z.string().min(1).max(280),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const [updatedPost] = await ctx.db
+        .update(posts)
+        .set({
+          content: input.content,
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(posts.id, input.postId),
+            eq(posts.authorId, ctx.session.user.id)
+          )
+        )
+        .returning();
+
+      if (!updatedPost) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Post not found or you don't have permission to edit it",
+        });
+      }
+
+      return updatedPost;
+    }),
 }); 
