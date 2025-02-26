@@ -2,32 +2,16 @@
 
 import { PageHeader } from "@/components/page-header";
 import { Post } from "@/components/post";
+import { PostSkeleton } from "@/components/post-skeleton";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/utils/api";
 import { notFound } from "next/navigation";
 
-function PostSkeleton() {
+function PostPageSkeleton() {
   return (
-    <div className="border-b px-4 py-3">
-      <div className="flex gap-3">
-        <Skeleton className="h-12 w-12 rounded-full" />
-        <div className="flex-1 space-y-3">
-          <div className="flex gap-2">
-            <Skeleton className="h-4 w-32" />
-            <Skeleton className="h-4 w-24" />
-          </div>
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-3/4" />
-          <div className="flex gap-6 pt-2">
-            <Skeleton className="h-4 w-12" />
-            <Skeleton className="h-4 w-12" />
-            <Skeleton className="h-4 w-12" />
-            <Skeleton className="h-4 w-12" />
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-8 space-y-4 border-t pt-4">
+    <div>
+      <PostSkeleton />
+      <div className="mt-8 space-y-4 border-t pt-4 px-4">
         <div className="flex gap-3">
           <Skeleton className="h-10 w-10 rounded-full" />
           <div className="flex-1">
@@ -56,7 +40,7 @@ export default function PostPage({
     return (
       <div>
         <PageHeader title="Post" />
-        <PostSkeleton />
+        <PostPageSkeleton />
       </div>
     );
   }

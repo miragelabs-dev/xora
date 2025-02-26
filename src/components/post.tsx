@@ -1,7 +1,6 @@
 import { useSession } from "@/app/session-provider";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Textarea } from "@/components/ui/textarea";
 import { UserAvatar } from "@/components/user-avatar";
 import { PostView } from "@/lib/db/schema/post";
 import { api } from "@/utils/api";
@@ -12,7 +11,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { ComposeForm } from "./compose-form";
 import { PostActions } from "./post-actions";
+
 interface PostProps {
   post: PostView;
   showReplies?: boolean;
@@ -185,38 +186,19 @@ export function Post({
       </div>
 
       {showReplies && (
-        <div className="border-t border-b border-border">
-          <div className="flex gap-4 p-4">
-            <UserAvatar className="h-10 w-10" />
-
-            <div className="flex-1 space-y-4">
-              <Textarea
-                value={replyContent}
-                onChange={(e) => setReplyContent(e.target.value)}
-                placeholder="Tweet your reply"
-                className="min-h-[100px] resize-none border-none bg-transparent p-0 pt-1.5 !text-lg focus-visible:ring-0"
-              />
-
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-muted-foreground">
-                  {replyContent.length}/280
-                </div>
-
-                <Button
-                  onClick={() => {
-                    if (!replyContent.trim()) return;
-                    reply({
-                      content: replyContent.trim(),
-                      replyToId: postId,
-                    });
-                  }}
-                  disabled={!replyContent.trim() || replyContent.length > 280}
-                >
-                  Reply
-                </Button>
-              </div>
-            </div>
-          </div>
+        <div className="border-t border-b border-border p-4">
+          <ComposeForm
+            user={user}
+            onSubmit={({ content, image }) => {
+              reply({
+                content,
+                image,
+                replyToId: postId,
+              });
+            }}
+            placeholder="Tweet your reply"
+            submitLabel="Reply"
+          />
         </div>
       )}
 

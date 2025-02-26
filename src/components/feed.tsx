@@ -1,11 +1,11 @@
 'use client';
 
 import { Post } from "@/components/post";
-import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/utils/api";
 import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
+import { PostSkeleton } from "./post-skeleton";
 
 interface FeedProps {
   type?: 'for-you' | 'following' | 'user' | 'replies';
@@ -14,27 +14,9 @@ interface FeedProps {
 
 export function FeedSkeleton() {
   return (
-    <div className="space-y-4">
+    <div>
       {[...Array(3)].map((_, i) => (
-        <div key={i} className="border-b px-4 py-3">
-          <div className="flex gap-3">
-            <Skeleton className="h-12 w-12 rounded-full" />
-            <div className="flex-1 space-y-3">
-              <div className="flex gap-2">
-                <Skeleton className="h-4 w-32" />
-                <Skeleton className="h-4 w-24" />
-              </div>
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-3/4" />
-              <div className="flex gap-6 pt-2">
-                <Skeleton className="h-4 w-12" />
-                <Skeleton className="h-4 w-12" />
-                <Skeleton className="h-4 w-12" />
-                <Skeleton className="h-4 w-12" />
-              </div>
-            </div>
-          </div>
-        </div>
+        <PostSkeleton key={i} />
       ))}
     </div>
   );
