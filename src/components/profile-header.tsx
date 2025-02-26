@@ -2,32 +2,19 @@ import { EditProfileDialog } from "@/components/edit-profile-dialog";
 import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/user-avatar";
 import { cn } from "@/lib/utils";
+import type { ProfileResponse } from "@/server/api/routers/user";
 import { api } from "@/utils/api";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
 interface ProfileHeaderProps {
-  username: string;
-  name?: string;
-  bio?: string;
-  followersCount?: number;
-  followingCount?: number;
-  isCurrentUser?: boolean;
-  isFollowing?: boolean;
-  userId: number;
+  profile: ProfileResponse;
   className?: string;
 }
 
 export function ProfileHeader({
-  username,
-  name,
-  bio,
-  followersCount = 0,
-  followingCount = 0,
-  isCurrentUser = false,
-  isFollowing = false,
-  userId,
+  profile,
   className
 }: ProfileHeaderProps) {
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
@@ -35,13 +22,13 @@ export function ProfileHeader({
 
   const { mutate: follow, isPending: isFollowPending } = api.user.follow.useMutation({
     onSuccess: () => {
-      utils.user.getProfile.invalidate();
+      utils.user.getProfileByUsername.invalidate();
     },
   });
 
   const { mutate: unfollow, isPending: isUnfollowPending } = api.user.unfollow.useMutation({
     onSuccess: () => {
-      utils.user.getProfile.invalidate();
+      utils.user.getProfileByUsername.invalidate();
     },
   });
 
@@ -50,8 +37,8 @@ export function ProfileHeader({
       <div className={cn("relative", className)}>
         <div className="relative h-32 border-b w-full overflow-hidden sm:h-48">
           <Image
-            src='' // TODO: Add cover image
-            alt={`${username}'s cover`}
+            src={profile.cover || ''}
+            alt={`${profile.username}'s cover`}
             className="object-cover"
             fill
             priority
@@ -61,11 +48,12 @@ export function ProfileHeader({
         <div className="space-y-3 px-4 -mt-12">
           <div className="flex justify-between items-end">
             <UserAvatar
-              className="size-[100px] text-3xl"
-              fallback={username[0]}
+              src={profile.image}
+              className="h-[100px] w-[100px] text-3xl"
+              fallback={profile.username[0]}
             />
 
-            {isCurrentUser ? (
+            {profile.isCurrentUser ? (
               <Button
                 variant="outline"
                 onClick={() => setIsEditProfileOpen(true)}
@@ -74,39 +62,39 @@ export function ProfileHeader({
               </Button>
             ) : (
               <Button
-                variant={isFollowing ? "outline" : "default"}
+                variant={profile.isFollowing ? "outline" : "default"}
                 onClick={() => {
-                  if (isFollowing) {
-                    unfollow({ userId });
+                  if (profile.isFollowing) {
+                    unfollow({ userId: profile.id });
                   } else {
-                    follow({ userId });
+                    follow({ userId: profile.id });
                   }
                 }}
                 disabled={isFollowPending || isUnfollowPending}
               >
-                {isFollowing ? "Following" : "Follow"}
+                {profile.isFollowing ? "Following" : "Follow"}
               </Button>
             )}
           </div>
 
           <div className="space-y-1">
-            <h1 className="text-xl font-bold">{name || `@${username}`}</h1>
-            <p className="text-sm text-muted-foreground">@{username}</p>
-            {bio && <p className="text-sm mt-2">{bio}</p>}
+            <h1 className="text-xl font-bold">{profile.name || `@${profile.username}`}</h1>
+            <p className="text-sm text-muted-foreground">@{profile.username}</p>
+            {profile.bio && <p className="text-sm mt-2">{profile.bio}</p>}
           </div>
 
           <div className="flex gap-4 text-sm text-muted-foreground">
             <Link
-              href={`/${username}/following`}
+              href={`/${profile.username}/following`}
               className="hover:underline"
             >
-              <strong className="text-foreground">{followingCount}</strong> Following
+              <strong className="text-foreground">{profile.followingCount}</strong> Following
             </Link>
             <Link
-              href={`/${username}/followers`}
+              href={`/${profile.username}/followers`}
               className="hover:underline"
             >
-              <strong className="text-foreground">{followersCount}</strong> Followers
+              <strong className="text-foreground">{profile.followersCount}</strong> Followers
             </Link>
           </div>
         </div>
@@ -115,10 +103,7 @@ export function ProfileHeader({
       <EditProfileDialog
         open={isEditProfileOpen}
         onOpenChange={setIsEditProfileOpen}
-        defaultValues={{
-          name,
-          bio,
-        }}
+        user={profile}
       />
     </>
   );

@@ -4,38 +4,31 @@
 
 @layer base {
   :root {
-    /* Ana arka plan ve metin renkleri */
     --background: 220 40% 8%;
     --foreground: 60 30% 98%;
 
-    /* Primary - Turuncu ana renk */
     --primary: 24 95% 64%;
     --primary-foreground: 220 40% 8%;
 
-    /* Kart ve Popover bileşenleri */
     --card: 220 40% 10%;
     --card-foreground: 60 30% 98%;
     --popover: 220 40% 8%;
     --popover-foreground: 60 30% 98%;
 
-    /* İkincil ve Aksent renkler */
     --secondary: 220 35% 15%;
     --secondary-foreground: 60 30% 98%;
     --accent: 220 35% 18%;
     --accent-foreground: 60 30% 98%;
 
-    /* Diğer UI elementleri */
     --muted: 220 35% 15%;
     --muted-foreground: 220 20% 65%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 60 30% 98%;
 
-    /* Border, Input ve Ring renkleri */
     --border: 220 35% 18%;
     --input: 220 35% 18%;
     --ring: 24 95% 64%;
 
-    /* Grafik renkleri */
     --chart-1: 24 95% 64%;
     --chart-2: 36 95% 64%;
     --chart-3: 12 95% 64%;

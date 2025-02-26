@@ -1,4 +1,3 @@
-import { Session } from "@/types";
 import { jwtVerify } from 'jose';
 import { cookies } from "next/headers";
 import { db } from "./db";
@@ -52,7 +51,7 @@ function generateRandomUsername(): string {
     .join('');
 }
 
-export async function validateRequest(): Promise<Session | null> {
+export async function validateRequest() {
   try {
     const token = cookies().get("access_token")?.value;
 
@@ -88,17 +87,13 @@ export async function validateRequest(): Promise<Session | null> {
           address
         },
       })
-      .returning({
-        id: users.id,
-        address: users.address,
-        username: users.username,
-      });
+      .returning();
 
     if (!user) {
       throw new Error('Failed to create or update user');
     }
 
-    return user;
+    return { user };
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(`Authentication failed: ${error.message}`);

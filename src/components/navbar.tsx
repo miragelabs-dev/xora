@@ -1,20 +1,22 @@
 'use client';
 
+import { useSession } from "@/app/session-provider";
 import { Logo } from "@/components/icons/logo";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetClose, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { navbarMenu } from "@/config/app";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { LogOut, Menu, PenSquare } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useNavbarMenu } from "../hooks/use-navbar-menu";
 import { UserAvatar } from "./user-avatar";
 
 export function Navbar() {
   const pathname = usePathname();
-
   const showMobileHeader = pathname === '/home';
+  const navbarMenu = useNavbarMenu();
+  const { user } = useSession();
 
   return (
     <>
@@ -28,7 +30,11 @@ export function Navbar() {
             </SheetTrigger>
             <SheetContent side="left" className="w-[280px] p-0">
               <div className="flex h-14 items-center border-b px-4">
-                <UserAvatar className="h-9 w-9" />
+                <UserAvatar
+                  src={user?.image}
+                  fallback={user?.username?.[0]}
+                  className="h-9 w-9"
+                />
                 <div className="ml-3">
                   <p className="font-semibold">@username</p>
                   <p className="text-sm text-muted-foreground">0 followers</p>

@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { integer, pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
+import { integer, pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
 import { likes, posts, reposts, saves } from "./post";
 
 export const users = pgTable("users", {
@@ -8,6 +8,8 @@ export const users = pgTable("users", {
   username: text("username").notNull(),
   name: text("name"),
   bio: text("bio"),
+  image: varchar("image"),
+  cover: varchar("cover"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

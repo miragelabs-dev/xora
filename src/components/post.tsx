@@ -22,6 +22,7 @@ export function Post({
     id: postId,
     content,
     createdAt: timestamp,
+    authorImage,
     authorId,
     authorUsername,
     authorName,
@@ -94,7 +95,11 @@ export function Post({
         )}
 
         <article className="flex gap-4">
-          <UserAvatar />
+          <UserAvatar
+            src={authorImage}
+            fallback={authorUsername[0]}
+            className="h-10 w-10"
+          />
 
           <div className="flex-1 space-y-2">
             <div className="flex items-center justify-between gap-2">
@@ -160,7 +165,7 @@ export function Post({
       {showReplies && (
         <div className="border-t border-b border-border">
           <div className="flex gap-4 p-4">
-            <UserAvatar />
+            <UserAvatar className="h-10 w-10" />
 
             <div className="flex-1 space-y-4">
               <Textarea

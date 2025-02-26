@@ -98,7 +98,11 @@ export default function NotificationsPage() {
               className={`flex gap-4 p-4 hover:bg-accent/50 cursor-pointer transition-colors ${notification.read ? 'opacity-60' : ''
                 }`}
             >
-              <UserAvatar fallback={notification.actorUsername[0]} />
+              <UserAvatar
+                src={notification.actorImage}
+                fallback={notification.actorUsername[0]}
+                className="h-10 w-10"
+              />
               <div className="flex flex-col gap-1">
                 <p className="text-sm">
                   <span className="font-bold">@{notification.actorUsername}</span>{' '}

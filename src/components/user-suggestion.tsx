@@ -10,6 +10,7 @@ interface UserSuggestionProps {
     id: number;
     username: string;
     name: string | null;
+    image: string | null;
   };
 }
 
@@ -29,6 +30,7 @@ export function UserSuggestion({ user }: UserSuggestionProps) {
         className="flex flex-1 items-center gap-2 min-w-0"
       >
         <UserAvatar
+          src={user.image}
           className="h-10 w-10"
           fallback={user.username[0]}
         />
