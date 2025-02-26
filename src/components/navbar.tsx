@@ -3,20 +3,37 @@
 import { useSession } from "@/app/session-provider";
 import { Logo } from "@/components/icons/logo";
 import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetClose, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { LogOut, Menu, PenSquare } from "lucide-react";
+import { LogOut, Menu, MoreHorizontal, PenSquare } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useLogout } from "../hooks/use-logout";
 import { useNavbarMenu } from "../hooks/use-navbar-menu";
 import { UserAvatar } from "./user-avatar";
+
+function LogoutMenuItem({ className }: { className?: string }) {
+  const handleLogout = useLogout();
+
+  return (
+    <DropdownMenuItem
+      className={cn("text-destructive focus:text-destructive cursor-pointer", className)}
+      onClick={handleLogout}
+    >
+      <LogOut className="mr-2 h-4 w-4" />
+      <span>Logout</span>
+    </DropdownMenuItem>
+  );
+}
 
 export function Navbar() {
   const pathname = usePathname();
   const showMobileHeader = pathname === '/home';
   const navbarMenu = useNavbarMenu();
   const { user } = useSession();
+  const handleLogout = useLogout();
 
   return (
     <>
@@ -36,8 +53,7 @@ export function Navbar() {
                   className="h-9 w-9"
                 />
                 <div className="ml-3">
-                  <p className="font-semibold">@username</p>
-                  <p className="text-sm text-muted-foreground">0 followers</p>
+                  <p className="font-semibold">@{user?.username}</p>
                 </div>
               </div>
               <nav className="flex flex-col py-4">
@@ -56,13 +72,13 @@ export function Navbar() {
                   </SheetClose>
                 ))}
                 <SheetClose asChild>
-                  <Button
-                    variant="ghost"
-                    className="flex items-center gap-3 px-4 py-3 justify-start text-base font-normal hover:bg-muted/50"
+                  <button
+                    className="flex items-center gap-3 px-4 py-3 text-base transition-colors hover:bg-muted/50 text-destructive w-full text-left"
+                    onClick={handleLogout}
                   >
                     <LogOut size={24} />
-                    Log out
-                  </Button>
+                    Logout
+                  </button>
                 </SheetClose>
               </nav>
             </SheetContent>
@@ -117,6 +133,23 @@ export function Navbar() {
                     </Link>
                   </motion.div>
                 ))}
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className={cn(
+                      "flex w-full items-center gap-3 rounded p-[10px] transition-colors xl:justify-start hover:bg-muted",
+                      "opacity-50 hover:opacity-100"
+                    )}>
+                      <MoreHorizontal size={24} />
+                      <span className="hidden text-base font-semibold leading-5 xl:inline">
+                        More
+                      </span>
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent side="right" align="start" className="w-[180px]">
+                    <LogoutMenuItem />
+                  </DropdownMenuContent>
+                </DropdownMenu>
 
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
