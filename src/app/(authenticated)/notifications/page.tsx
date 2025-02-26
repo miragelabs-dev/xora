@@ -1,6 +1,7 @@
 'use client';
 
 import { PageHeader } from "@/components/page-header";
+import { Skeleton } from "@/components/ui/skeleton";
 import { UserAvatar } from "@/components/user-avatar";
 import { NotificationView } from "@/lib/db/schema";
 import { api } from "@/utils/api";
@@ -8,6 +9,22 @@ import { formatDistanceToNow } from "date-fns";
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+
+function NotificationsSkeleton() {
+  return (
+    <div className="space-y-2">
+      {[...Array(8)].map((_, i) => (
+        <div key={i} className="flex items-center gap-3 p-4 hover:bg-muted/50 border-b">
+          <Skeleton className="h-12 w-12 rounded-full" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-4 w-full max-w-[250px]" />
+            <Skeleton className="h-3 w-24" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function NotificationsPage() {
   const utils = api.useUtils();
@@ -54,6 +71,15 @@ export default function NotificationsPage() {
       default:
         return 'interacted with you';
     }
+  }
+
+  if (isLoading) {
+    return (
+      <div>
+        <PageHeader title="Notifications" />
+        <NotificationsSkeleton />
+      </div>
+    );
   }
 
   return (
