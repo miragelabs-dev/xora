@@ -1,65 +1,30 @@
 import { follows, posts, users } from "@/lib/db/schema";
 import { createNotification, deleteNotification } from "@/server/utils/notifications";
 import { TRPCError } from "@trpc/server";
+import type { InferSelectModel } from "drizzle-orm";
 import { and, count, desc, eq, lt, sql } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
+// Base user type from Drizzle schema
+type DBUser = InferSelectModel<typeof users>;
+
+// Extend the base type with additional fields we need
+export type ProfileResponse = DBUser & {
+  followersCount: number;
+  followingCount: number;
+  postsCount: number;
+  isCurrentUser: boolean;
+  isFollowing: boolean;
+};
+
 export const userRouter = createTRPCRouter({
-  getProfile: protectedProcedure
-    .input(z.object({
-      userId: z.number(),
-    }))
-    .query(async ({ ctx, input }) => {
-      const user = await ctx.db.query.users.findFirst({
-        where: eq(users.id, input.userId),
-      });
-
-      if (!user) {
-        throw new TRPCError({ code: "NOT_FOUND" });
-      }
-
-      const postsCountResult = await ctx.db
-        .select({ value: count() })
-        .from(posts)
-        .where(eq(posts.authorId, input.userId));
-
-      const followersCount = await ctx.db
-        .select({ value: count() })
-        .from(follows)
-        .where(eq(follows.followingId, input.userId));
-
-      const followingCount = await ctx.db
-        .select({ value: count() })
-        .from(follows)
-        .where(eq(follows.followerId, input.userId));
-
-      const isFollowing = await ctx.db.query.follows.findFirst({
-        where: and(
-          eq(follows.followerId, ctx.session.id),
-          eq(follows.followingId, input.userId)
-        ),
-      });
-
-      return {
-        id: user.id,
-        username: user.username,
-        name: user.name,
-        bio: user.bio,
-        followersCount: followersCount[0].value,
-        followingCount: followingCount[0].value,
-        postsCount: postsCountResult[0].value,
-        isCurrentUser: user.id === ctx.session.id,
-        isFollowing: !!isFollowing,
-      };
-    }),
-
   follow: protectedProcedure
     .input(z.object({
       userId: z.number(),
     }))
     .mutation(async ({ ctx, input }) => {
-      if (input.userId === ctx.session.id) {
+      if (input.userId === ctx.session.user.id) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Cannot follow yourself"
@@ -67,13 +32,13 @@ export const userRouter = createTRPCRouter({
       }
 
       await ctx.db.insert(follows).values({
-        followerId: ctx.session.id,
+        followerId: ctx.session.user.id,
         followingId: input.userId,
       });
 
       await createNotification(ctx.db, {
         userId: input.userId,
-        actorId: ctx.session.id,
+        actorId: ctx.session.user.id,
         type: "follow",
         targetId: input.userId,
         targetType: "profile",
@@ -88,12 +53,12 @@ export const userRouter = createTRPCRouter({
       await ctx.db
         .delete(follows)
         .where(and(
-          eq(follows.followerId, ctx.session.id),
+          eq(follows.followerId, ctx.session.user.id),
           eq(follows.followingId, input.userId)
         ));
 
       await deleteNotification(ctx.db, {
-        actorId: ctx.session.id,
+        actorId: ctx.session.user.id,
         type: "follow",
         targetId: input.userId,
         targetType: "profile",
@@ -178,8 +143,10 @@ export const userRouter = createTRPCRouter({
 
   updateProfile: protectedProcedure
     .input(z.object({
-      name: z.string().min(1).max(50).optional(),
-      bio: z.string().max(160).optional(),
+      name: z.string().nullable(),
+      bio: z.string().nullable(),
+      image: z.string().url().nullable(),
+      cover: z.string().url().nullable(),
     }))
     .mutation(async ({ ctx, input }) => {
       const [updatedUser] = await ctx.db
@@ -187,9 +154,11 @@ export const userRouter = createTRPCRouter({
         .set({
           name: input.name,
           bio: input.bio,
+          image: input.image,
+          cover: input.cover,
           updatedAt: new Date(),
         })
-        .where(eq(users.id, ctx.session.id))
+        .where(eq(users.id, ctx.session.user.id))
         .returning();
 
       if (!updatedUser) {
@@ -206,7 +175,7 @@ export const userRouter = createTRPCRouter({
     .input(z.object({
       username: z.string(),
     }))
-    .query(async ({ ctx, input }) => {
+    .query(async ({ ctx, input }): Promise<ProfileResponse> => {
       const user = await ctx.db.query.users.findFirst({
         where: eq(users.username, input.username),
       });
@@ -232,20 +201,17 @@ export const userRouter = createTRPCRouter({
 
       const isFollowing = await ctx.db.query.follows.findFirst({
         where: and(
-          eq(follows.followerId, ctx.session.id),
+          eq(follows.followerId, ctx.session.user.id),
           eq(follows.followingId, user.id)
         ),
       });
 
       return {
-        id: user.id,
-        username: user.username,
-        name: user.name,
-        bio: user.bio,
+        ...user,
         followersCount: followersCount[0].value,
         followingCount: followingCount[0].value,
         postsCount: postsCountResult[0].value,
-        isCurrentUser: user.id === ctx.session.id,
+        isCurrentUser: user.address === ctx.session.user.address,
         isFollowing: !!isFollowing,
       };
     }),
@@ -286,9 +252,9 @@ export const userRouter = createTRPCRouter({
         })
         .from(users)
         .where(
-          sql`${users.id} != ${ctx.session.id} AND NOT EXISTS (
+          sql`${users.id} != ${ctx.session.user.id} AND NOT EXISTS (
             SELECT 1 FROM ${follows}
-            WHERE ${follows.followerId} = ${ctx.session.id}
+            WHERE ${follows.followerId} = ${ctx.session.user.id}
             AND ${follows.followingId} = ${users.id}
           )`
         )

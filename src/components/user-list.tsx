@@ -63,7 +63,8 @@ export function UserList({ type, userId }: UserListProps) {
             className="flex items-center gap-3 border-b border-border p-4 hover:bg-muted/50"
           >
             <UserAvatar
-              className="size-10"
+              src={user.image}
+              className="h-10 w-10"
               fallback={user.username[0]}
             />
             <div className="flex-1 min-w-0">

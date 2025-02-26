@@ -39,6 +39,7 @@ export const notificationView = pgView("notification_view").as((qb) => {
       userUsername: sql<string>`${userAlias.username}`.as('user_username'),
       actorId: notifications.actorId,
       actorUsername: sql<string>`${actorAlias.username}`.as('actor_username'),
+      actorImage: sql<string>`${actorAlias.image}`.as('actor_image'),
       type: notifications.type,
       read: notifications.read,
       createdAt: notifications.createdAt,

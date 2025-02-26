@@ -17,7 +17,7 @@ export const notificationRouter = createTRPCRouter({
         .from(notificationView)
         .where(
           and(
-            eq(notificationView.userId, ctx.session.id),
+            eq(notificationView.userId, ctx.session.user.id),
             cursor ? lt(notificationView.id, cursor) : undefined
           )
         )
@@ -47,7 +47,7 @@ export const notificationRouter = createTRPCRouter({
         .where(
           and(
             eq(notifications.id, input.notificationId),
-            eq(notifications.userId, ctx.session.id)
+            eq(notifications.userId, ctx.session.user.id)
           )
         );
     }),
@@ -57,6 +57,6 @@ export const notificationRouter = createTRPCRouter({
       await ctx.db
         .update(notifications)
         .set({ read: true })
-        .where(eq(notifications.userId, ctx.session.id));
+        .where(eq(notifications.userId, ctx.session.user.id));
     }),
 }); 

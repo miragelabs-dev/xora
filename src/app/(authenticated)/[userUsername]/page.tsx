@@ -4,34 +4,12 @@ import { Feed } from "@/components/feed";
 import { PageHeader } from "@/components/page-header";
 import { ProfileHeader } from "@/components/profile-header";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { api } from "@/utils/api";
-import { Loader2 } from "lucide-react";
-import { notFound } from "next/navigation";
+import { useProfile } from "@/contexts/profile-context";
 import { useState } from "react";
 
-export default function UserProfilePage({
-  params
-}: {
-  params: { userUsername: string }
-}) {
-  const username = decodeURIComponent(params.userUsername);
-
+export default function UserProfilePage() {
+  const { profile } = useProfile();
   const [activeTab, setActiveTab] = useState<'posts' | 'replies'>('posts');
-  const { data: profile, isLoading } = api.user.getProfileByUsername.useQuery({
-    username
-  });
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center p-4">
-        <Loader2 className="h-6 w-6 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (!profile) {
-    return notFound();
-  }
 
   return (
     <div>
@@ -41,14 +19,7 @@ export default function UserProfilePage({
       />
 
       <ProfileHeader
-        userId={profile.id}
-        username={profile.username}
-        name={profile.name}
-        bio={profile.bio}
-        followersCount={profile.followersCount}
-        followingCount={profile.followingCount}
-        isCurrentUser={profile.isCurrentUser}
-        isFollowing={profile.isFollowing}
+        profile={profile}
       />
 
       <Tabs

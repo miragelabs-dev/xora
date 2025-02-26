@@ -1,5 +1,6 @@
 'use client';
 
+import { useSession } from "@/app/session-provider";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { UserAvatar } from "@/components/user-avatar";
@@ -29,9 +30,15 @@ export function Compose({ onSuccess }: { onSuccess?: () => void }) {
     setContent(prev => prev + emoji);
   };
 
+  const { user } = useSession();
+
   return (
     <div className="flex gap-3 sm:gap-4 p-3 sm:p-4 border-b">
-      <UserAvatar className="h-8 w-8 sm:h-10 sm:w-10" />
+      <UserAvatar
+        src={user.image}
+        fallback={user.username[0]}
+        className="h-8 w-8 sm:h-10 sm:w-10"
+      />
 
       <div className="flex-1 space-y-3 sm:space-y-4">
         <Textarea

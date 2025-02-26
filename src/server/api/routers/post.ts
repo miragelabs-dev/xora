@@ -15,7 +15,7 @@ export const postRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const post = await ctx.db.insert(posts).values({
         content: input.content,
-        authorId: ctx.session.id,
+        authorId: ctx.session.user.id,
       }).returning();
 
       return post[0];
@@ -31,7 +31,7 @@ export const postRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const { type, limit, cursor, userId } = input;
 
-      await setUserId(ctx.db, ctx.session.id);
+      await setUserId(ctx.db, ctx.session.user.id);
 
       const baseQuery = ctx.db
         .select()
@@ -84,13 +84,13 @@ export const postRouter = createTRPCRouter({
 
       await ctx.db.insert(likes).values({
         postId: input.postId,
-        userId: ctx.session.id,
+        userId: ctx.session.user.id,
       });
 
-      if (post.authorId !== ctx.session.id) {
+      if (post.authorId !== ctx.session.user.id) {
         await createNotification(ctx.db, {
           userId: post.authorId,
-          actorId: ctx.session.id,
+          actorId: ctx.session.user.id,
           type: "like",
           targetId: input.postId,
           targetType: "post",
@@ -107,11 +107,11 @@ export const postRouter = createTRPCRouter({
         .delete(likes)
         .where(and(
           eq(likes.postId, input.postId),
-          eq(likes.userId, ctx.session.id)
+          eq(likes.userId, ctx.session.user.id)
         ));
 
       await deleteNotification(ctx.db, {
-        actorId: ctx.session.id,
+        actorId: ctx.session.user.id,
         type: "like",
         targetId: input.postId,
         targetType: "post",
@@ -128,7 +128,7 @@ export const postRouter = createTRPCRouter({
         .where(
           and(
             eq(posts.id, input.postId),
-            eq(posts.authorId, ctx.session.id)
+            eq(posts.authorId, ctx.session.user.id)
           )
         )
         .returning();
@@ -158,13 +158,13 @@ export const postRouter = createTRPCRouter({
 
       await ctx.db.insert(reposts).values({
         postId: input.postId,
-        userId: ctx.session.id,
+        userId: ctx.session.user.id,
       });
 
-      if (post.authorId !== ctx.session.id) {
+      if (post.authorId !== ctx.session.user.id) {
         await createNotification(ctx.db, {
           userId: post.authorId,
-          actorId: ctx.session.id,
+          actorId: ctx.session.user.id,
           type: "repost",
           targetId: input.postId,
           targetType: "post",
@@ -181,11 +181,11 @@ export const postRouter = createTRPCRouter({
         .delete(reposts)
         .where(and(
           eq(reposts.postId, input.postId),
-          eq(reposts.userId, ctx.session.id)
+          eq(reposts.userId, ctx.session.user.id)
         ));
 
       await deleteNotification(ctx.db, {
-        actorId: ctx.session.id,
+        actorId: ctx.session.user.id,
         type: "repost",
         targetId: input.postId,
         targetType: "post",
@@ -197,7 +197,7 @@ export const postRouter = createTRPCRouter({
       postId: z.number(),
     }))
     .query(async ({ ctx, input }) => {
-      await setUserId(ctx.db, ctx.session.id);
+      await setUserId(ctx.db, ctx.session.user.id);
 
       const post = await ctx.db.select().from(postView).where(eq(postView.id, input.postId));
 
@@ -226,7 +226,7 @@ export const postRouter = createTRPCRouter({
 
       await ctx.db.insert(saves).values({
         postId: input.postId,
-        userId: ctx.session.id,
+        userId: ctx.session.user.id,
       });
     }),
 
@@ -239,11 +239,11 @@ export const postRouter = createTRPCRouter({
         .delete(saves)
         .where(and(
           eq(saves.postId, input.postId),
-          eq(saves.userId, ctx.session.id)
+          eq(saves.userId, ctx.session.user.id)
         ));
 
       await deleteNotification(ctx.db, {
-        actorId: ctx.session.id,
+        actorId: ctx.session.user.id,
         type: "save",
         targetId: input.postId,
         targetType: "post",
@@ -252,13 +252,13 @@ export const postRouter = createTRPCRouter({
 
   bookmarks: protectedProcedure
     .query(async ({ ctx }) => {
-      await setUserId(ctx.db, ctx.session.id);
+      await setUserId(ctx.db, ctx.session.user.id);
 
       const posts = await ctx.db
         .select()
         .from(postView)
         .innerJoin(saves, eq(saves.postId, postView.id))
-        .where(eq(saves.userId, ctx.session.id))
+        .where(eq(saves.userId, ctx.session.user.id))
         .orderBy(desc(postView.createdAt));
 
       return posts.map(({ post_view: post }) => post);
@@ -280,14 +280,14 @@ export const postRouter = createTRPCRouter({
 
       const [post] = await ctx.db.insert(posts).values({
         content: input.content,
-        authorId: ctx.session.id,
+        authorId: ctx.session.user.id,
         replyToId: input.replyToId,
       }).returning();
 
-      if (parentPost.authorId !== ctx.session.id) {
+      if (parentPost.authorId !== ctx.session.user.id) {
         await createNotification(ctx.db, {
           userId: parentPost.authorId,
-          actorId: ctx.session.id,
+          actorId: ctx.session.user.id,
           type: "comment",
           targetId: input.replyToId,
           targetType: "post",
