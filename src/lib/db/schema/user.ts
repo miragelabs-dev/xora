@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { integer, pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import { integer, pgTable, serial, text, timestamp, unique, varchar } from "drizzle-orm/pg-core";
 import { likes, posts, reposts, saves } from "./post";
 
 export const users = pgTable("users", {
@@ -22,6 +22,10 @@ export const follows = pgTable("follows", {
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => {
+  return {
+    followerFollowingUnique: unique().on(table.followerId, table.followingId),
+  }
 });
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -31,13 +35,11 @@ export const usersRelations = relations(users, ({ many }) => ({
   reposts: many(reposts),
   followers: many(follows, {
     relationName: "user_followers",
-    fields: [users.id],
-    references: [follows.followingId],
+    foreignKey: [follows.followingId],
   }),
   following: many(follows, {
     relationName: "user_following",
-    fields: [users.id],
-    references: [follows.followerId],
+    foreignKey: [follows.followerId],
   }),
 }));
 
