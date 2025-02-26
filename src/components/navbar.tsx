@@ -147,22 +147,23 @@ export function Navbar() {
             key={link.name}
             href={link.link}
             className={cn(
-              "flex flex-1 flex-col items-center justify-center gap-1 text-xs transition-colors hover:bg-muted/50",
+              "flex flex-1 items-center justify-center transition-colors hover:bg-muted/50",
               pathname === link.link
-                ? "text-primary font-medium"
+                ? "text-primary"
                 : "text-muted-foreground"
             )}
           >
             {link.icon && <link.icon size={20} />}
-            <span>{link.name}</span>
           </Link>
         ))}
         <Link
           href="/compose/post"
-          className="flex flex-1 flex-col items-center justify-center gap-1 text-xs text-primary transition-colors hover:bg-muted/50"
+          className={cn(
+            "flex flex-1 items-center justify-center transition-colors hover:bg-muted/50",
+            pathname === '/compose/post' ? "text-primary" : "text-muted-foreground"
+          )}
         >
           <PenSquare size={20} />
-          <span>Post</span>
         </Link>
       </nav>
     </>
