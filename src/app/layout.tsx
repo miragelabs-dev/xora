@@ -1,3 +1,4 @@
+import { Toaster } from "@/components/ui/sonner";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { TRPCProvider } from './trpc-provider';
@@ -18,6 +19,7 @@ export default async function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
       </head>
       <body className={`${inter.variable} antialiased`}>
+        <Toaster />
         <TRPCProvider>
           {children}
         </TRPCProvider>
