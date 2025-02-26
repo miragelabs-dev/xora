@@ -1,4 +1,4 @@
-import { likes, posts, reposts, saves } from "@/lib/db/schema";
+import { follows, likes, posts, reposts, saves } from "@/lib/db/schema";
 import { postView } from "@/lib/db/schema/post";
 import { setUserId } from "@/server/utils/db";
 import { createNotification, deleteNotification } from "@/server/utils/notifications";
@@ -48,6 +48,15 @@ export const postRouter = createTRPCRouter({
       if (type === 'replies' && userId) {
         conditions.push(eq(postView.authorId, userId));
         conditions.push(sql`${postView.replyToId} IS NOT NULL`);
+      }
+
+      if (type === 'following') {
+        const subquery = ctx.db
+          .select({ followingId: follows.followingId })
+          .from(follows)
+          .where(eq(follows.followerId, ctx.session.user.id));
+
+        conditions.push(sql`${postView.authorId} IN (${subquery})`);
       }
 
       if (cursor) {
