@@ -49,19 +49,21 @@ npx chopd
 - [x] Bookmarks management
 - [x] Comments and replies system
 - [x] Enhanced user profiles
+- [x] Username updates with validation
+- [x] Image attachments for posts
 - [ ] Post dropdown menu improvements:
   - [ ] Copy text
   - [ ] Copy post URL
-- [ ] Notification system:
+- [x] Notification system:
   - [x] Retweet notifications
   - [x] Comment notifications
   - [x] Like notifications
-  - [ ] Follow notifications
+  - [x] Follow notifications
 
 ### Layout Enhancements
-- [ ] Right sidebar search functionality
-- [ ] "Who to follow" section:
-  - [ ] Random user suggestions
+- [x] Right sidebar search functionality
+- [x] "Who to follow" section:
+  - [x] Random user suggestions
 
 ## 🛠️ Development Guidelines
 This project includes Cursor AI rules (`.mdc` files) for consistent development practices:
