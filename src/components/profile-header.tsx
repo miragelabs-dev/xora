@@ -37,7 +37,7 @@ export function ProfileHeader({
       <div className={cn("relative", className)}>
         <div className="relative h-32 border-b w-full overflow-hidden sm:h-48">
           <Image
-            src={profile.cover || ''}
+            src={profile.cover || '/defaults/banner.jpeg'}
             alt={`${profile.username}'s cover`}
             className="object-cover"
             fill

@@ -21,6 +21,7 @@ import { User } from "@/lib/db/schema";
 import { api } from "@/utils/api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ImageIcon, Loader2 } from "lucide-react";
+import Image from "next/image";
 import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -160,9 +161,10 @@ export function EditProfileDialog({
                 ) : (
                   <>
                     {cover ? (
-                      <img
-                        src={cover}
+                      <Image
+                        src={cover || '/defaults/banner.jpeg'}
                         alt="Cover"
+                        fill
                         className="h-full w-full object-cover transition-opacity group-hover:opacity-80"
                       />
                     ) : (
