@@ -1,5 +1,6 @@
 'use client';
 
+import { TopCryptoList } from "@/components/top-crypto-list";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UserSuggestion } from "@/components/user-suggestion";
@@ -110,6 +111,8 @@ export function RightSidebar() {
             )}
           </div>
         </div>
+
+        <TopCryptoList />
       </div>
     </aside>
   );
