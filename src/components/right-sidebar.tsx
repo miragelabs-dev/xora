@@ -35,7 +35,9 @@ export function RightSidebar() {
   );
 
   const { data: suggestions, isLoading: isSuggestionsLoading } =
-    api.user.getRandomSuggestions.useQuery({ limit: 3 });
+    api.user.getRandomSuggestions.useQuery({
+      limit: 5
+    });
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
