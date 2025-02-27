@@ -2,6 +2,7 @@ import { useSession } from "@/app/session-provider";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { UserAvatar } from "@/components/user-avatar";
+import { VerifiedBadge } from "@/components/verified-badge";
 import { PostView } from "@/lib/db/schema/post";
 import { api } from "@/utils/api";
 import { formatDistanceToNow } from "date-fns";
@@ -112,6 +113,19 @@ export function Post({
                 >
                   {`@${post.author.username}`}
                 </Link>
+                {post.author.isCryptoBot ? (
+                  <div className="inline-flex items-center ml-2">
+                    <div className="flex items-center gap-1.5 bg-primary/10 hover:bg-primary/15 transition-colors rounded-full pl-2 pr-2.5 py-0.5">
+                      <div className="size-2 rounded-full bg-primary animate-pulse" />
+                      <span className="text-primary text-xs font-semibold tracking-wide">
+                        CRYPTO BOT
+                      </span>
+                      <VerifiedBadge className="h-4 w-4 text-primary" />
+                    </div>
+                  </div>
+                ) : post.author.isVerified && (
+                  <VerifiedBadge className="ml-1 inline-block" />
+                )}
                 <span className="ml-2 text-muted-foreground">· {
                   formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })
                 }</span>
@@ -154,7 +168,7 @@ export function Post({
                 <div className="border-t border-border pt-3">
                   <div className="flex flex-col gap-2" data-no-navigate>
                     {Array.from(new Set(post.content.match(/\$[A-Za-z]{2,5}/g) || []))
-                      .map((symbol) => (
+                      .map((symbol: string) => (
                         <CryptoPriceTag
                           key={symbol}
                           symbol={symbol.substring(1)}
