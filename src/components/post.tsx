@@ -1,12 +1,11 @@
 import { useSession } from "@/app/session-provider";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Textarea } from "@/components/ui/textarea";
 import { UserAvatar } from "@/components/user-avatar";
 import { PostView } from "@/lib/db/schema/post";
 import { api } from "@/utils/api";
 import { formatDistanceToNow } from "date-fns";
-import { Loader2, MoreHorizontal, Pencil, Repeat2, Trash } from "lucide-react";
+import { Loader2, MoreHorizontal, Repeat2, Trash } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -28,8 +27,6 @@ export function Post({
   showReplies = false,
 }: PostProps) {
   const [replyContent, setReplyContent] = useState("");
-  const [isEditing, setIsEditing] = useState(false);
-  const [editContent, setEditContent] = useState(post.content);
   const [isImageLightboxOpen, setIsImageLightboxOpen] = useState(false);
 
   const utils = api.useUtils();
@@ -52,15 +49,6 @@ export function Post({
     },
   });
 
-  const { mutate: updatePost, isPending: isUpdatePending } = api.post.update.useMutation({
-    onSuccess: () => {
-      setIsEditing(false);
-      utils.post.feed.invalidate();
-      utils.post.getById.invalidate({ postId: post.id });
-      utils.post.getReplies.invalidate({ postId: post.id });
-    },
-  });
-
   const { data: replies, hasNextPage, fetchNextPage, isFetchingNextPage } =
     api.post.getReplies.useInfiniteQuery(
       {
@@ -79,8 +67,6 @@ export function Post({
     >
       <div
         onClick={(e) => {
-          if (isEditing) return;
-
           const selection = window.getSelection();
           const shouldNavigate = !(e.target as HTMLElement).closest('[data-no-navigate]') &&
             (!selection || selection.toString().length === 0);
@@ -145,14 +131,6 @@ export function Post({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem
-                      onClick={() => setIsEditing(true)}
-                      disabled={isEditing}
-                      data-no-navigate
-                    >
-                      <Pencil className="mr-2 h-4 w-4" />
-                      Edit Post
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
                       disabled={isPending}
                       onClick={() => deletePost({ postId: post.id })}
                       data-no-navigate
@@ -170,67 +148,22 @@ export function Post({
               )}
             </div>
 
-            {isEditing ? (
-              <div className="mt-2">
-                <Textarea
-                  value={editContent}
-                  onChange={(e) => setEditContent(e.target.value)}
-                  className="min-h-[100px] resize-none"
-                  maxLength={280}
-                  disabled={isUpdatePending}
-                />
-                <div className="mt-2 flex items-center justify-between">
-                  <div className="text-sm text-muted-foreground">
-                    {editContent.length}/280
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setIsEditing(false);
-                        setEditContent(post.content);
-                      }}
-                      disabled={isUpdatePending}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        if (editContent.trim() && editContent !== post.content) {
-                          updatePost({ postId: post.id, content: editContent.trim() });
-                        }
-                      }}
-                      disabled={isUpdatePending || !editContent.trim() || editContent === post.content}
-                    >
-                      {isUpdatePending ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ) : (
-                        'Save'
-                      )}
-                    </Button>
+            <div className="text-sm mt-2 select-text space-y-4">
+              <p>{post.content}</p>
+              {post.content.match(/\$[A-Za-z]{2,5}/g) && (
+                <div className="border-t border-border pt-3">
+                  <div className="flex flex-col gap-2" data-no-navigate>
+                    {Array.from(new Set(post.content.match(/\$[A-Za-z]{2,5}/g) || []))
+                      .map((symbol) => (
+                        <CryptoPriceTag
+                          key={symbol}
+                          symbol={symbol.substring(1)}
+                        />
+                      ))}
                   </div>
                 </div>
-              </div>
-            ) : (
-              <div className="text-sm mt-2 select-text space-y-4">
-                <p>{post.content}</p>
-                {post.content.match(/\$[A-Za-z]{2,5}/g) && (
-                  <div className="border-t border-border pt-3">
-                    <div className="flex flex-col gap-2" data-no-navigate>
-                      {Array.from(new Set(post.content.match(/\$[A-Za-z]{2,5}/g) || []))
-                        .map((symbol) => (
-                          <CryptoPriceTag
-                            key={symbol}
-                            symbol={symbol.substring(1)}
-                          />
-                        ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
+              )}
+            </div>
 
             {post.image && (
               <>
