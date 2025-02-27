@@ -14,6 +14,7 @@ import { useState } from "react";
 
 import { ComposeForm } from "./compose-form";
 import { CryptoPriceTag } from "./crypto-price-tag";
+import { ImageLightbox } from "./image-lightbox";
 import { PostActions } from "./post-actions";
 
 interface PostProps {
@@ -29,6 +30,7 @@ export function Post({
   const [replyContent, setReplyContent] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(post.content);
+  const [isImageLightboxOpen, setIsImageLightboxOpen] = useState(false);
 
   const utils = api.useUtils();
   const { user } = useSession();
@@ -231,16 +233,30 @@ export function Post({
             )}
 
             {post.image && (
-              <div className="relative mt-5 aspect-[16/9] overflow-hidden rounded-xl">
-                <Image
-                  src={post.image}
-                  alt="Post image"
-                  fill
-                  className="object-cover"
+              <>
+                <div
+                  className="relative mt-5 aspect-[16/9] overflow-hidden rounded-xl cursor-zoom-in"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsImageLightboxOpen(true);
+                  }}
                   data-no-navigate
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                >
+                  <Image
+                    src={post.image}
+                    alt="Post image"
+                    fill
+                    className="object-cover"
+                    data-no-navigate
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  />
+                </div>
+                <ImageLightbox
+                  src={post.image}
+                  isOpen={isImageLightboxOpen}
+                  onClose={() => setIsImageLightboxOpen(false)}
                 />
-              </div>
+              </>
             )}
 
             <PostActions
