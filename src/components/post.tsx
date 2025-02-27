@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { ComposeForm } from "./compose-form";
+import { CryptoPriceTag } from "./crypto-price-tag";
 import { PostActions } from "./post-actions";
 
 interface PostProps {
@@ -211,7 +212,22 @@ export function Post({
                 </div>
               </div>
             ) : (
-              <p className="text-sm mt-2 select-text">{post.content}</p>
+              <div className="text-sm mt-2 select-text space-y-4">
+                <p>{post.content}</p>
+                {post.content.match(/\$[A-Za-z]{2,5}/g) && (
+                  <div className="border-t border-border pt-3">
+                    <div className="flex flex-col gap-2">
+                      {Array.from(new Set(post.content.match(/\$[A-Za-z]{2,5}/g) || []))
+                        .map((symbol) => (
+                          <CryptoPriceTag
+                            key={symbol}
+                            symbol={symbol.substring(1)}
+                          />
+                        ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
 
             {post.image && (

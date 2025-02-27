@@ -30,7 +30,7 @@ export function SessionProvider({ children }: {
   }, [isLoading, isSuccess, router]);
 
   if (isLoading) {
-    return <Loading message="Loading session..." />;
+    return <Loading message="Entering the crypto universe..." />;
   }
 
   if (!isSuccess) {
