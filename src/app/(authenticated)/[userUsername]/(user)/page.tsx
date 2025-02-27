@@ -38,13 +38,15 @@ export default function UserProfilePage() {
           <TabsTrigger value="posts" className="flex-1">
             Posts
           </TabsTrigger>
-          <TabsTrigger value="replies" className="flex-1">
-            Replies
-          </TabsTrigger>
           {!profile.isCryptoBot && (
-            <TabsTrigger value="interests" className="flex-1">
-              Interests
-            </TabsTrigger>
+            <>
+              <TabsTrigger value="replies" className="flex-1">
+                Replies
+              </TabsTrigger>
+              <TabsTrigger value="interests" className="flex-1">
+                Interests
+              </TabsTrigger>
+            </>
           )}
         </TabsList>
       </Tabs>

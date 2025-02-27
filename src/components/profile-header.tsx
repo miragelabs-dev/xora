@@ -103,12 +103,12 @@ export function ProfileHeader({
           </div>
 
           <div className="flex gap-4 text-sm text-muted-foreground">
-            <Link
+            {!profile.isCryptoBot && <Link
               href={`/${profile.username}/following`}
               className="hover:underline"
             >
               <strong className="text-foreground">{profile.followingCount}</strong> Following
-            </Link>
+            </Link>}
             <Link
               href={`/${profile.username}/followers`}
               className="hover:underline"
