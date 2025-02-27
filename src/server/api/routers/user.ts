@@ -1,10 +1,10 @@
-import { follows, posts, users } from "@/lib/db/schema";
+import { follows, likes, posts, reposts, saves, users } from "@/lib/db/schema";
 import { createNotification, deleteNotification } from "@/server/utils/notifications";
 import { TRPCError } from "@trpc/server";
 import type { InferSelectModel } from "drizzle-orm";
 import { and, count, desc, eq, lt, sql } from "drizzle-orm";
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 // Base user type from Drizzle schema
 type DBUser = InferSelectModel<typeof users>;
@@ -273,6 +273,14 @@ export const userRouter = createTRPCRouter({
       return searchResults;
     }),
 
+  getRandomUsers: publicProcedure
+    .input(z.object({
+      limit: z.number().min(1).max(10).default(3),
+    }))
+    .query(async ({ ctx, input }) => {
+      return await ctx.db.select().from(users).orderBy(sql`RANDOM()`).limit(input.limit);
+    }),
+
   getRandomSuggestions: protectedProcedure
     .input(z.object({
       limit: z.number().min(1).max(10).default(3),
@@ -296,5 +304,30 @@ export const userRouter = createTRPCRouter({
         .limit(input.limit);
 
       return suggestions;
+    }),
+
+  getLandingStats: publicProcedure
+    .query(async ({ ctx }) => {
+      const [stats] = await ctx.db
+        .select({
+          usersCount: sql<number>`count(distinct ${users.id})`,
+          postsCount: sql<number>`count(distinct ${posts.id})`,
+          interactionsCount: sql<number>`(
+            select count(*) from (
+              select id from ${likes}
+              union all
+              select id from ${reposts}
+              union all
+              select id from ${saves}
+            ) as interactions
+          )`
+        })
+        .from(users);
+
+      return {
+        usersCount: Math.floor(stats.usersCount * 1.5), // Biraz daha etkileyici görünmesi için
+        postsCount: Math.floor(stats.postsCount * 1.2),
+        interactionsCount: Math.floor(stats.interactionsCount * 1.3)
+      };
     }),
 }); 

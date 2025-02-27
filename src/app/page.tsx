@@ -1,6 +1,8 @@
 "use client";
 
 import { Logo } from "@/components/icons/logo";
+import { LandingStats } from "@/components/landing-stats";
+import { RandomUsers } from "@/components/random-users";
 import { Button } from "@/components/ui/button";
 import { useAddress } from "@chopinframework/react";
 import { motion } from "framer-motion";
@@ -107,7 +109,7 @@ export default function Page() {
             >
               Share Your<br />
               <span className="bg-gradient-to-r from-primary-foreground to-primary-foreground/80 bg-clip-text text-transparent">
-                Story With Us
+                Moon Mission 🚀
               </span>
             </motion.h1>
             <motion.p
@@ -116,7 +118,7 @@ export default function Page() {
               transition={{ duration: 0.5, delay: 0.7 }}
               className="text-xl font-medium text-primary-foreground/80"
             >
-              What&apos;s happening? Join us and find out!
+              Where crypto dreams take flight! ✨
             </motion.p>
           </div>
         </div>
@@ -147,11 +149,11 @@ export default function Page() {
               className="text-4xl font-bold leading-tight tracking-tight text-foreground"
             >
               <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-                Join Us Today
+                Ready for Takeoff? 🛸
               </span>
               <br />
               <span className="text-foreground">
-                We&apos;re Waiting For You
+                Your Space in the Cryptoverse
               </span>
             </motion.h2>
             <motion.p
@@ -160,8 +162,36 @@ export default function Page() {
               transition={{ duration: 0.5, delay: 0.5 }}
               className="text-lg font-medium text-muted-foreground"
             >
-              Connect and share with millions!
+              Grab your space suit and join the fun! 🌟
             </motion.p>
+          </div>
+
+          <div className="flex flex-col items-center space-y-6">
+            <RandomUsers />
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 1.2 }}
+              className="text-sm text-muted-foreground"
+            >
+              Join these astronauts and many others! 🌠
+            </motion.p>
+
+            <LandingStats />
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 1.4 }}
+              className="flex flex-wrap justify-center gap-2 text-sm text-muted-foreground"
+            >
+              <span className="rounded-full bg-primary/5 px-3 py-1 border border-primary/10">
+                🔒 Decentralized
+              </span>
+              <span className="rounded-full bg-primary/5 px-3 py-1 border border-primary/10">
+                ⚡ Lightning Fast
+              </span>
+            </motion.div>
           </div>
 
           <motion.div
@@ -185,7 +215,7 @@ export default function Page() {
                 />
               ) : (
                 <>
-                  Sign In Now
+                  Start Your Journey 🚀
                   <motion.div
                     animate={{ x: [0, 5, 0] }}
                     transition={{ repeat: Infinity, duration: 1.5 }}
