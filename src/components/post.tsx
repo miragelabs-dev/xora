@@ -72,20 +72,21 @@ export function Post({
 
   return (
     <div
-      className="group relative block border-b border-border cursor-pointer"
-      onClick={(e) => {
-        if (isEditing) return;
-
-        const selection = window.getSelection();
-        const shouldNavigate = !(e.target as HTMLElement).closest('[data-no-navigate]') &&
-          (!selection || selection.toString().length === 0);
-
-        if (shouldNavigate) {
-          router.push(`/${post.author.username}/status/${post.id}`);
-        }
-      }}
+      className="group relative block border-b border-border"
     >
-      <div className="relative px-4 py-3">
+      <div
+        onClick={(e) => {
+          if (isEditing) return;
+
+          const selection = window.getSelection();
+          const shouldNavigate = !(e.target as HTMLElement).closest('[data-no-navigate]') &&
+            (!selection || selection.toString().length === 0);
+
+          if (shouldNavigate) {
+            router.push(`/${post.author.username}/status/${post.id}`);
+          }
+        }}
+        className="relative px-4 py-3 hover:bg-muted/20 transition-colors duration-200 cursor-pointer">
         {post.repost && (
           <div className="ml-2 top-[-8px] relative flex items-center gap-1 px-4 pt-2 text-xs text-muted-foreground">
             <Repeat2 className="h-4 w-4" />
