@@ -14,13 +14,13 @@ export const postRouter = createTRPCRouter({
       image: z.string().nullable().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      const result = await ctx.db.insert(posts).values({
+      const [result] = await ctx.db.insert(posts).values({
         content: input.content,
         authorId: ctx.session.user.id,
         image: input.image || null,
       }).returning();
 
-      return result[0];
+      return result;
     }),
 
   feed: protectedProcedure
@@ -48,7 +48,7 @@ export const postRouter = createTRPCRouter({
       if (type === 'user' && userId) {
         const userPostsCondition = sql`(
           (${postView.authorId} = ${userId} AND ${postView.replyToId} IS NULL) OR 
-          (${sql`first_repost.user_id`} = ${userId} AND ${postView.replyToId} IS NULL)
+          (${postView.reposterId} = ${userId} AND ${postView.replyToId} IS NULL)
         )`;
         conditions.push(userPostsCondition);
       }
@@ -148,7 +148,7 @@ export const postRouter = createTRPCRouter({
       postId: z.number(),
     }))
     .mutation(async ({ ctx, input }) => {
-      const result = await ctx.db
+      const [deletedPost] = await ctx.db
         .delete(posts)
         .where(
           and(
@@ -157,8 +157,6 @@ export const postRouter = createTRPCRouter({
           )
         )
         .returning();
-
-      const deletedPost = result[0];
 
       if (!deletedPost) {
         throw new TRPCError({
