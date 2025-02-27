@@ -38,7 +38,7 @@ export function Navbar() {
   return (
     <>
       {showMobileHeader && (
-        <header className="fixed top-0 left-0 right-0 z-50 flex h-14 items-center justify-between border-b bg-background/80 backdrop-blur-lg px-4 sm:hidden">
+        <header className="fixed top-0 left-0 right-0 z-50 flex h-14 items-center justify-between border-b bg-background/80 backdrop-blur-lg px-4 lg:hidden">
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="h-9 w-9">
@@ -92,7 +92,7 @@ export function Navbar() {
         </header>
       )}
 
-      <header className="relative z-[3] hidden sm:flex sm:flex-shrink-0 sm:flex-grow sm:flex-col sm:items-end">
+      <header className="relative z-[3] hidden lg:flex lg:flex-shrink-0 lg:flex-grow lg:flex-col lg:items-end">
         <div className="flex select-none flex-col items-end w-[250px]">
           <div className="fixed top-0 h-full w-[250px]">
             <nav className="flex h-full flex-col gap-6 py-6 px-4">
@@ -174,7 +174,7 @@ export function Navbar() {
         </div>
       </header>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-50 flex h-14 border-t bg-background/80 backdrop-blur-lg sm:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 flex h-14 border-t bg-background/80 backdrop-blur-lg lg:hidden">
         {navbarMenu.map((link) => (
           <Link
             key={link.name}

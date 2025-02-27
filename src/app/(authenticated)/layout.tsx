@@ -13,11 +13,11 @@ export default async function Layout({
   return (
     <SessionProvider>
       <div className={cn(
-        "mx-auto flex min-h-[100svh] max-w-[1350px] flex-col flex-nowrap items-stretch justify-center pb-14 sm:flex-row sm:pb-0",
+        "mx-auto flex min-h-[100svh] max-w-[1350px] flex-col flex-nowrap items-stretch justify-center pb-14 lg:flex-row lg:pb-0",
       )}>
         <Navbar />
         <main className="flex flex-grow">
-          <div className="relative w-full border-x border-border sm:w-[610px]">
+          <div className="relative w-full border-x border-border lg:w-[610px]">
             {children}
           </div>
           <RightSidebar />
