@@ -1,4 +1,4 @@
-import { follows, likes, posts, reposts, saves } from "@/lib/db/schema";
+import { follows, likes, posts, reposts, saves, users } from "@/lib/db/schema";
 import { postView } from "@/lib/db/schema/post";
 import { setUserId } from "@/server/utils/db";
 import { createNotification, deleteNotification } from "@/server/utils/notifications";
@@ -25,7 +25,7 @@ export const postRouter = createTRPCRouter({
 
   feed: protectedProcedure
     .input(z.object({
-      type: z.enum(["for-you", "following", "user", "replies"]).default("for-you"),
+      type: z.enum(["for-you", "following", "user", "replies", "interests"]).default("for-you"),
       userId: z.number().optional(),
       limit: z.number().min(1).max(100).default(20),
       cursor: z.number().nullish(),
@@ -53,6 +53,21 @@ export const postRouter = createTRPCRouter({
         conditions.push(userPostsCondition);
       }
 
+      if (type === 'interests') {
+        const subquery = ctx.db
+          .select({ followingId: follows.followingId })
+          .from(follows)
+          .leftJoin(users, eq(follows.followingId, users.id))
+          .where(
+            and(
+              eq(follows.followerId, ctx.session.user.id),
+              eq(users.isCryptoBot, true)
+            )
+          );
+
+        conditions.push(sql`${postView.authorId} IN (${subquery})`);
+      }
+
       if (type === 'replies' && userId) {
         conditions.push(eq(postView.authorId, userId));
         conditions.push(sql`${postView.replyToId} IS NOT NULL`);
@@ -62,7 +77,13 @@ export const postRouter = createTRPCRouter({
         const subquery = ctx.db
           .select({ followingId: follows.followingId })
           .from(follows)
-          .where(eq(follows.followerId, ctx.session.user.id));
+          .leftJoin(users, eq(follows.followingId, users.id))
+          .where(
+            and(
+              eq(follows.followerId, ctx.session.user.id),
+              eq(users.isCryptoBot, false)
+            )
+          );
 
         conditions.push(sql`${postView.authorId} IN (${subquery})`);
       }

@@ -1,6 +1,9 @@
+'use client';
+
 import { EditProfileDialog } from "@/components/edit-profile-dialog";
 import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/user-avatar";
+import { VerifiedBadge } from "@/components/verified-badge";
 import { cn } from "@/lib/utils";
 import type { ProfileResponse } from "@/server/api/routers/user";
 import { api } from "@/utils/api";
@@ -22,13 +25,13 @@ export function ProfileHeader({
 
   const { mutate: follow, isPending: isFollowPending } = api.user.follow.useMutation({
     onSuccess: () => {
-      utils.user.getProfileByUsername.invalidate();
+      utils.user.getProfileByUsername.invalidate({ username: profile.username });
     },
   });
 
   const { mutate: unfollow, isPending: isUnfollowPending } = api.user.unfollow.useMutation({
     onSuccess: () => {
-      utils.user.getProfileByUsername.invalidate();
+      utils.user.getProfileByUsername.invalidate({ username: profile.username });
     },
   });
 
@@ -49,7 +52,7 @@ export function ProfileHeader({
           <div className="flex justify-between items-end">
             <UserAvatar
               src={profile.image}
-              className="h-[100px] w-[100px] text-3xl"
+              className="h-[100px] w-[100px] text-3xl border-4 border-background"
               fallback={profile.username[0]}
             />
 
@@ -78,7 +81,24 @@ export function ProfileHeader({
           </div>
 
           <div className="space-y-1">
-            <h1 className="text-xl font-bold">{`@${profile.username}`}</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl font-bold">{`@${profile.username}`}</h1>
+              {profile.isCryptoBot ? (
+                <div className="animate-in zoom-in duration-300 flex items-center">
+                  <div className="flex items-center gap-1.5 bg-primary/10 hover:bg-primary/15 transition-colors rounded-full pl-2 pr-2.5 py-0.5">
+                    <div className="size-2 rounded-full bg-primary animate-pulse" />
+                    <span className="text-primary text-xs font-semibold tracking-wide">
+                      CRYPTO BOT
+                    </span>
+                    <VerifiedBadge className="h-4 w-4 text-primary" />
+                  </div>
+                </div>
+              ) : profile.isVerified && (
+                <div className="animate-in zoom-in duration-300">
+                  <VerifiedBadge />
+                </div>
+              )}
+            </div>
             <p className="text-sm text-muted-foreground">{profile.bio}</p>
           </div>
 

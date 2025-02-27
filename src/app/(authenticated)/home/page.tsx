@@ -24,6 +24,9 @@ export default function Page() {
             <TabsTrigger value="following" className="flex-1">
               Following
             </TabsTrigger>
+            <TabsTrigger value="interests" className="flex-1">
+              Interests
+            </TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
@@ -43,8 +46,10 @@ export default function Page() {
       >
         {activeTab === 'for-you' ? (
           <Feed />
-        ) : (
+        ) : activeTab === 'following' ? (
           <Feed type="following" />
+        ) : (
+          <Feed type="interests" />
         )}
       </motion.div>
     </motion.div>

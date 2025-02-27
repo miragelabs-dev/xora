@@ -37,7 +37,6 @@ export function UserSuggestion({ user }: UserSuggestionProps) {
         </div>
       </Link>
       <Button
-        variant="outline"
         className="ml-4"
         onClick={() => follow({ userId: user.id })}
         disabled={isPending}

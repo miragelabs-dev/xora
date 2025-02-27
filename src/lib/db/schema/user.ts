@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { integer, pgTable, serial, text, timestamp, unique, varchar } from "drizzle-orm/pg-core";
+import { boolean, integer, pgTable, serial, text, timestamp, unique, varchar } from "drizzle-orm/pg-core";
 import { likes, posts, reposts, saves } from "./post";
 
 export const users = pgTable("users", {
@@ -9,6 +9,8 @@ export const users = pgTable("users", {
   bio: text("bio"),
   image: varchar("image"),
   cover: varchar("cover"),
+  isVerified: boolean("is_verified").default(false).notNull(),
+  isCryptoBot: boolean("is_crypto_bot").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

@@ -6,10 +6,8 @@ import { and, count, desc, eq, lt, sql } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
-// Base user type from Drizzle schema
 type DBUser = InferSelectModel<typeof users>;
 
-// Extend the base type with additional fields we need
 export type ProfileResponse = DBUser & {
   followersCount: number;
   followingCount: number;
@@ -294,11 +292,14 @@ export const userRouter = createTRPCRouter({
         })
         .from(users)
         .where(
-          sql`${users.id} != ${ctx.session.user.id} AND NOT EXISTS (
-            SELECT 1 FROM ${follows}
-            WHERE ${follows.followerId} = ${ctx.session.user.id}
-            AND ${follows.followingId} = ${users.id}
-          )`
+          and(
+            eq(users.isCryptoBot, false),
+            sql`${users.id} != ${ctx.session.user.id} AND NOT EXISTS (
+              SELECT 1 FROM ${follows}
+              WHERE ${follows.followerId} = ${ctx.session.user.id}
+              AND ${follows.followingId} = ${users.id}
+            )`
+          )
         )
         .orderBy(sql`RANDOM()`)
         .limit(input.limit);
@@ -329,5 +330,43 @@ export const userRouter = createTRPCRouter({
         postsCount: Math.floor(stats.postsCount * 1.2),
         interactionsCount: Math.floor(stats.interactionsCount * 1.3)
       };
+    }),
+
+  getTopCryptoAccounts: protectedProcedure
+    .query(async ({ ctx }) => {
+      if (!ctx.session?.user?.id) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "User must be logged in"
+        });
+      }
+
+      const cryptoAccounts = await ctx.db
+        .select()
+        .from(users)
+        .leftJoin(
+          follows,
+          and(
+            eq(follows.followerId, ctx.session.user.id),
+            eq(follows.followingId, users.id)
+          )
+        )
+        .where(
+          and(
+            eq(users.isCryptoBot, true),
+            eq(users.isVerified, true)
+          )
+        )
+        .orderBy(users.username)
+        .then(rows => rows.map(row => ({
+          id: row.users.id,
+          address: row.users.address,
+          username: row.users.username,
+          image: row.users.image,
+          isVerified: row.users.isVerified,
+          isFollowing: !!row.follows
+        })));
+
+      return cryptoAccounts;
     }),
 }); 

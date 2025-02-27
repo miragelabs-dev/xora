@@ -1,5 +1,6 @@
 'use client';
 
+import { CryptoPriceTag } from "@/components/crypto-price-tag";
 import { Feed } from "@/components/feed";
 import { PageHeader } from "@/components/page-header";
 import { ProfileHeader } from "@/components/profile-header";
@@ -9,7 +10,7 @@ import { useState } from "react";
 
 export default function UserProfilePage() {
   const { profile } = useProfile();
-  const [activeTab, setActiveTab] = useState<'posts' | 'replies'>('posts');
+  const [activeTab, setActiveTab] = useState<'posts' | 'replies' | 'interests'>('posts');
 
   return (
     <div>
@@ -22,9 +23,15 @@ export default function UserProfilePage() {
         profile={profile}
       />
 
+      {profile.isCryptoBot && (
+        <div className="mt-4 px-4">
+          <CryptoPriceTag symbol={profile.address} />
+        </div>
+      )}
+
       <Tabs
         value={activeTab}
-        onValueChange={(value) => setActiveTab(value as 'posts' | 'replies')}
+        onValueChange={(value) => setActiveTab(value as 'posts' | 'replies' | 'interests')}
         className="mt-4"
       >
         <TabsList className="w-full">
@@ -34,13 +41,20 @@ export default function UserProfilePage() {
           <TabsTrigger value="replies" className="flex-1">
             Replies
           </TabsTrigger>
+          {!profile.isCryptoBot && (
+            <TabsTrigger value="interests" className="flex-1">
+              Interests
+            </TabsTrigger>
+          )}
         </TabsList>
       </Tabs>
 
       {activeTab === 'posts' ? (
         <Feed type="user" userId={profile.id} />
-      ) : (
+      ) : activeTab === 'replies' ? (
         <Feed type="replies" userId={profile.id} />
+      ) : (
+        <Feed type="interests" userId={profile.id} />
       )}
     </div>
   );

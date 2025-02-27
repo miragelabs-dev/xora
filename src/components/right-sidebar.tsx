@@ -1,6 +1,6 @@
 'use client';
 
-import { TopCryptoList } from "@/components/top-crypto-list";
+import { TopCryptoAccounts } from "@/components/top-crypto-accounts";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UserSuggestion } from "@/components/user-suggestion";
@@ -53,7 +53,7 @@ export function RightSidebar() {
 
   return (
     <aside className="sticky top-0 hidden w-[350px] pl-8 xl:block">
-      <div className="space-y-6 pt-5">
+      <div className="space-y-6 py-5">
         <div className="relative" ref={searchRef}>
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -99,6 +99,8 @@ export function RightSidebar() {
                 <UserSuggestionSkeleton />
                 <UserSuggestionSkeleton />
                 <UserSuggestionSkeleton />
+                <UserSuggestionSkeleton />
+                <UserSuggestionSkeleton />
               </>
             ) : suggestions?.length === 0 ? (
               <div className="text-center text-sm text-muted-foreground">
@@ -112,7 +114,7 @@ export function RightSidebar() {
           </div>
         </div>
 
-        <TopCryptoList />
+        <TopCryptoAccounts />
       </div>
     </aside>
   );
