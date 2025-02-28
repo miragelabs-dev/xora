@@ -1,17 +1,17 @@
+import { Metadata } from "next";
 import { CollectionDetail } from "./collection-detail";
 
-interface CollectionDetailPageProps {
-  params: {
-    id: string;
-  };
-}
+type Params = Promise<{ id: string }>;
 
-export default function CollectionDetailPage({ params }: CollectionDetailPageProps) {
+export const metadata: Metadata = {
+  title: `NFT Collection`,
+  description: `View NFT collection`,
+};
+
+export default async function Page({ params }: { params: Params }) {
+  const { id } = await params;
+
   return (
-    <main className="flex-1">
-      <div className="container max-w-2xl flex-1 px-4">
-        <CollectionDetail collectionId={parseInt(params.id)} />
-      </div>
-    </main>
+    <CollectionDetail collectionId={parseInt(id)} />
   );
 } 

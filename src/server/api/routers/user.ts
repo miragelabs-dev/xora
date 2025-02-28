@@ -327,7 +327,7 @@ export const userRouter = createTRPCRouter({
         .from(users);
 
       return {
-        usersCount: Math.floor(stats.usersCount * 1.5), // Biraz daha etkileyici görünmesi için
+        usersCount: Math.floor(stats.usersCount * 1.5),
         postsCount: Math.floor(stats.postsCount * 1.2),
         interactionsCount: Math.floor(stats.interactionsCount * 1.3)
       };

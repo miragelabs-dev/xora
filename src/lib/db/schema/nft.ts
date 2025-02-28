@@ -57,7 +57,6 @@ export type Collection = typeof collections.$inferSelect;
 export type NewCollection = typeof collections.$inferInsert;
 export type NFT = typeof nfts.$inferSelect;
 export type NFTWithRelations = NFT & {
-  collection: Collection;
   post: Post & {
     author: User;
   };

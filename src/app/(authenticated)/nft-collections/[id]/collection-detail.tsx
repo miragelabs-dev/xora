@@ -50,7 +50,7 @@ function NFTCard({ nft }: { nft: NFTWithRelations }) {
 
 function CollectionSkeleton() {
   return (
-    <div className="space-y-8 py-4">
+    <div className="space-y-8 p-4">
       <div className="space-y-4">
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-4 w-full max-w-[250px]" />
@@ -158,24 +158,26 @@ export function CollectionDetail({ collectionId }: CollectionDetailProps) {
         </div>
       </PageHeader>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        {nfts.map((nft, i) => (
-          <motion.div
-            key={nft.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: i * 0.1 }}
-          >
-            <NFTCard nft={nft} />
-          </motion.div>
-        ))}
-      </div>
-
-      {hasNextPage && (
-        <div ref={ref} className="flex justify-center p-4">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      <div className="space-y-4 px-4">
+        <div className="grid gap-4 md:grid-cols-2">
+          {nfts.map((nft, i) => (
+            <motion.div
+              key={nft.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: i * 0.1 }}
+            >
+              <NFTCard nft={nft} />
+            </motion.div>
+          ))}
         </div>
-      )}
+
+        {hasNextPage && (
+          <div ref={ref} className="flex justify-center p-4">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </div>
+        )}
+      </div>
     </div>
   );
 } 

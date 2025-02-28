@@ -83,7 +83,7 @@ npx chopd
 ### Future Features
 - [ ] Crypto Bot Trading Bot
 - [ ] Customizable price alerts
-- []
+- [ ] NFT Marketplace
 
 ## 🛠️ Development Guidelines
 This project includes Cursor AI rules (`.mdc` files) for consistent development practices:

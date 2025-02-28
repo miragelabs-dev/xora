@@ -150,13 +150,15 @@ export const nftRouter = createTRPCRouter({
           },
         },
         limit: input.limit + 1,
-        where: input.type === "my"
-          ? eq(collections.creatorId, ctx.session.user.id)
-          : undefined,
+        where: and(
+          input.type === "my"
+            ? eq(collections.creatorId, ctx.session.user.id)
+            : undefined,
+          input.cursor
+            ? lt(collections.id, input.cursor)
+            : undefined,
+        ),
         orderBy: [desc(collections.createdAt)],
-        cursor: input.cursor
-          ? { id: input.cursor }
-          : undefined,
       });
 
       let nextCursor: typeof input.cursor = undefined;
