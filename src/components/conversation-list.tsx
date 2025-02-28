@@ -80,7 +80,7 @@ export function ConversationList() {
             return (
               <Link
                 className="block"
-                href={`/messages/${conversation.recipient.id}`}
+                href={`/messages/${anotherUser.id}`}
                 key={conversation.id}
                 onClick={() => handleConversationClick(conversation.id)}
               >
@@ -97,7 +97,7 @@ export function ConversationList() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2">
                         <p className="font-medium truncate">
-                          @{conversation.recipient.username}
+                          @{anotherUser.username}
                         </p>
                         <p className="text-xs text-muted-foreground whitespace-nowrap">
                           {formatDistanceToNow(new Date(conversation.lastMessageAt), {
