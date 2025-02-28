@@ -246,4 +246,35 @@ export const nftRouter = createTRPCRouter({
         .where(eq(collections.id, input.id))
         .returning();
     }),
+
+  getUserCollections: protectedProcedure
+    .input(z.object({
+      userId: z.number(),
+      cursor: z.number().nullish(),
+      limit: z.number().min(1).max(100).default(50),
+    }))
+    .query(async ({ ctx, input }) => {
+      const items = await ctx.db.query.collections.findMany({
+        where: and(
+          eq(collections.creatorId, input.userId),
+          input.cursor ? lt(collections.id, input.cursor) : undefined,
+        ),
+        limit: input.limit + 1,
+        orderBy: [desc(collections.createdAt)],
+        with: {
+          creator: true,
+        },
+      });
+
+      let nextCursor: typeof input.cursor = undefined;
+      if (items.length > input.limit) {
+        const nextItem = items.pop();
+        nextCursor = nextItem!.id;
+      }
+
+      return {
+        items,
+        nextCursor,
+      };
+    }),
 }); 

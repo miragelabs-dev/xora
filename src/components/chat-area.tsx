@@ -4,6 +4,7 @@ import { useSession } from "@/app/session-provider";
 import { api } from "@/utils/api";
 import { formatDistanceToNow } from "date-fns";
 import { ArrowLeft, Loader2, Send } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "./ui/button";
@@ -93,10 +94,10 @@ export function ChatArea({ userId }: ChatAreaProps) {
           fallback={recipient.username[0]}
           className="h-9 w-9"
         />
-        <div className="flex items-center gap-1.5">
+        <Link href={`/${recipient.username}`} className="flex items-center gap-1.5 hover:underline">
           <p className="font-medium">@{recipient.username}</p>
           {recipient.isVerified && <VerifiedBadge className="h-4 w-4" />}
-        </div>
+        </Link>
       </header>
 
       <ScrollArea ref={scrollRef} className="flex-1">

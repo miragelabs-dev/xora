@@ -4,6 +4,7 @@ import { CryptoPriceTag } from "@/components/crypto-price-tag";
 import { Feed } from "@/components/feed";
 import { ProfileHeader } from "@/components/profile-header";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { UserCollectionsView } from "@/components/user-collections-view";
 import { api } from "@/utils/api";
 import { notFound } from "next/navigation";
 import { useState } from "react";
@@ -14,7 +15,7 @@ export function ProfileView({
 }: {
   username: string;
 }) {
-  const [activeTab, setActiveTab] = useState<'posts' | 'replies' | 'interests'>('posts');
+  const [activeTab, setActiveTab] = useState<'posts' | 'replies' | 'nft-collections'>('posts');
 
   const { data: profile, isLoading } = api.user.getProfileByUsername.useQuery({
     username
@@ -40,7 +41,7 @@ export function ProfileView({
 
       <Tabs
         value={activeTab}
-        onValueChange={(value) => setActiveTab(value as 'posts' | 'replies' | 'interests')}
+        onValueChange={(value) => setActiveTab(value as 'posts' | 'replies' | 'nft-collections')}
         className="mt-4"
       >
         <TabsList className="w-full">
@@ -52,11 +53,11 @@ export function ProfileView({
               <TabsTrigger value="replies" className="flex-1">
                 Replies
               </TabsTrigger>
-              <TabsTrigger value="interests" className="flex-1">
-                Interests
-              </TabsTrigger>
             </>
           )}
+          <TabsTrigger value="nft-collections" className="flex-1">
+            NFT Collections
+          </TabsTrigger>
         </TabsList>
       </Tabs>
 
@@ -65,7 +66,7 @@ export function ProfileView({
       ) : activeTab === 'replies' ? (
         <Feed type="replies" userId={profile.id} />
       ) : (
-        <Feed type="interests" userId={profile.id} />
+        <UserCollectionsView userId={profile.id} />
       )}
     </div>
   );

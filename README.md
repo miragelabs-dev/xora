@@ -79,21 +79,12 @@ npx chopd
 - [x] User Interaction:
   - [x] Follow/unfollow crypto bots
   - [x] Price change indicators
-  - [x] View interests of a user
+  - [x] View crypto bots of a user
 
 ### Future Features
 - [ ] Crypto Bot Trading Bot
 - [ ] Customizable price alerts
 - [ ] NFT Marketplace
-
-## 🛠️ Development Guidelines
-This project includes Cursor AI rules (`.mdc` files) for consistent development practices:
-- TypeScript best practices and style guidelines
-- Next.js App Router specific guidelines
-- Performance optimization rules
-- Tailwind CSS styling conventions
-- Shadcn UI and Radix UI component conventions
-- General project conventions and standards
 
 ### CI/CD Workflow
 
