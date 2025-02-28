@@ -12,7 +12,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLogout } from "../hooks/use-logout";
 import { useNavbarMenu } from "../hooks/use-navbar-menu";
-import { useUnreadNotifications } from "../hooks/use-unread-notifications";
 import { UserAvatar } from "./user-avatar";
 
 function LogoutMenuItem({ className }: { className?: string }) {
@@ -33,9 +32,9 @@ export function Navbar() {
   const pathname = usePathname();
   const showMobileHeader = pathname === '/home';
   const navbarMenu = useNavbarMenu();
+
   const { user } = useSession();
   const handleLogout = useLogout();
-  const unreadCount = useUnreadNotifications();
 
   return (
     <>
@@ -198,7 +197,7 @@ export function Navbar() {
           >
             <div className="relative">
               {link.icon && <link.icon size={20} />}
-              {link.name === "Messages" && link.unreadCount !== undefined && link.unreadCount > 0 && (
+              {link.unreadCount !== undefined && link.unreadCount > 0 && (
                 <div className="absolute -top-1 -right-1 min-w-[16px] h-[16px] rounded-full bg-primary text-[10px] font-medium flex items-center justify-center text-primary-foreground">
                   {link.unreadCount > 99 ? "99+" : link.unreadCount}
                 </div>

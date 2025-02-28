@@ -175,6 +175,7 @@ export const postView = pgView('post_view').as((qb) => {
       },
       reposterId: sql<number | null>`${fr.userId}`.as('reposter_id'),
       repost: buildRepostJson(fr, alias(users, 'reposter_user')),
+      repostCreatedAt: sql<Date | null>`${fr.createdAt}`.as('repost_created_at'),
       stats: statsSelect,
       viewer: viewerSelect,
       replyToId: posts.replyToId,

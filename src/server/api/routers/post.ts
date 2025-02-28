@@ -38,7 +38,7 @@ export const postRouter = createTRPCRouter({
       const baseQuery = ctx.db
         .select()
         .from(postView)
-        .orderBy(desc(postView.createdAt));
+        .orderBy(desc(sql`COALESCE(${postView.repostCreatedAt}, ${postView.createdAt})`));
 
       const conditions = [];
 

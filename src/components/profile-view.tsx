@@ -53,11 +53,11 @@ export function ProfileView({
               <TabsTrigger value="replies" className="flex-1">
                 Replies
               </TabsTrigger>
+              <TabsTrigger value="nft-collections" className="flex-1">
+                NFT Collections
+              </TabsTrigger>
             </>
           )}
-          <TabsTrigger value="nft-collections" className="flex-1">
-            NFT Collections
-          </TabsTrigger>
         </TabsList>
       </Tabs>
 

@@ -18,7 +18,7 @@ import { CryptoPriceTag } from "./crypto-price-tag";
 import { ImageLightbox } from "./image-lightbox";
 import { PostActions } from "./post-actions";
 
-type ReplyPostView = Omit<PostView, 'replyTo' | 'replyToId' | 'repost' | 'reposterId'>;
+type ReplyPostView = Omit<PostView, 'replyTo' | 'replyToId' | 'repost' | 'reposterId' | 'repostCreatedAt'>;
 
 interface PostProps {
   post: PostView | ReplyPostView;

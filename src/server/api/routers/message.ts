@@ -1,5 +1,5 @@
 import { conversations, messages, users } from "@/lib/db/schema";
-import { and, desc, eq, lt, not, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, lt, not, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
@@ -106,7 +106,7 @@ export const messageRouter = createTRPCRouter({
             input.cursor ? lt(messages.id, input.cursor) : undefined
           )
         )
-        .orderBy(desc(messages.id))
+        .orderBy(asc(messages.id))
         .limit(input.limit + 1);
 
       let nextCursor: typeof input.cursor = undefined;

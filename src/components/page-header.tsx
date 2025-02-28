@@ -8,9 +8,10 @@ interface PageHeaderProps {
   title: string;
   subtitle?: string;
   children?: React.ReactNode;
+  toolbar?: React.ReactNode;
 }
 
-export function PageHeader({ title, subtitle, children }: PageHeaderProps) {
+export function PageHeader({ title, subtitle, toolbar, children }: PageHeaderProps) {
   const router = useRouter();
 
   return (
@@ -29,6 +30,11 @@ export function PageHeader({ title, subtitle, children }: PageHeaderProps) {
             <p className="text-sm text-muted-foreground">{subtitle}</p>
           )}
         </div>
+        {toolbar && (
+          <div className="ml-auto">
+            {toolbar}
+          </div>
+        )}
       </div>
       {children && (
         <div className="px-4 pb-3">

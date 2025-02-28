@@ -1,5 +1,6 @@
 "use client";
 
+import { useSession } from "@/app/session-provider";
 import { cn } from "@/lib/utils";
 import { api } from "@/utils/api";
 import { formatDistanceToNow } from "date-fns";
@@ -27,6 +28,8 @@ export function ConversationList() {
   const handleConversationClick = (conversationId: number) => {
     markAsRead({ conversationId });
   };
+
+  const { user } = useSession();
 
   if (isLoading) {
     return (
@@ -65,12 +68,14 @@ export function ConversationList() {
     );
   }
 
+
   return (
     <div className="h-full border-r">
       <ScrollArea className="h-full">
         <div className="space-y-2 p-2">
           {conversations.items.map((conversation) => {
             const isActive = params?.userId === conversation.recipient.id.toString();
+            const anotherUser = conversation.recipient.id !== user.id ? conversation.recipient : conversation.initiator;
 
             return (
               <Link
@@ -85,8 +90,8 @@ export function ConversationList() {
                 >
                   <div className="flex items-start gap-4 p-4">
                     <UserAvatar
-                      src={conversation.recipient.image}
-                      fallback={conversation.recipient.username?.[0] ?? "U"}
+                      src={anotherUser.image}
+                      fallback={anotherUser.username?.[0] ?? "U"}
                       className="h-12 w-12"
                     />
                     <div className="flex-1 min-w-0">

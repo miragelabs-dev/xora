@@ -1,30 +1,21 @@
 'use client';
 
-import { useSession } from "@/app/session-provider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { type Collection } from "@/lib/db/schema";
+import { CollectionWithCreator } from "@/lib/db/schema";
 import { api } from "@/utils/api";
 import { motion } from "framer-motion";
-import { Library, MoreVertical, Plus } from "lucide-react";
+import { Library, Plus } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { CreateCollectionModal } from "./create-collection-modal";
-import { EditCollectionModal } from "./edit-collection-modal";
 import { Button } from "./ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Skeleton } from "./ui/skeleton";
 import { UserAvatar } from "./user-avatar";
 
 type TabValue = "all" | "my";
 
-type CollectionWithCreator = Collection & {
-  creator: {
-    username: string;
-    image: string | null;
-  };
-};
 
 function useCollections(activeTab: TabValue) {
   const { ref, inView } = useInView();
@@ -60,9 +51,6 @@ function useCollections(activeTab: TabValue) {
 }
 
 function CollectionCard({ collection }: { collection: CollectionWithCreator }) {
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const isOwner = useSession().user.id === collection.creatorId;
-
   return (
     <Card className="overflow-hidden transition-all hover:bg-muted/50">
       <CardHeader>
@@ -75,23 +63,6 @@ function CollectionCard({ collection }: { collection: CollectionWithCreator }) {
             />
             <CardTitle className="text-lg">{collection.name}</CardTitle>
           </div>
-          {isOwner && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 -m-3">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={(e) => {
-                  e.stopPropagation();
-                  setIsEditModalOpen(true);
-                }}>
-                  Edit Collection
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
         </div>
         <CardDescription>by @{collection.creator.username}</CardDescription>
       </CardHeader>
@@ -100,15 +71,9 @@ function CollectionCard({ collection }: { collection: CollectionWithCreator }) {
           {collection.description || "No description"}
         </p>
         <p className="mt-2 text-sm font-medium">
-          {collection.totalSupply} NFTs
+          {collection.nftsCount} NFTs
         </p>
       </CardContent>
-
-      <EditCollectionModal
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        collection={collection}
-      />
     </Card>
   );
 }

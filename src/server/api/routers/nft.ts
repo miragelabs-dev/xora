@@ -1,6 +1,6 @@
-import { collections, nfts, posts } from "@/lib/db/schema";
+import { collections, nfts, posts, users } from "@/lib/db/schema";
 import { TRPCError } from "@trpc/server";
-import { and, asc, desc, eq, lt } from "drizzle-orm";
+import { and, desc, eq, lt, sql } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
@@ -110,7 +110,7 @@ export const nftRouter = createTRPCRouter({
       const items = await ctx.db.query.nfts.findMany({
         where: and(
           eq(nfts.collectionId, input.collectionId),
-          input.cursor ? lt(nfts.tokenId, input.cursor) : undefined
+          input.cursor ? lt(nfts.id, input.cursor) : undefined
         ),
         with: {
           post: {
@@ -120,7 +120,7 @@ export const nftRouter = createTRPCRouter({
           },
         },
         limit: input.limit + 1,
-        orderBy: [asc(nfts.tokenId)],
+        orderBy: [desc(nfts.id)],
       });
 
       let nextCursor: typeof input.cursor = undefined;
@@ -142,24 +142,38 @@ export const nftRouter = createTRPCRouter({
       cursor: z.number().nullish(),
     }))
     .query(async ({ ctx, input }) => {
-      const items = await ctx.db.query.collections.findMany({
-        with: {
-          creator: true,
-          nfts: {
-            limit: 1,
+      const items = await ctx.db
+        .select({
+          id: collections.id,
+          name: collections.name,
+          symbol: collections.symbol,
+          description: collections.description,
+          baseUri: collections.baseUri,
+          createdAt: collections.createdAt,
+          updatedAt: collections.updatedAt,
+          totalSupply: collections.totalSupply,
+          creatorId: collections.creatorId,
+          creator: {
+            id: users.id,
+            username: users.username,
+            image: users.image,
           },
-        },
-        limit: input.limit + 1,
-        where: and(
+          nftsCount: sql<number>`COUNT(${nfts.id})`.as("nfts_count"),
+        })
+        .from(collections)
+        .innerJoin(users, eq(collections.creatorId, users.id))
+        .leftJoin(nfts, eq(collections.id, nfts.collectionId))
+        .groupBy(collections.id, users.id, users.username, users.image)
+        .where(and(
           input.type === "my"
             ? eq(collections.creatorId, ctx.session.user.id)
             : undefined,
           input.cursor
             ? lt(collections.id, input.cursor)
             : undefined,
-        ),
-        orderBy: [desc(collections.createdAt)],
-      });
+        ))
+        .orderBy(desc(collections.createdAt))
+        .limit(input.limit + 1);
 
       let nextCursor: typeof input.cursor = undefined;
       if (items.length > input.limit) {
@@ -178,12 +192,25 @@ export const nftRouter = createTRPCRouter({
       collectionId: z.number(),
     }))
     .query(async ({ ctx, input }) => {
-      const collection = await ctx.db.query.collections.findFirst({
-        where: eq(collections.id, input.collectionId),
-        with: {
-          creator: true,
+      const [collection] = await ctx.db.select({
+        id: collections.id,
+        name: collections.name,
+        symbol: collections.symbol,
+        description: collections.description,
+        baseUri: collections.baseUri,
+        creator: {
+          id: users.id,
+          username: users.username,
+          image: users.image,
         },
-      });
+        nftsCount: sql<number>`COUNT(${nfts.id})`.as("nfts_count"),
+      })
+        .from(collections)
+        .where(eq(collections.id, input.collectionId))
+        .innerJoin(users, eq(collections.creatorId, users.id))
+        .leftJoin(nfts, eq(collections.id, nfts.collectionId))
+        .groupBy(collections.id, users.id, users.username, users.image)
+        .orderBy(desc(collections.createdAt));
 
       if (!collection) {
         throw new TRPCError({

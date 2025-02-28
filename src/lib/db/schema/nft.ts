@@ -61,4 +61,18 @@ export type NFTWithRelations = NFT & {
     author: User;
   };
 };
-export type NewNFT = typeof nfts.$inferInsert; 
+export type NewNFT = typeof nfts.$inferInsert;
+
+export type CollectionWithCreator = {
+  id: number;
+  name: string;
+  symbol: string;
+  description: string | null;
+  baseUri: string | null;
+  creator: {
+    id: number;
+    username: string;
+    image: string | null;
+  };
+  nftsCount: number;
+};

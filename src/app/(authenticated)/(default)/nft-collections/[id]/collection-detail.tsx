@@ -1,13 +1,17 @@
 'use client';
 
+import { useSession } from "@/app/session-provider";
+import { EditCollectionModal } from "@/components/edit-collection-modal";
 import { PageHeader } from "@/components/page-header";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UserAvatar } from "@/components/user-avatar";
 import { NFTWithRelations } from "@/lib/db/schema";
 import { api } from "@/utils/api";
 import { motion } from "framer-motion";
-import { Library, Loader2 } from "lucide-react";
+import { Library, Loader2, MoreVertical } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect } from "react";
@@ -100,6 +104,8 @@ export function CollectionDetail({ collectionId }: CollectionDetailProps) {
     }
   );
 
+  const isOwner = useSession().user.id === collection?.creator.id;
+
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
@@ -129,9 +135,35 @@ export function CollectionDetail({ collectionId }: CollectionDetailProps) {
     );
   }
 
+
   return (
     <div className="space-y-8">
-      <PageHeader title={collection.name}>
+      <PageHeader title={collection.name} toolbar={
+        <>
+          {isOwner && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild data-prevent-navigation>
+                <Button variant="ghost" size="icon" className="h-8 w-8 -m-3">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" data-prevent-navigation>
+                <EditCollectionModal
+                  collection={collection}
+                >
+                  <DropdownMenuItem onClick={(e) => {
+                    e.stopPropagation();
+                  }}>
+                    Edit Collection
+                  </DropdownMenuItem>
+
+                </EditCollectionModal>
+
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </>
+      }>
         <div className="space-y-4">
           <p className="text-muted-foreground">
             {collection.description || "No description provided"}
@@ -143,7 +175,7 @@ export function CollectionDetail({ collectionId }: CollectionDetailProps) {
             >
               <UserAvatar
                 src={collection.creator.image}
-                fallback={collection.creator.username[0]}
+                fallback={collection.creator.username}
                 className="h-8 w-8"
               />
               <span>Created by @{collection.creator.username}</span>
@@ -151,7 +183,7 @@ export function CollectionDetail({ collectionId }: CollectionDetailProps) {
           </div>
           <div className="flex items-center gap-4 text-sm">
             <p>
-              <span className="font-medium">{collection.totalSupply}</span>{" "}
+              <span className="font-medium">{collection.nftsCount}</span>{" "}
               <span className="text-muted-foreground">items</span>
             </p>
           </div>
