@@ -107,9 +107,9 @@ export default function Page() {
               transition={{ duration: 0.5, delay: 0.5 }}
               className="text-5xl font-bold leading-tight tracking-tight drop-shadow-lg"
             >
-              Share Your<br />
+              Welcome to<br />
               <span className="bg-gradient-to-r from-primary-foreground to-primary-foreground/80 bg-clip-text text-transparent">
-                Moon Mission 🚀
+                Decentralized Social
               </span>
             </motion.h1>
             <motion.p
@@ -118,7 +118,7 @@ export default function Page() {
               transition={{ duration: 0.5, delay: 0.7 }}
               className="text-xl font-medium text-primary-foreground/80"
             >
-              Where crypto dreams take flight! ✨
+              Your voice, uncensored and unstoppable
             </motion.p>
           </div>
         </div>
@@ -149,11 +149,11 @@ export default function Page() {
               className="text-4xl font-bold leading-tight tracking-tight text-foreground"
             >
               <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-                Ready for Takeoff? 🛸
+                Join the Revolution
               </span>
               <br />
               <span className="text-foreground">
-                Your Space in the Cryptoverse
+                Connect, Share, Own Your Data
               </span>
             </motion.h2>
             <motion.p
@@ -162,7 +162,7 @@ export default function Page() {
               transition={{ duration: 0.5, delay: 0.5 }}
               className="text-lg font-medium text-muted-foreground"
             >
-              Grab your space suit and join the fun! 🌟
+              Experience true freedom of expression
             </motion.p>
           </div>
 
@@ -186,10 +186,10 @@ export default function Page() {
               className="flex flex-wrap justify-center gap-2 text-sm text-muted-foreground"
             >
               <span className="rounded-full bg-primary/5 px-3 py-1 border border-primary/10">
-                🔒 Decentralized
+                🔒 Fully Decentralized
               </span>
               <span className="rounded-full bg-primary/5 px-3 py-1 border border-primary/10">
-                ⚡ Lightning Fast
+                ⚡ Censorship Resistant
               </span>
             </motion.div>
           </div>
@@ -215,7 +215,7 @@ export default function Page() {
                 />
               ) : (
                 <>
-                  Start Your Journey 🚀
+                  Connect Wallet to Begin
                   <motion.div
                     animate={{ x: [0, 5, 0] }}
                     transition={{ repeat: Infinity, duration: 1.5 }}
