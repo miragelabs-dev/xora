@@ -266,7 +266,7 @@ export function Post({
       {showReplies && replies?.pages.map((page, i) => (
         <div key={i}>
           {page.items.map((reply) => (
-            <Post key={reply.id} post={reply} />
+            <Post key={reply.id} post={reply} hideReplyTo />
           ))}
         </div>
       ))}

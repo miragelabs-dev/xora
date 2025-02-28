@@ -18,5 +18,5 @@ export function PostDetailView({ postId }: { postId: string }) {
     return notFound();
   }
 
-  return <Post post={post} showReplies hideReplyTo />;
+  return <Post post={post} showReplies />;
 } 
