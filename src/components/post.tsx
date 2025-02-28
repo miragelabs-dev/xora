@@ -4,6 +4,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { UserAvatar } from "@/components/user-avatar";
 import { VerifiedBadge } from "@/components/verified-badge";
 import { PostView } from "@/lib/db/schema/post";
+import { cn } from "@/lib/utils";
 import { api } from "@/utils/api";
 import { formatDistanceToNow } from "date-fns";
 import { Loader2, MoreHorizontal, Repeat2, Trash } from "lucide-react";
@@ -18,14 +19,32 @@ import { ImageLightbox } from "./image-lightbox";
 import { PostActions } from "./post-actions";
 
 interface PostProps {
-  post: PostView;
+  post: Partial<PostView> & {
+    id: number;
+    content: string;
+    image: string;
+    createdAt: Date;
+    author: {
+      id: number;
+      username: string;
+      image: string;
+      address: string;
+      isCryptoBot: boolean;
+      isVerified: boolean;
+    };
+    authorId: number;
+    stats: PostView['stats'];
+    viewer: PostView['viewer'];
+  };
   showReplies?: boolean;
   className?: string;
+  hideBorder?: boolean;
 }
 
 export function Post({
   post,
   showReplies = false,
+  hideBorder = false,
 }: PostProps) {
   const [replyContent, setReplyContent] = useState("");
   const [isImageLightboxOpen, setIsImageLightboxOpen] = useState(false);
@@ -63,9 +82,19 @@ export function Post({
     );
 
   return (
-    <div
-      className="group relative block border-b border-border"
-    >
+    <div className={cn("group relative block", !hideBorder && "border-b border-border")}>
+      {post.replyTo && (
+        <>
+          <div className="relative">
+            <div className="absolute left-[34px] top-[16px] h-full w-0.5 bg-border" />
+            <Post
+              post={post.replyTo}
+              hideBorder
+            />
+          </div>
+        </>
+      )}
+
       <div
         onClick={(e) => {
           const selection = window.getSelection();
@@ -76,8 +105,9 @@ export function Post({
             router.push(`/${post.author.username}/status/${post.id}`);
           }
         }}
-        className="relative px-4 py-3 hover:bg-muted/20 transition-colors duration-200 cursor-pointer">
-        {post.repost && (
+        className="relative px-4 py-3 hover:bg-muted/20 transition-colors duration-200 cursor-pointer"
+      >
+        {post?.repost && (
           <div className="ml-2 top-[-8px] relative flex items-center gap-1 px-4 pt-2 text-xs text-muted-foreground">
             <Repeat2 className="h-4 w-4" />
             <span>
@@ -167,8 +197,8 @@ export function Post({
               {post.content.match(/\$[A-Za-z]{2,5}/g) && (
                 <div className="border-t border-border pt-3">
                   <div className="flex flex-col gap-2" data-no-navigate>
-                    {Array.from(new Set(post.content.match(/\$[A-Za-z]{2,5}/g) || []))
-                      .map((symbol: string) => (
+                    {Array.from<string>(new Set(post.content.match(/\$[A-Za-z]{2,5}/g) || []))
+                      .map((symbol) => (
                         <CryptoPriceTag
                           key={symbol}
                           symbol={symbol.substring(1)}

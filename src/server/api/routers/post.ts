@@ -37,13 +37,10 @@ export const postRouter = createTRPCRouter({
 
       const baseQuery = ctx.db
         .select()
-        .from(postView);
+        .from(postView)
+        .orderBy(desc(postView.createdAt));
 
       const conditions = [];
-
-      if (type === 'for-you') {
-        conditions.push(sql`${postView.replyToId} IS NULL`);
-      }
 
       if (type === 'user' && userId) {
         const userPostsCondition = sql`(
@@ -94,13 +91,6 @@ export const postRouter = createTRPCRouter({
 
       const items = await baseQuery
         .where(and(...conditions))
-        .orderBy(desc(sql`COALESCE(
-          CASE 
-            WHEN ${postView.reposterId} IS NOT NULL 
-            THEN (${postView.repost}->>'createdAt')::timestamp
-          END, 
-          ${postView.createdAt}
-        )`))
         .limit(limit + 1);
 
       let nextCursor: typeof cursor = undefined;
