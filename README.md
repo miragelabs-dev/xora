@@ -81,6 +81,22 @@ This project includes Cursor AI rules (`.mdc` files) for consistent development 
 - Shadcn UI and Radix UI component conventions
 - General project conventions and standards
 
+### CI/CD Workflow
+
+This project uses GitHub Actions for continuous integration. The workflow includes:
+
+- **Trigger**: Runs on push to main branch and pull requests
+- **Environment**: Ubuntu latest with Node.js 20
+- **Steps**:
+  1. Code checkout
+  2. Node.js and pnpm setup
+  3. Dependencies installation
+  4. Linting check
+  5. Build verification
+  6. Security audit
+
+You can view the workflow configuration in `.github/workflows/code-check.yml`.
+
 ## 📜 License
 MIT License. Use, modify, and contribute freely. 📝
 
