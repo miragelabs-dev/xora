@@ -74,7 +74,7 @@ export function Post({
 
   return (
     <div className={cn("group relative block", !hideBorder && "border-b border-border")}>
-      {isFullPostView && post.replyTo && (
+      {isFullPostView && post.replyTo && showReplies && (
         <>
           <div className="relative">
             <div className="absolute left-[34px] top-[16px] h-full w-0.5 bg-border" />

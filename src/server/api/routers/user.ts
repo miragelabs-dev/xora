@@ -65,12 +65,12 @@ export const userRouter = createTRPCRouter({
 
   getFollowers: protectedProcedure
     .input(z.object({
-      userId: z.number(),
+      username: z.string(),
       limit: z.number().min(1).max(100).default(50),
       cursor: z.number().nullish(),
     }))
     .query(async ({ ctx, input }) => {
-      const { userId, limit, cursor } = input;
+      const { username, limit, cursor } = input;
 
       const items = await ctx.db
         .select({
@@ -83,7 +83,7 @@ export const userRouter = createTRPCRouter({
         .innerJoin(users, eq(users.id, follows.followerId))
         .where(
           and(
-            eq(follows.followingId, userId),
+            eq(users.username, username),
             cursor ? lt(follows.id, cursor) : undefined
           )
         )
@@ -104,12 +104,12 @@ export const userRouter = createTRPCRouter({
 
   getFollowing: protectedProcedure
     .input(z.object({
-      userId: z.number(),
+      username: z.string(),
       limit: z.number().min(1).max(100).default(50),
       cursor: z.number().nullish(),
     }))
     .query(async ({ ctx, input }) => {
-      const { userId, limit, cursor } = input;
+      const { username, limit, cursor } = input;
 
       const items = await ctx.db
         .select({
@@ -121,7 +121,7 @@ export const userRouter = createTRPCRouter({
         .innerJoin(users, eq(users.id, follows.followingId))
         .where(
           and(
-            eq(follows.followerId, userId),
+            eq(users.username, username),
             cursor ? lt(follows.id, cursor) : undefined
           )
         )

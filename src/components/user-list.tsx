@@ -9,10 +9,10 @@ import { useInView } from "react-intersection-observer";
 
 interface UserListProps {
   type: 'followers' | 'following';
-  userId: number;
+  username: string;
 }
 
-export function UserList({ type, userId }: UserListProps) {
+export function UserList({ type, username }: UserListProps) {
   const { ref, inView } = useInView();
 
   const {
@@ -23,11 +23,11 @@ export function UserList({ type, userId }: UserListProps) {
     fetchNextPage
   } = type === 'followers'
       ? api.user.getFollowers.useInfiniteQuery(
-        { userId, limit: 20 },
+        { username, limit: 20 },
         { getNextPageParam: (lastPage) => lastPage.nextCursor }
       )
       : api.user.getFollowing.useInfiniteQuery(
-        { userId, limit: 20 },
+        { username, limit: 20 },
         { getNextPageParam: (lastPage) => lastPage.nextCursor }
       );
 

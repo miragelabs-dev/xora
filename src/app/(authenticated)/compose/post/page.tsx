@@ -1,16 +1,17 @@
-'use client';
-
-import { Compose } from "@/components/compose";
+import { ComposePostView } from "@/components/compose-post-view";
 import { PageHeader } from "@/components/page-header";
-import { useRouter } from "next/navigation";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: 'Compose Post',
+  description: 'Create a new post',
+};
 
 export default function ComposePage() {
-  const router = useRouter();
-
   return (
     <div>
       <PageHeader title="New Post" />
-      <Compose onSuccess={() => router.push('/home')} />
+      <ComposePostView />
     </div>
   );
 } 
