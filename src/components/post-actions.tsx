@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { api } from "@/utils/api";
 import { Bookmark, Heart, MessageCircle, Repeat2 } from "lucide-react";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { JSX, useState } from "react";
 
 interface PostStats {
   repliesCount: number;
