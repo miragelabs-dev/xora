@@ -1,5 +1,5 @@
 import { notifications, notificationView } from "@/lib/db/schema/notification";
-import { and, desc, eq, lt } from "drizzle-orm";
+import { and, desc, eq, lt, sql } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
@@ -58,5 +58,20 @@ export const notificationRouter = createTRPCRouter({
         .update(notifications)
         .set({ read: true })
         .where(eq(notifications.userId, ctx.session.user.id));
+    }),
+
+  getUnreadCount: protectedProcedure
+    .query(async ({ ctx }) => {
+      const [result] = await ctx.db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(notifications)
+        .where(
+          and(
+            eq(notifications.userId, ctx.session.user.id),
+            eq(notifications.read, false)
+          )
+        );
+
+      return result.count;
     }),
 }); 

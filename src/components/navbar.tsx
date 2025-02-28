@@ -12,6 +12,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLogout } from "../hooks/use-logout";
 import { useNavbarMenu } from "../hooks/use-navbar-menu";
+import { useUnreadNotifications } from "../hooks/use-unread-notifications";
 import { UserAvatar } from "./user-avatar";
 
 function LogoutMenuItem({ className }: { className?: string }) {
@@ -34,6 +35,7 @@ export function Navbar() {
   const navbarMenu = useNavbarMenu();
   const { user } = useSession();
   const handleLogout = useLogout();
+  const unreadCount = useUnreadNotifications();
 
   return (
     <>
@@ -122,12 +124,19 @@ export function Navbar() {
                     <Link
                       href={link.link}
                       className={cn(
-                        "flex items-center gap-3 rounded p-[10px] transition-colors xl:justify-start hover:bg-muted",
-                        pathname === link.link ? "opacity-100" : "opacity-50"
+                        "flex items-center gap-3 rounded p-[10px] transition-colors xl:justify-start hover:bg-muted relative",
+                        pathname === link.link ? "font-bold" : ""
                       )}
                     >
-                      {link.icon && <link.icon size={24} />}
-                      <span className="hidden text-base font-semibold leading-5 xl:inline">
+                      <div className="relative">
+                        {link.icon && <link.icon size={24} />}
+                        {link.name === "Notifications" && unreadCount > 0 && (
+                          <div className="absolute -top-2 -right-2 min-w-[22px] h-[22px] rounded-full bg-primary font-bold text-[11px] flex items-center justify-center text-primary-foreground">
+                            {unreadCount > 99 ? "99+" : unreadCount}
+                          </div>
+                        )}
+                      </div>
+                      <span className="hidden text-base leading-5 xl:inline">
                         {link.name}
                       </span>
                     </Link>
@@ -181,13 +190,20 @@ export function Navbar() {
             key={link.name}
             href={link.link}
             className={cn(
-              "flex flex-1 items-center justify-center transition-colors hover:bg-muted/50",
+              "flex flex-1 items-center justify-center transition-colors hover:bg-muted/50 relative",
               pathname === link.link
                 ? "text-primary"
                 : "text-muted-foreground"
             )}
           >
-            {link.icon && <link.icon size={20} />}
+            <div className="relative">
+              {link.icon && <link.icon size={20} />}
+              {link.name === "Notifications" && unreadCount > 0 && (
+                <div className="absolute -top-1 -right-1 min-w-[16px] h-[16px] rounded-full bg-primary text-[10px] font-medium flex items-center justify-center text-primary-foreground">
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </div>
+              )}
+            </div>
           </Link>
         ))}
         <Link

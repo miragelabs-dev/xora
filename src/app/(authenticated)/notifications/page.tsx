@@ -4,11 +4,13 @@ import { PageHeader } from "@/components/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UserAvatar } from "@/components/user-avatar";
 import { NotificationView } from "@/lib/db/schema";
+import { cn } from "@/lib/utils";
 import { api } from "@/utils/api";
 import { formatDistanceToNow } from "date-fns";
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 function NotificationsSkeleton() {
   return (
@@ -40,6 +42,17 @@ export default function NotificationsPage() {
       utils.notification.list.invalidate();
     },
   });
+
+  const { mutate: markAllAsRead } = api.notification.markAllAsRead.useMutation({
+    onSuccess: () => {
+      utils.notification.list.invalidate();
+      utils.notification.getUnreadCount.invalidate();
+    },
+  });
+
+  useEffect(() => {
+    markAllAsRead();
+  }, [markAllAsRead]);
 
   const handleNotificationClick = (notification: NotificationView) => {
     if (!notification.read) {
@@ -121,8 +134,11 @@ export default function NotificationsPage() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3, delay: index * 0.05 }}
               onClick={() => handleNotificationClick(notification)}
-              className={`flex gap-4 p-4 hover:bg-accent/50 cursor-pointer transition-colors ${notification.read ? 'opacity-60' : ''
-                }`}
+              className={cn(
+                "flex gap-4 p-4 hover:bg-accent/50 cursor-pointer transition-colors",
+                !notification.read && "bg-primary/5",
+                notification.read && "opacity-60"
+              )}
             >
               <UserAvatar
                 src={notification.actorImage}
