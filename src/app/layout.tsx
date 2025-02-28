@@ -1,5 +1,6 @@
 import { Toaster } from "@/components/ui/sonner";
 import { CryptoProvider } from "@/contexts/crypto-context";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { TRPCProvider } from './trpc-provider';
@@ -26,6 +27,7 @@ export default async function RootLayout({
             {children}
           </CryptoProvider>
         </TRPCProvider>
+        <SpeedInsights />
       </body>
     </html>
   );

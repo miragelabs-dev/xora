@@ -27,6 +27,7 @@
     "@trpc/next": "11.0.0-rc.795",
     "@trpc/react-query": "11.0.0-rc.795",
     "@trpc/server": "11.0.0-rc.795",
+    "@vercel/speed-insights": "^1.2.0",
     "class-variance-authority": "^0.7.1",
     "cloudinary": "^2.5.1",
     "clsx": "^2.1.1",
