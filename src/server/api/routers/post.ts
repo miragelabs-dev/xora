@@ -377,4 +377,62 @@ export const postRouter = createTRPCRouter({
         nextCursor,
       };
     }),
+
+  getTrendingHashtags: protectedProcedure
+    .input(z.object({
+      limit: z.number().min(1).max(10).default(5),
+    }))
+    .query(async ({ ctx, input }) => {
+      const hashtags = await ctx.db
+        .select({
+          tag: sql<string>`substring(${posts.content} from '#([A-Za-z0-9_]+)')`,
+          count: sql<number>`count(*)`
+        })
+        .from(posts)
+        .where(sql`
+          ${posts.createdAt} > NOW() - INTERVAL '7 days'
+          AND ${posts.content} ~ '#[A-Za-z0-9_]+'
+        `)
+        .groupBy(sql`substring(${posts.content} from '#([A-Za-z0-9_]+)')`)
+        .having(sql`substring(${posts.content} from '#([A-Za-z0-9_]+)') IS NOT NULL`)
+        .orderBy(sql`count(*) DESC`)
+        .limit(input.limit);
+
+      return hashtags.map(({ tag, count }) => ({
+        tag,
+        count: Number(count)
+      }));
+    }),
+
+  search: protectedProcedure
+    .input(z.object({
+      query: z.string(),
+      limit: z.number().min(1).max(100).default(20),
+      cursor: z.number().nullish(),
+    }))
+    .query(async ({ ctx, input }) => {
+      await setUserId(ctx.db, ctx.session.user.id);
+
+      const items = await ctx.db
+        .select()
+        .from(postView)
+        .where(
+          input.query.startsWith('#')
+            ? sql`${postView.content} ~ ${input.query.toLowerCase()}`
+            : sql`${postView.content} ~* ${input.query}`
+        )
+        .orderBy(desc(postView.createdAt))
+        .limit(input.limit + 1);
+
+      let nextCursor: typeof input.cursor = undefined;
+      if (items.length > input.limit) {
+        const nextItem = items.pop();
+        nextCursor = nextItem!.id;
+      }
+
+      return {
+        items,
+        nextCursor,
+      };
+    }),
 }); 

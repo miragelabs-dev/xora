@@ -252,7 +252,7 @@ export const userRouter = createTRPCRouter({
   search: protectedProcedure
     .input(z.object({
       query: z.string().min(1).max(50),
-      limit: z.number().min(1).max(10).default(5),
+      limit: z.number().min(1).max(20).default(5),
     }))
     .query(async ({ ctx, input }) => {
       const { query, limit } = input;
@@ -261,6 +261,7 @@ export const userRouter = createTRPCRouter({
         .select({
           id: users.id,
           username: users.username,
+          image: users.image,
         })
         .from(users)
         .where(

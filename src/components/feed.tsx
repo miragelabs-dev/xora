@@ -8,8 +8,9 @@ import { useInView } from "react-intersection-observer";
 import { PostSkeleton } from "./post-skeleton";
 
 interface FeedProps {
-  type?: 'for-you' | 'following' | 'user' | 'replies' | 'interests';
+  type?: 'for-you' | 'following' | 'user' | 'replies' | 'interests' | 'search';
   userId?: number;
+  searchQuery?: string;
 }
 
 export function FeedSkeleton() {
@@ -22,7 +23,7 @@ export function FeedSkeleton() {
   );
 }
 
-export function Feed({ type = 'for-you', userId }: FeedProps) {
+export function Feed({ type = 'for-you', userId, searchQuery }: FeedProps) {
   const { ref, inView } = useInView();
 
   const {
@@ -31,16 +32,27 @@ export function Feed({ type = 'for-you', userId }: FeedProps) {
     isFetchingNextPage,
     hasNextPage,
     fetchNextPage
-  } = api.post.feed.useInfiniteQuery(
-    {
-      type,
-      userId,
-      limit: 20,
-    },
-    {
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-    }
-  );
+  } = type === 'search'
+      ? api.post.search.useInfiniteQuery(
+        {
+          query: searchQuery || '',
+          limit: 20,
+        },
+        {
+          getNextPageParam: (lastPage) => lastPage.nextCursor,
+          enabled: !!searchQuery
+        }
+      )
+      : api.post.feed.useInfiniteQuery(
+        {
+          type,
+          userId,
+          limit: 20,
+        },
+        {
+          getNextPageParam: (lastPage) => lastPage.nextCursor,
+        }
+      );
 
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {

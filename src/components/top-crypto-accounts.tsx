@@ -62,7 +62,7 @@ export function TopCryptoAccounts() {
   return (
     <div className="rounded-xl bg-muted/50 p-4">
       <h2 className="mb-4 text-xl font-bold">
-        Crypto Accounts
+        Crypto Bot Accounts
       </h2>
       <div className="space-y-4">
         {cryptoAccounts?.map((account) => {
@@ -87,7 +87,7 @@ export function TopCryptoAccounts() {
                   </div>
                   {price && (
                     <div className="flex gap-2">
-                      <p className="font-medium text-sm text-muted-foreground">${price.current_price.toLocaleString()}</p>
+                      <p className="text-xs font-medium text-sm text-muted-foreground">${price.current_price.toLocaleString()}</p>
                       <p className={`text-xs flex items-center justify-end gap-1 ${price.price_change_percentage_24h >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                         {price.price_change_percentage_24h >= 0 ? (
                           <ArrowUp className="h-3 w-3" />
@@ -101,7 +101,7 @@ export function TopCryptoAccounts() {
                 </div>
               </Link>
               <Button
-                variant={account.isFollowing ? "outline" : "default"}
+                variant={account.isFollowing ? "dark" : "light"}
                 className="ml-4"
                 onClick={() => {
                   if (account.isFollowing) {

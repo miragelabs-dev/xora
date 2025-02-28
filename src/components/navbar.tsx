@@ -160,10 +160,11 @@ export function Navbar() {
                 >
                   <Button
                     asChild
+                    size='lg'
                     className="mt-4 w-full rounded-full"
                   >
                     <Link href="/compose/post">
-                      <PenSquare className="size-5 xl:hidden" />
+                      <PenSquare className="size-5" />
                       <span className="hidden xl:inline">Post</span>
                     </Link>
                   </Button>

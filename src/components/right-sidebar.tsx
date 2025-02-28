@@ -1,6 +1,7 @@
 'use client';
 
 import { TopCryptoAccounts } from "@/components/top-crypto-accounts";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UserSuggestion } from "@/components/user-suggestion";
@@ -8,6 +9,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { api } from "@/utils/api";
 import { Loader2, Search } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 function UserSuggestionSkeleton() {
@@ -24,11 +26,40 @@ function UserSuggestionSkeleton() {
   );
 }
 
+interface TrendingTopic {
+  tag: string;
+  count: number;
+}
+
+function TrendingTopicSkeleton() {
+  return (
+    <div className="space-y-2">
+      <Skeleton className="h-4 w-24" />
+      <Skeleton className="h-3 w-16" />
+    </div>
+  );
+}
+
+function TrendingTopic({ topic }: { topic: TrendingTopic }) {
+  return (
+    <Link
+      href={`/search?q=%23${topic.tag}`}
+      className="block space-y-1 rounded-lg p-3 transition-colors hover:bg-muted"
+    >
+      <p className="font-medium">#{topic.tag}</p>
+      <p className="text-sm text-muted-foreground">
+        {topic.count} {topic.count === 1 ? 'post' : 'posts'}
+      </p>
+    </Link>
+  );
+}
+
 export function RightSidebar() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const debouncedQuery = useDebounce(searchQuery, 300);
+  const router = useRouter();
 
   const { data: searchResults, isLoading: isSearching } = api.user.search.useQuery(
     { query: debouncedQuery, limit: 5 },
@@ -37,6 +68,11 @@ export function RightSidebar() {
 
   const { data: suggestions, isLoading: isSuggestionsLoading } =
     api.user.getRandomSuggestions.useQuery({
+      limit: 5
+    });
+
+  const { data: trendingTopics, isLoading: isTopicsLoading } =
+    api.post.getTrendingHashtags.useQuery({
       limit: 5
     });
 
@@ -51,6 +87,15 @@ export function RightSidebar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      const query = searchQuery.trim();
+      setIsSearchOpen(false);
+      router.push(`/search?q=${encodeURIComponent(query)}`);
+      setSearchQuery("");
+    }
+  };
+
   return (
     <aside className="sticky top-0 hidden w-[350px] pl-8 xl:block">
       <div className="space-y-6 py-5">
@@ -62,6 +107,7 @@ export function RightSidebar() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => setIsSearchOpen(true)}
+            onKeyDown={handleSearch}
           />
 
           {isSearchOpen && debouncedQuery.length > 0 && (
@@ -90,6 +136,31 @@ export function RightSidebar() {
             </div>
           )}
         </div>
+
+        <Card className="overflow-hidden">
+          <div className="p-4">
+            <h2 className="text-xl font-bold">Trending</h2>
+          </div>
+          <div className="divide-y">
+            {isTopicsLoading ? (
+              <div className="space-y-4 p-4">
+                <TrendingTopicSkeleton />
+                <TrendingTopicSkeleton />
+                <TrendingTopicSkeleton />
+                <TrendingTopicSkeleton />
+                <TrendingTopicSkeleton />
+              </div>
+            ) : trendingTopics?.length === 0 ? (
+              <div className="p-4 text-center text-sm text-muted-foreground">
+                No trending topics
+              </div>
+            ) : (
+              trendingTopics?.map((topic) => (
+                <TrendingTopic key={topic.tag} topic={topic} />
+              ))
+            )}
+          </div>
+        </Card>
 
         <div className="rounded-xl bg-muted/50 p-4">
           <h2 className="mb-4 text-xl font-bold">Who to follow</h2>
