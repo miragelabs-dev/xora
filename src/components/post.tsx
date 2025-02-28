@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { UserAvatar } from "@/components/user-avatar";
 import { VerifiedBadge } from "@/components/verified-badge";
-import { PostView } from "@/lib/db/schema/post";
+import { PostView } from "@/lib/db/schema/post-view";
 import { cn } from "@/lib/utils";
 import { api } from "@/utils/api";
 import { formatDistanceToNow } from "date-fns";
@@ -22,6 +22,7 @@ type ReplyPostView = Omit<PostView, 'replyTo' | 'replyToId' | 'repost' | 'repost
 
 interface PostProps {
   post: PostView | ReplyPostView;
+  hideReplyTo?: boolean;
   showReplies?: boolean;
   className?: string;
   hideBorder?: boolean;
@@ -33,6 +34,7 @@ function isFullPost(post: PostView | ReplyPostView): post is PostView {
 
 export function Post({
   post,
+  hideReplyTo = false,
   showReplies = false,
   hideBorder = false,
 }: PostProps) {
@@ -74,7 +76,7 @@ export function Post({
 
   return (
     <div className={cn("group relative block", !hideBorder && "border-b border-border")}>
-      {isFullPostView && post.replyTo && showReplies && (
+      {isFullPostView && post.replyTo && !hideReplyTo && (
         <>
           <div className="relative">
             <div className="absolute left-[34px] top-[16px] h-full w-0.5 bg-border" />
@@ -96,7 +98,12 @@ export function Post({
             router.push(`/${post.author.username}/status/${post.id}`);
           }
         }}
-        className="relative px-4 py-3 hover:bg-muted/20 transition-colors duration-200 cursor-pointer"
+        className={cn(
+          "relative px-4 py-3 hover:bg-muted/20 transition-colors duration-200 cursor-pointer",
+          {
+            "bg-gradient-to-r from-primary/5 to-primary/10": !!post.nft,
+          }
+        )}
       >
         {isFullPostView && post.repost && (
           <div className="ml-2 top-[-8px] relative flex items-center gap-1 px-4 pt-2 text-xs text-muted-foreground">
@@ -228,6 +235,7 @@ export function Post({
             )}
 
             <PostActions
+              nft={post.nft}
               stats={post.stats}
               interactions={post.viewer}
               postId={post.id}
