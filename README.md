@@ -2,7 +2,8 @@
 
 Welcome to our Decentralized Twitter Clone built with Chopin Framework and Celestia! 🌐✨ This project aims to create a censorship-resistant, secure, and scalable social network.
 
-<img width="1267" alt="Screenshot 2025-02-27 at 00 16 18" src="https://github.com/user-attachments/assets/3b9c85a1-2a9d-4ac0-81e0-653716bbbee6" />
+<img width="1423" alt="Screenshot 2025-03-01 at 01 05 00" src="https://github.com/user-attachments/assets/a3cff216-3a63-4d99-b7e5-23b042fa3820" />
+<img width="1235" alt="Screenshot 2025-03-01 at 01 05 33" src="https://github.com/user-attachments/assets/7c8d7381-09bd-4a31-a992-fe1cadf17939" />
 
 ## 🏆 Why This Project?
 Existing social networks are either centralized (X) or don't fully inherit blockchain security (Farcaster). Our solution leverages Chopin Framework + Celestia to ensure true decentralization while remaining scalable.
@@ -49,42 +50,33 @@ npx chopd
 ### Core Features
 - [x] Standard Twitter clone features
   - [x] Notification system
-  - [x] Retweet functionality
-  - [x] Bookmarks management
+  - [x] Bookmarks system
+  - [x] Messages system
   - [x] Comments and replies system
+  - [x] Retweet functionality
   - [x] Follow/unfollow users
   - [x] Profile management
   - [x] Profile picture upload
   - [x] Profile banner upload
   - [x] Update profile information
-  - [x] Messages system
 
-### AI Features
-- [ ] AI-powered post generation
 
-## NFT Features
-- [x] Create a NFT collection
-- [x] Edit a NFT collection
-- [x] View list of NFT collections
-- [x] View a NFT collection
-- [x] Mint a NFT
-- [ ] Transfer a NFT
-- [ ] Burn a NFT
+- [x] NFT Features
+  - [x] Create a NFT collection
+  - [x] Edit a NFT collection
+  - [x] View a NFT collection
+  - [x] Mint a NFT
 
-### Crypto Bot Features
-- [x] Tweet about a crypto currency
-  - [x] Real-time price tracking
-  - [x] 24-hour price change notifications
+- [x] Crypto Bot Features
+  - [x] Auto ticker for coins mentioned in posts
   - [x] Direct trading links to Binance
-- [x] User Interaction:
   - [x] Follow/unfollow crypto bots
   - [x] Price change indicators
-  - [x] View crypto bots of a user
 
-### Future Features
-- [ ] Crypto Bot Trading Bot
-- [ ] Customizable price alerts
-- [ ] NFT Marketplace
+### Future Planning
+- [ ] Cross-chain Trading
+- [ ] Embedded Web3 Apps
+- [ ] Social Hook Stack Framework
 
 ### CI/CD Workflow
 
