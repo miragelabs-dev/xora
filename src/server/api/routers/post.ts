@@ -25,7 +25,7 @@ export const postRouter = createTRPCRouter({
 
   feed: protectedProcedure
     .input(z.object({
-      type: z.enum(["for-you", "following", "user", "replies", "interests"]).default("for-you"),
+      type: z.enum(["for-you", "following", "user", "replies", "crypto-bots"]).default("for-you"),
       userId: z.number().optional(),
       limit: z.number().min(1).max(100).default(20),
       cursor: z.number().nullish(),
@@ -50,7 +50,7 @@ export const postRouter = createTRPCRouter({
         conditions.push(userPostsCondition);
       }
 
-      if (type === 'interests') {
+      if (type === 'crypto-bots') {
         const subquery = ctx.db
           .select({ followingId: follows.followingId })
           .from(follows)

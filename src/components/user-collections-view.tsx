@@ -1,6 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Collection } from "@/lib/db/schema";
 import { api } from "@/utils/api";
 import { motion } from "framer-motion";
 import { Library } from "lucide-react";
@@ -13,7 +14,7 @@ interface UserCollectionsViewProps {
   userId: number;
 }
 
-function CollectionCard({ collection }: { collection: any }) {
+function CollectionCard({ collection }: { collection: Collection }) {
   return (
     <Link href={`/nft-collections/${collection.id}`}>
       <Card className="overflow-hidden transition-all hover:bg-muted/50">
@@ -40,7 +41,7 @@ function EmptyState() {
       <div className="space-y-2">
         <h3 className="text-lg font-semibold">No Collections Found</h3>
         <p className="text-sm text-muted-foreground">
-          This user hasn't created any NFT collections yet.
+          This user hasn&apos;t created any NFT collections yet.
         </p>
       </div>
     </div>

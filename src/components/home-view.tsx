@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 
 export function HomeView() {
-  const [activeTab, setActiveTab] = useState<'for-you' | 'following' | 'interests'>('for-you');
+  const [activeTab, setActiveTab] = useState<'for-you' | 'following' | 'crypto-bots'>('for-you');
 
   return (
     <motion.div
@@ -16,7 +16,7 @@ export function HomeView() {
       transition={{ duration: 0.3 }}
     >
       <div className="sticky top-0 z-[25] h-auto w-full bg-background/80 backdrop-blur">
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'for-you' | 'following' | 'interests')}>
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'for-you' | 'following' | 'crypto-bots')}>
           <TabsList className="w-full">
             <TabsTrigger value="for-you" className="flex-1">
               For You
@@ -24,8 +24,8 @@ export function HomeView() {
             <TabsTrigger value="following" className="flex-1">
               Following
             </TabsTrigger>
-            <TabsTrigger value="interests" className="flex-1">
-              Interests
+            <TabsTrigger value="crypto-bots" className="flex-1">
+              Crypto Bots
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -49,7 +49,7 @@ export function HomeView() {
         ) : activeTab === 'following' ? (
           <Feed type="following" />
         ) : (
-          <Feed type="interests" />
+          <Feed type="crypto-bots" />
         )}
       </motion.div>
     </motion.div>
