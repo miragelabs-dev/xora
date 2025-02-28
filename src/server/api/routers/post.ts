@@ -408,7 +408,7 @@ export const postRouter = createTRPCRouter({
         .from(postView)
         .where(
           input.query.startsWith('#')
-            ? sql`${postView.content} ~ ${input.query.toLowerCase()}`
+            ? sql`${postView.content} ~* ${input.query.toLowerCase().replace('#', '#[A-Za-z0-9_]*')}`
             : sql`${postView.content} ~* ${input.query}`
         )
         .orderBy(desc(postView.createdAt))
