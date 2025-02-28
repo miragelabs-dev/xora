@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import { api } from "@/utils/api";
 import { formatDistanceToNow } from "date-fns";
 import { MessageCircle } from "lucide-react";
@@ -11,9 +12,21 @@ import { UserAvatar } from "./user-avatar";
 
 export function ConversationList() {
   const params = useParams();
+  const utils = api.useUtils();
   const { data: conversations, isLoading } = api.message.getConversations.useQuery({
     limit: 50,
   });
+
+  const { mutate: markAsRead } = api.message.markConversationAsRead.useMutation({
+    onSuccess: () => {
+      utils.message.getConversations.invalidate();
+      utils.message.getUnreadCount.invalidate();
+    },
+  });
+
+  const handleConversationClick = (conversationId: number) => {
+    markAsRead({ conversationId });
+  };
 
   if (isLoading) {
     return (
@@ -60,9 +73,14 @@ export function ConversationList() {
             const isActive = params?.userId === conversation.recipient.id.toString();
 
             return (
-              <Link className="block" href={`/messages/${conversation.recipient.id}`} key={conversation.id}>
+              <Link
+                className="block"
+                href={`/messages/${conversation.recipient.id}`}
+                key={conversation.id}
+                onClick={() => handleConversationClick(conversation.id)}
+              >
                 <Card
-                  className={`border-0 transition-colors hover:bg-muted/50 ${isActive ? "bg-muted" : ""
+                  className={`border-0 relative transition-colors hover:bg-muted/50 ${isActive ? "bg-muted" : ""
                     }`}
                 >
                   <div className="flex items-start gap-4 p-4">
@@ -84,9 +102,17 @@ export function ConversationList() {
                         </p>
                       </div>
                       {conversation.lastMessage && (
-                        <p className="text-sm text-muted-foreground truncate mt-1">
+                        <p className={cn(
+                          "text-sm truncate mt-1",
+                          conversation.unreadCount > 0
+                            ? "text-foreground font-medium"
+                            : "text-muted-foreground"
+                        )}>
                           {conversation.lastMessage.content}
                         </p>
+                      )}
+                      {conversation.unreadCount > 0 && (
+                        <div className="absolute top-2 right-4 h-2 w-2 rounded-full bg-primary" />
                       )}
                     </div>
                   </div>

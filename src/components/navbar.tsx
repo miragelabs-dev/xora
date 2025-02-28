@@ -130,9 +130,9 @@ export function Navbar() {
                     >
                       <div className="relative">
                         {link.icon && <link.icon size={24} />}
-                        {link.name === "Notifications" && unreadCount > 0 && (
+                        {link.name === "Messages" && link.unreadCount !== undefined && link.unreadCount > 0 && (
                           <div className="absolute -top-2 -right-2 min-w-[22px] h-[22px] rounded-full bg-primary font-bold text-[11px] flex items-center justify-center text-primary-foreground">
-                            {unreadCount > 99 ? "99+" : unreadCount}
+                            {link.unreadCount > 99 ? "99+" : link.unreadCount}
                           </div>
                         )}
                       </div>
@@ -198,9 +198,9 @@ export function Navbar() {
           >
             <div className="relative">
               {link.icon && <link.icon size={20} />}
-              {link.name === "Notifications" && unreadCount > 0 && (
+              {link.name === "Messages" && link.unreadCount !== undefined && link.unreadCount > 0 && (
                 <div className="absolute -top-1 -right-1 min-w-[16px] h-[16px] rounded-full bg-primary text-[10px] font-medium flex items-center justify-center text-primary-foreground">
-                  {unreadCount > 99 ? "99+" : unreadCount}
+                  {link.unreadCount > 99 ? "99+" : link.unreadCount}
                 </div>
               )}
             </div>

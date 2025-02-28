@@ -1,5 +1,5 @@
 import { conversations, messages, users } from "@/lib/db/schema";
-import { and, desc, eq, lt, or, sql } from "drizzle-orm";
+import { and, desc, eq, lt, not, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
@@ -33,7 +33,18 @@ export const messageRouter = createTRPCRouter({
             id: lastMessage.id,
             content: lastMessage.content,
             createdAt: lastMessage.createdAt,
+            read: lastMessage.read,
+            sender: sql<{ id: number }>`json_build_object(
+              'id', ${lastMessage.senderId}
+            )`,
           },
+          unreadCount: sql<number>`(
+            SELECT count(*)::int 
+            FROM ${messages} m 
+            WHERE m.conversation_id = ${conversations.id} 
+            AND m.read = false 
+            AND m.sender_id != ${ctx.session.user.id}
+          )`,
         })
         .from(conversations)
         .where(
@@ -169,5 +180,42 @@ export const messageRouter = createTRPCRouter({
       });
 
       return conversation;
+    }),
+
+  getUnreadCount: protectedProcedure
+    .query(async ({ ctx }) => {
+      const [result] = await ctx.db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(messages)
+        .innerJoin(conversations, eq(messages.conversationId, conversations.id))
+        .where(
+          and(
+            eq(messages.read, false),
+            not(eq(messages.senderId, ctx.session.user.id)),
+            or(
+              eq(conversations.recipientId, ctx.session.user.id),
+              eq(conversations.initiatorId, ctx.session.user.id)
+            )
+          )
+        );
+
+      return result.count;
+    }),
+
+  markConversationAsRead: protectedProcedure
+    .input(z.object({
+      conversationId: z.number(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .update(messages)
+        .set({ read: true })
+        .where(
+          and(
+            eq(messages.conversationId, input.conversationId),
+            eq(messages.read, false),
+            not(eq(messages.senderId, ctx.session.user.id))
+          )
+        );
     }),
 }); 

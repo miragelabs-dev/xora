@@ -1,8 +1,10 @@
 import { useSession } from "@/app/session-provider";
 import { Bookmark, Home, Library, MessageCircle, User } from "lucide-react";
+import { useUnreadMessages } from "./use-unread-messages";
 
 export function useNavbarMenu() {
   const { user } = useSession();
+  const unreadMessages = useUnreadMessages();
 
   return [
     {
@@ -19,6 +21,7 @@ export function useNavbarMenu() {
       name: "Messages",
       link: "/messages",
       icon: MessageCircle,
+      unreadCount: unreadMessages,
     },
     {
       name: "Bookmarks",
