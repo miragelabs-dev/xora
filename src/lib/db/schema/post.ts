@@ -1,5 +1,5 @@
 import { desc, eq, relations, sql } from "drizzle-orm";
-import { alias, BuildAliasTable, integer, pgTable, pgView, serial, text, timestamp, unique, varchar } from "drizzle-orm/pg-core";
+import { alias, BuildAliasTable, integer, pgTable, pgView, QueryBuilder, serial, text, timestamp, unique, varchar } from "drizzle-orm/pg-core";
 import { users } from "./user";
 
 export const posts = pgTable("posts", {
@@ -12,7 +12,6 @@ export const posts = pgTable("posts", {
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   replyToId: integer("reply_to_id")
-    .references(() => posts.id, { onDelete: "cascade" }),
 });
 
 export const postsRelations = relations(posts, ({ one, many }) => ({
@@ -71,7 +70,7 @@ export const reposts = pgTable("reposts", {
 export type Post = typeof posts.$inferSelect;
 export type NewPost = typeof posts.$inferInsert;
 
-const firstRepostSubquery = (qb: typeof posts.$inferSelect) =>
+const firstRepostSubquery = (qb: QueryBuilder) =>
   qb
     .selectDistinct({
       id: reposts.id,
@@ -84,7 +83,7 @@ const firstRepostSubquery = (qb: typeof posts.$inferSelect) =>
     .as('first_repost');
 
 const buildRepostJson = (
-  repostTable: BuildAliasTable<typeof reposts, 'repost'>,
+  repostTable: ReturnType<typeof firstRepostSubquery>,
   userTable: BuildAliasTable<typeof users, 'reposter_user'>
 ) =>
   sql<{

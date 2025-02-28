@@ -18,27 +18,17 @@ import { CryptoPriceTag } from "./crypto-price-tag";
 import { ImageLightbox } from "./image-lightbox";
 import { PostActions } from "./post-actions";
 
+type ReplyPostView = Omit<PostView, 'replyTo' | 'replyToId' | 'repost' | 'reposterId'>;
+
 interface PostProps {
-  post: Partial<PostView> & {
-    id: number;
-    content: string;
-    image: string;
-    createdAt: Date;
-    author: {
-      id: number;
-      username: string;
-      image: string;
-      address: string;
-      isCryptoBot: boolean;
-      isVerified: boolean;
-    };
-    authorId: number;
-    stats: PostView['stats'];
-    viewer: PostView['viewer'];
-  };
+  post: PostView | ReplyPostView;
   showReplies?: boolean;
   className?: string;
   hideBorder?: boolean;
+}
+
+function isFullPost(post: PostView | ReplyPostView): post is PostView {
+  return 'replyTo' in post && 'repost' in post;
 }
 
 export function Post({
@@ -52,6 +42,7 @@ export function Post({
   const utils = api.useUtils();
   const { user } = useSession();
   const router = useRouter();
+  const isFullPostView = isFullPost(post);
 
   const isPostOwner = post.authorId === user?.id;
 
@@ -83,7 +74,7 @@ export function Post({
 
   return (
     <div className={cn("group relative block", !hideBorder && "border-b border-border")}>
-      {post.replyTo && (
+      {isFullPostView && post.replyTo && (
         <>
           <div className="relative">
             <div className="absolute left-[34px] top-[16px] h-full w-0.5 bg-border" />
@@ -107,7 +98,7 @@ export function Post({
         }}
         className="relative px-4 py-3 hover:bg-muted/20 transition-colors duration-200 cursor-pointer"
       >
-        {post?.repost && (
+        {isFullPostView && post.repost && (
           <div className="ml-2 top-[-8px] relative flex items-center gap-1 px-4 pt-2 text-xs text-muted-foreground">
             <Repeat2 className="h-4 w-4" />
             <span>

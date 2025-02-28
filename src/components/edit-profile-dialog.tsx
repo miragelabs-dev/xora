@@ -263,6 +263,7 @@ export function EditProfileDialog({
                         className="resize-none"
                         maxLength={160}
                         {...field}
+                        value={field.value ?? ''}
                       />
                     </FormControl>
                     <div className="flex justify-end">

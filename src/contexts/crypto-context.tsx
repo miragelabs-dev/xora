@@ -2,6 +2,12 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 
+interface BinanceTickerResponse {
+  symbol: string;
+  lastPrice: string;
+  priceChangePercent: string;
+}
+
 interface CryptoPrice {
   symbol: string;
   current_price: number;
@@ -37,7 +43,7 @@ export function CryptoProvider({ children }: { children: React.ReactNode }) {
         const data = await response.json();
         const formattedPrices: Record<string, CryptoPrice> = {};
 
-        data.forEach((item: any) => {
+        data.forEach((item: BinanceTickerResponse) => {
           const symbol = item.symbol.replace('USDT', '');
           formattedPrices[symbol] = {
             symbol,
