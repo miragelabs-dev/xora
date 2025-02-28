@@ -65,7 +65,7 @@ export function ProfileHeader({
               </Button>
             ) : (
               <Button
-                variant={profile.isFollowing ? "outline" : "default"}
+                variant={profile.isFollowing ? "dark" : "light"}
                 onClick={() => {
                   if (profile.isFollowing) {
                     unfollow({ userId: profile.id });

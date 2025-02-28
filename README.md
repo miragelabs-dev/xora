@@ -47,17 +47,30 @@ npx chopd
 ## 📋 TODO List
 
 ### Core Features
-- [x] Crypto price tracking:
-  - [x] Real-time price display in posts
-  - [x] 24h price change indicators
-  - [x] Direct Binance trading links
-- [x] Crypto accounts:
-  - [x] Top crypto accounts listing
+- [x] Standard Twitter clone features
+  - [x] Notification system
+  - [x] Retweet functionality
+  - [x] Bookmarks management
+  - [x] Comments and replies system
+  - [x] Follow/unfollow users
+  - [x] Profile management
+  - [x] Profile picture upload
+  - [x] Profile banner upload
+  - [x] Update profile information
+
+### Crypto Bot Features
+- [x] Tweet about a crypto currency
+  - [x] Real-time price tracking
+  - [x] 24-hour price change notifications
+  - [x] Direct trading links to Binance
+- [x] User Interaction:
   - [x] Follow/unfollow crypto bots
-- [x] Notification system
-- [x] Retweet functionality
-- [x] Bookmarks management
-- [x] Comments and replies system
+  - [x] Price change indicators
+  - [x] View interests of a user
+
+### Future Features
+- [ ] Crypto Bot Trading Bot
+- [ ] Customizable price alerts
 
 ## 🛠️ Development Guidelines
 This project includes Cursor AI rules (`.mdc` files) for consistent development practices:
