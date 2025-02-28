@@ -370,4 +370,20 @@ export const userRouter = createTRPCRouter({
 
       return cryptoAccounts;
     }),
+
+  getById: protectedProcedure
+    .input(z.object({
+      userId: z.number(),
+    }))
+    .query(async ({ ctx, input }) => {
+      const user = await ctx.db.query.users.findFirst({
+        where: eq(users.id, input.userId),
+      });
+
+      if (!user) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      return user;
+    }),
 }); 

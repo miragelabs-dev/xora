@@ -7,8 +7,10 @@ import { VerifiedBadge } from "@/components/verified-badge";
 import { cn } from "@/lib/utils";
 import type { ProfileResponse } from "@/server/api/routers/user";
 import { api } from "@/utils/api";
+import { MessageCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 interface ProfileHeaderProps {
@@ -22,6 +24,7 @@ export function ProfileHeader({
 }: ProfileHeaderProps) {
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const utils = api.useUtils();
+  const router = useRouter();
 
   const { mutate: follow, isPending: isFollowPending } = api.user.follow.useMutation({
     onSuccess: () => {
@@ -34,6 +37,16 @@ export function ProfileHeader({
       utils.user.getProfileByUsername.invalidate({ username: profile.username });
     },
   });
+
+  const { mutate: sendMessage } = api.message.sendMessage.useMutation({
+    onSuccess: () => {
+      router.push('/messages');
+    },
+  });
+
+  const handleMessageClick = () => {
+    router.push(`/messages/${profile.id}`);
+  };
 
   return (
     <>
@@ -64,19 +77,29 @@ export function ProfileHeader({
                 Edit Profile
               </Button>
             ) : (
-              <Button
-                variant={profile.isFollowing ? "dark" : "light"}
-                onClick={() => {
-                  if (profile.isFollowing) {
-                    unfollow({ userId: profile.id });
-                  } else {
-                    follow({ userId: profile.id });
-                  }
-                }}
-                disabled={isFollowPending || isUnfollowPending}
-              >
-                {profile.isFollowing ? "Following" : "Follow"}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant={profile.isFollowing ? "dark" : "light"}
+                  onClick={() => {
+                    if (profile.isFollowing) {
+                      unfollow({ userId: profile.id });
+                    } else {
+                      follow({ userId: profile.id });
+                    }
+                  }}
+                  disabled={isFollowPending || isUnfollowPending}
+                >
+                  {profile.isFollowing ? "Following" : "Follow"}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="rounded-full"
+                  onClick={handleMessageClick}
+                >
+                  <MessageCircle className="h-4 w-4" />
+                </Button>
+              </div>
             )}
           </div>
 

@@ -57,6 +57,7 @@ npx chopd
   - [x] Profile picture upload
   - [x] Profile banner upload
   - [x] Update profile information
+  - [x] Messages system
 
 ### AI Features
 - [ ] AI-powered post generation
