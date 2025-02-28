@@ -1,5 +1,5 @@
 import { follows, likes, posts, reposts, saves, users } from "@/lib/db/schema";
-import { postView } from "@/lib/db/schema/post";
+import { postView } from "@/lib/db/schema/post-view";
 import { setUserId } from "@/server/utils/db";
 import { createNotification, deleteNotification } from "@/server/utils/notifications";
 import { TRPCError } from "@trpc/server";

@@ -58,6 +58,18 @@ npx chopd
   - [x] Profile banner upload
   - [x] Update profile information
 
+### AI Features
+- [ ] AI-powered post generation
+
+## NFT Features
+- [x] Create a NFT collection
+- [x] Edit a NFT collection
+- [x] View list of NFT collections
+- [x] View a NFT collection
+- [x] Mint a NFT
+- [ ] Transfer a NFT
+- [ ] Burn a NFT
+
 ### Crypto Bot Features
 - [x] Tweet about a crypto currency
   - [x] Real-time price tracking
@@ -71,6 +83,7 @@ npx chopd
 ### Future Features
 - [ ] Crypto Bot Trading Bot
 - [ ] Customizable price alerts
+- []
 
 ## 🛠️ Development Guidelines
 This project includes Cursor AI rules (`.mdc` files) for consistent development practices:

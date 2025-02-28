@@ -1,11 +1,13 @@
 'use client';
 
 import { Button } from "@/components/ui/button";
+import { PostView } from "@/lib/db/schema";
 import { cn } from "@/lib/utils";
 import { api } from "@/utils/api";
 import { Bookmark, Heart, MessageCircle, Repeat2 } from "lucide-react";
 import Link from "next/link";
 import React, { JSX, useState } from "react";
+import { MintNFTModal } from "./mint-nft-modal";
 
 interface PostStats {
   repliesCount: number;
@@ -18,17 +20,19 @@ interface PostInteractions {
   isLiked: boolean;
   isReposted: boolean;
   isSaved: boolean;
+  isOwner: boolean;
 }
 
 interface PostActionsProps {
+  postId: number;
+  nft: PostView['nft'];
   stats: PostStats;
   interactions: PostInteractions;
-  postId: number;
   authorUsername: string;
   className?: string;
 }
 
-export function PostActions({ stats, interactions, postId, authorUsername, className }: PostActionsProps) {
+export function PostActions({ postId, nft, stats, interactions, authorUsername, className }: PostActionsProps) {
   const utils = api.useUtils();
 
   const [optimisticInteractions, setOptimisticInteractions] = useState(interactions);
@@ -42,6 +46,7 @@ export function PostActions({ stats, interactions, postId, authorUsername, class
     isRepostLoading: false,
     isSaveLoading: false,
   });
+  const [isMintModalOpen, setIsMintModalOpen] = useState(false);
 
   const invalidateQueries = () => {
     utils.post.feed.invalidate();
@@ -158,62 +163,129 @@ export function PostActions({ stats, interactions, postId, authorUsername, class
   );
 
   return (
-    <div
-      className={cn("mt-2 flex justify-between text-muted-foreground", className)}
-      data-no-navigate
-    >
-      <Link href={`/${authorUsername}/status/${postId}`} className="gap-2">
+    <>
+      <div
+        className={cn("mt-2 flex justify-between text-muted-foreground", className)}
+        data-no-navigate
+      >
+        <Link href={`/${authorUsername}/status/${postId}`} className="gap-2">
+          {renderActionButton(
+            <MessageCircle />,
+            stats.repliesCount,
+            false,
+            false,
+            (e) => e.stopPropagation(),
+            ""
+          )}
+        </Link>
+
         {renderActionButton(
-          <MessageCircle />,
-          stats.repliesCount,
-          false,
-          false,
-          (e) => e.stopPropagation(),
-          ""
+          <Repeat2 />,
+          optimisticStats.repostsCount,
+          optimisticInteractions.isReposted,
+          loadingStates.isRepostLoading,
+          (e) => {
+            e.preventDefault();
+            if (!loadingStates.isRepostLoading) {
+              void (optimisticInteractions.isReposted ? unrepost({ postId }) : repost({ postId }));
+            }
+          },
+          "text-green-500"
         )}
-      </Link>
 
-      {renderActionButton(
-        <Repeat2 />,
-        optimisticStats.repostsCount,
-        optimisticInteractions.isReposted,
-        loadingStates.isRepostLoading,
-        (e) => {
-          e.preventDefault();
-          if (!loadingStates.isRepostLoading) {
-            void (optimisticInteractions.isReposted ? unrepost({ postId }) : repost({ postId }));
-          }
-        },
-        "text-green-500"
-      )}
+        {renderActionButton(
+          <Heart />,
+          optimisticStats.likesCount,
+          optimisticInteractions.isLiked,
+          loadingStates.isLikeLoading,
+          (e) => {
+            e.preventDefault();
+            if (!loadingStates.isLikeLoading) {
+              void (optimisticInteractions.isLiked ? unlike({ postId }) : like({ postId }));
+            }
+          },
+          "text-red-500"
+        )}
 
-      {renderActionButton(
-        <Heart />,
-        optimisticStats.likesCount,
-        optimisticInteractions.isLiked,
-        loadingStates.isLikeLoading,
-        (e) => {
-          e.preventDefault();
-          if (!loadingStates.isLikeLoading) {
-            void (optimisticInteractions.isLiked ? unlike({ postId }) : like({ postId }));
-          }
-        },
-        "text-red-500"
-      )}
+        {renderActionButton(
+          <Bookmark />,
+          optimisticStats.savesCount,
+          optimisticInteractions.isSaved,
+          loadingStates.isSaveLoading,
+          (e) => {
+            e.preventDefault();
+            if (!loadingStates.isSaveLoading) {
+              void (optimisticInteractions.isSaved ? unsave({ postId }) : save({ postId }));
+            }
+          },
+          "text-blue-500"
+        )}
 
-      {renderActionButton(
-        <Bookmark />,
-        optimisticStats.savesCount,
-        optimisticInteractions.isSaved,
-        loadingStates.isSaveLoading,
-        (e) => {
-          e.preventDefault();
-          if (!loadingStates.isSaveLoading) {
-            void (optimisticInteractions.isSaved ? unsave({ postId }) : save({ postId }));
-          }
-        },
-        "text-blue-500"
-      )}
-    </div>
+        <>
+          {nft ? (
+            <Link href={`/nft-collections/${nft?.collectionId}`}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="relative overflow-hidden bg-secondary/50 border-primary/50 hover:border-primary/70"
+              >
+                <span className="absolute inset-0 bg-gradient-shimmer animate-shimmer" />
+                <span className="relative flex items-center gap-2">
+                  <svg
+                    className="w-4 h-4 text-primary"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                    />
+                  </svg>
+                  NFT Minted
+                </span>
+              </Button>
+            </Link>
+          ) : interactions.isOwner && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsMintModalOpen(true)}
+              data-no-navigate
+              className="bg-primary/10 hover:bg-primary/20 text-primary-foreground border border-primary/30 hover:border-primary/50 transition-all duration-200"
+            >
+              <span className="flex items-center gap-2">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  />
+                </svg>
+                Mint NFT
+              </span>
+            </Button>
+          )}
+        </>
+      </div>
+
+      <MintNFTModal
+        postId={postId}
+        isOpen={isMintModalOpen}
+        onClose={() => setIsMintModalOpen(false)}
+        onSuccess={() => {
+          utils.post.feed.invalidate();
+          utils.post.getById.invalidate({ postId });
+        }}
+      />
+    </>
   );
 } 
