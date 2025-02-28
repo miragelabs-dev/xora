@@ -72,6 +72,14 @@ export const userRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const { username, limit, cursor } = input;
 
+      const targetUser = await ctx.db.query.users.findFirst({
+        where: eq(users.username, username),
+      });
+
+      if (!targetUser) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
       const items = await ctx.db
         .select({
           id: users.id,
@@ -83,7 +91,7 @@ export const userRouter = createTRPCRouter({
         .innerJoin(users, eq(users.id, follows.followerId))
         .where(
           and(
-            eq(users.username, username),
+            eq(follows.followingId, targetUser.id),
             cursor ? lt(follows.id, cursor) : undefined
           )
         )
@@ -111,6 +119,14 @@ export const userRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const { username, limit, cursor } = input;
 
+      const targetUser = await ctx.db.query.users.findFirst({
+        where: eq(users.username, username),
+      });
+
+      if (!targetUser) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
       const items = await ctx.db
         .select({
           id: users.id,
@@ -121,7 +137,7 @@ export const userRouter = createTRPCRouter({
         .innerJoin(users, eq(users.id, follows.followingId))
         .where(
           and(
-            eq(users.username, username),
+            eq(follows.followerId, targetUser.id),
             cursor ? lt(follows.id, cursor) : undefined
           )
         )
