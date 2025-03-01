@@ -78,7 +78,7 @@ export function Feed({ type = 'for-you', userId, searchQuery }: FeedProps) {
         <div key={i}>
           {page.items.map((item) => (
             <Post
-              key={item.id}
+              key={`${item.id}-${item.repostedUsername}`}
               post={item}
             />
           ))}
