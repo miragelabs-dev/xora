@@ -129,7 +129,7 @@ export function Navbar() {
                     >
                       <div className="relative">
                         {link.icon && <link.icon size={24} />}
-                        {link.name === "Messages" && link.unreadCount !== undefined && link.unreadCount > 0 && (
+                        {link.unreadCount !== undefined && link.unreadCount > 0 && (
                           <div className="absolute -top-2 -right-2 min-w-[22px] h-[22px] rounded-full bg-primary font-bold text-[11px] flex items-center justify-center text-primary-foreground">
                             {link.unreadCount > 99 ? "99+" : link.unreadCount}
                           </div>
