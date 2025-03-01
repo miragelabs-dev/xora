@@ -7,7 +7,8 @@ import { VerifiedBadge } from "@/components/verified-badge";
 import { cn } from "@/lib/utils";
 import type { ProfileResponse } from "@/server/api/routers/user";
 import { api } from "@/utils/api";
-import { MessageCircle } from "lucide-react";
+import { format } from "date-fns";
+import { CalendarIcon, MessageCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -123,6 +124,11 @@ export function ProfileHeader({
               )}
             </div>
             <p className="text-sm text-muted-foreground">{profile.bio}</p>
+          </div>
+
+          <div className="flex gap-2 text-sm items-center text-muted-foreground">
+            <CalendarIcon className="size-4" />
+            Joined {format(new Date(profile.createdAt), 'MMMM yyyy')}
           </div>
 
           <div className="flex gap-4 text-sm text-muted-foreground">
