@@ -53,6 +53,9 @@ export function ProfileView({
               <TabsTrigger value="replies" className="flex-1">
                 Replies
               </TabsTrigger>
+              <TabsTrigger value="interests" className="flex-1">
+                Interests
+              </TabsTrigger>
               <TabsTrigger value="nft-collections" className="flex-1">
                 NFT Collections
               </TabsTrigger>
@@ -65,8 +68,10 @@ export function ProfileView({
         <Feed type="user" userId={profile.id} />
       ) : activeTab === 'replies' ? (
         <Feed type="replies" userId={profile.id} />
-      ) : (
+      ) : activeTab === 'nft-collections' ? (
         <UserCollectionsView userId={profile.id} />
+      ) : (
+        <Feed type="interests" />
       )}
     </div>
   );

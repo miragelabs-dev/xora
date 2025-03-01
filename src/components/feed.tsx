@@ -8,7 +8,7 @@ import { useInView } from "react-intersection-observer";
 import { PostSkeleton } from "./post-skeleton";
 
 interface FeedProps {
-  type?: 'for-you' | 'following' | 'user' | 'replies' | 'crypto-bots' | 'search';
+  type?: 'for-you' | 'following' | 'user' | 'replies' | 'interests' | 'search';
   userId?: number;
   searchQuery?: string;
 }

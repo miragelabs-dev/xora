@@ -3,7 +3,7 @@ import { postView } from "@/lib/db/schema/post-view";
 import { setUserId } from "@/server/utils/db";
 import { createNotification, deleteNotification } from "@/server/utils/notifications";
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, lt, sql } from "drizzle-orm";
+import { and, desc, eq, isNull, lt, sql } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
@@ -25,7 +25,7 @@ export const postRouter = createTRPCRouter({
 
   feed: protectedProcedure
     .input(z.object({
-      type: z.enum(["for-you", "following", "user", "replies", "crypto-bots"]).default("for-you"),
+      type: z.enum(["for-you", "following", "user", "replies", "interests"]).default("for-you"),
       userId: z.number().optional(),
       limit: z.number().min(1).max(100).default(20),
       cursor: z.number().nullish(),
@@ -44,13 +44,13 @@ export const postRouter = createTRPCRouter({
 
       if (type === 'user' && userId) {
         const userPostsCondition = sql`(
-          (${postView.authorId} = ${userId} AND ${postView.replyToId} IS NULL) OR 
+          (${postView.authorId} = ${userId} AND ${postView.replyToId} IS NULL AND ${postView.reposterId} IS NULL) OR 
           (${postView.reposterId} = ${userId} AND ${postView.replyToId} IS NULL)
         )`;
         conditions.push(userPostsCondition);
       }
 
-      if (type === 'crypto-bots') {
+      if (type === 'interests') {
         const subquery = ctx.db
           .select({ followingId: follows.followingId })
           .from(follows)
@@ -235,7 +235,14 @@ export const postRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       await setUserId(ctx.db, ctx.session.user.id);
 
-      const post = await ctx.db.select().from(postView).where(eq(postView.id, input.postId));
+      const post = await ctx.db.select()
+        .from(postView)
+        .where(
+          and(
+            eq(postView.id, input.postId),
+            isNull(postView.repostedById)
+          )
+        );
 
       if (!post[0]) {
         throw new TRPCError({
