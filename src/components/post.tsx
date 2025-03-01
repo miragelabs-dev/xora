@@ -11,7 +11,7 @@ import { Loader2, MoreHorizontal, Repeat2, Trash } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 
 import { ComposeForm } from "./compose-form";
 import { CryptoPriceTag } from "./crypto-price-tag";
@@ -73,6 +73,28 @@ export function Post({
         getNextPageParam: (lastPage) => lastPage.nextCursor,
       }
     );
+
+  const renderContent = (content: string) => {
+    const parts = content.split(/([@＠][a-zA-Z0-9_]+)/g);
+
+    return parts.map((part, index) => {
+      if (part.match(/^[@＠][a-zA-Z0-9_]+$/)) {
+        const username = part.slice(1);
+        return (
+          <Link
+            key={index}
+            href={`/${username}`}
+            className="text-blue-500 hover:underline"
+            onClick={(e) => e.stopPropagation()}
+            data-no-navigate
+          >
+            {part}
+          </Link>
+        );
+      }
+      return <Fragment key={index}>{part}</Fragment>;
+    });
+  };
 
   return (
     <div className={cn("group relative block", !hideBorder && "border-b border-border")}>
@@ -191,7 +213,7 @@ export function Post({
             </div>
 
             <div className="text-sm mt-2 select-text space-y-4">
-              <p>{post.content}</p>
+              <p>{renderContent(post.content)}</p>
               {post.content.match(/\$[A-Za-z]{2,5}/g) && (
                 <div className="border-t border-border pt-3">
                   <div className="flex flex-col gap-2" data-no-navigate>

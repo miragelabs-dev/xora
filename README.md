@@ -59,7 +59,8 @@ npx chopd
   - [x] Profile picture upload
   - [x] Profile banner upload
   - [x] Update profile information
-
+  - [x] Mention users in posts
+  - [x] Hashtag search
 
 - [x] NFT Features
   - [x] Create a NFT collection

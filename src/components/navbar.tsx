@@ -146,7 +146,6 @@ export function Navbar() {
                   <DropdownMenuTrigger asChild>
                     <button className={cn(
                       "flex w-full items-center gap-3 rounded p-[10px] transition-colors xl:justify-start hover:bg-muted",
-                      "opacity-50 hover:opacity-100"
                     )}>
                       <MoreHorizontal size={24} />
                       <span className="hidden text-base font-semibold leading-5 xl:inline">

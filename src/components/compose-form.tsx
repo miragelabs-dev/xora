@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { EmojiPicker } from "./emoji-picker";
+import { MentionSuggestions } from "./mention-suggestions";
 
 interface ComposeFormProps {
   user: {
@@ -34,6 +35,8 @@ export function ComposeForm({
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [mentionQuery, setMentionQuery] = useState("");
+  const [showMentions, setShowMentions] = useState(false);
 
   const adjustTextareaHeight = () => {
     const textarea = textareaRef.current;
@@ -44,8 +47,17 @@ export function ComposeForm({
   };
 
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setContent(e.target.value);
+    const newContent = e.target.value;
+    setContent(newContent);
     adjustTextareaHeight();
+
+    const lastWord = newContent.split(/\s/).pop() || "";
+    if (lastWord.startsWith("@") && lastWord.length > 1) {
+      setMentionQuery(lastWord);
+      setShowMentions(true);
+    } else {
+      setShowMentions(false);
+    }
   };
 
   const handleFileUpload = async (file: File) => {
@@ -85,9 +97,19 @@ export function ComposeForm({
     setContent(prev => prev + emoji);
   };
 
+  const handleMentionSelect = (username: string) => {
+    const words = content.split(/\s/);
+    words[words.length - 1] = `@${username}`;
+    setContent(words.join(" ") + " ");
+    setShowMentions(false);
+  };
+
   const handleSubmit = () => {
     if (!content.trim()) return;
-    onSubmit({ content: content.trim(), image });
+
+    const formattedContent = content.trim();
+
+    onSubmit({ content: formattedContent, image });
     setContent('');
     setImage(null);
   };
@@ -103,15 +125,23 @@ export function ComposeForm({
       />
 
       <div className="flex-1 space-y-3 sm:space-y-4">
-        <Textarea
-          ref={textareaRef}
-          placeholder={placeholder}
-          className="min-h-[80px] sm:min-h-[100px] resize-none border-none bg-transparent p-0 focus-visible:ring-0 pt-1.5 !text-lg overflow-hidden"
-          value={content}
-          onChange={handleContentChange}
-          disabled={isSubmitting || isUploading}
-          onInput={adjustTextareaHeight}
-        />
+        <div className="relative">
+          <Textarea
+            ref={textareaRef}
+            placeholder={placeholder}
+            className="min-h-[80px] sm:min-h-[100px] resize-none border-none bg-transparent p-0 focus-visible:ring-0 pt-1.5 !text-lg overflow-hidden"
+            value={content}
+            onChange={handleContentChange}
+            disabled={isSubmitting || isUploading}
+            onInput={adjustTextareaHeight}
+          />
+          <MentionSuggestions
+            query={mentionQuery}
+            isOpen={showMentions}
+            onSelect={handleMentionSelect}
+            onClose={() => setShowMentions(false)}
+          />
+        </div>
 
         {image && (
           <div className="relative rounded-xl overflow-hidden">
