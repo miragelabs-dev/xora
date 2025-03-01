@@ -57,8 +57,8 @@ export const postRouter = createTRPCRouter({
           .leftJoin(users, eq(follows.followingId, users.id))
           .where(
             and(
-              eq(follows.followerId, ctx.session.user.id),
-              eq(users.isCryptoBot, true)
+              eq(users.isCryptoBot, true),
+              userId ? eq(follows.followerId, userId) : eq(follows.followerId, ctx.session.user.id)
             )
           );
 

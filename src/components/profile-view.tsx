@@ -71,7 +71,7 @@ export function ProfileView({
       ) : activeTab === 'nft-collections' ? (
         <UserCollectionsView userId={profile.id} />
       ) : (
-        <Feed type="interests" />
+        <Feed type="interests" userId={profile.id} />
       )}
     </div>
   );
