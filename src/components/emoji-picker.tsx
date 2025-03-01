@@ -9,10 +9,9 @@ import {
 interface EmojiPickerProps {
   onEmojiSelect: (emoji: string) => void
   children: React.ReactNode
-  asChild?: boolean
 }
 
-export const EmojiPicker = ({ onEmojiSelect, children, asChild }: EmojiPickerProps) => {
+export const EmojiPicker = ({ onEmojiSelect, children }: EmojiPickerProps) => {
   const customStyles = {
     "--epr-picker-border-radius": "calc(var(--radius))",
     "--epr-hover-bg-color": "hsl(var(--accent))",
@@ -31,7 +30,7 @@ export const EmojiPicker = ({ onEmojiSelect, children, asChild }: EmojiPickerPro
 
   return (
     <Popover>
-      <PopoverTrigger asChild={asChild}>{children}</PopoverTrigger>
+      <PopoverTrigger asChild>{children}</PopoverTrigger>
       <PopoverContent className="w-full border-none p-0 shadow-none">
         <EmojiPickerReact
           style={customStyles}
