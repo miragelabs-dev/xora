@@ -38,14 +38,14 @@ export const postRouter = createTRPCRouter({
       const baseQuery = ctx.db
         .select()
         .from(postView)
-        .orderBy(desc(sql`COALESCE(${postView.repostCreatedAt}, ${postView.createdAt})`));
+        .orderBy(desc(sql`COALESCE(${postView.repostedAt}, ${postView.createdAt})`));
 
       const conditions = [];
 
       if (type === 'user' && userId) {
         const userPostsCondition = sql`(
-          (${postView.authorId} = ${userId} AND ${postView.replyToId} IS NULL AND ${postView.reposterId} IS NULL) OR 
-          (${postView.reposterId} = ${userId} AND ${postView.replyToId} IS NULL)
+          (${postView.authorId} = ${userId} AND ${postView.replyToId} IS NULL AND ${postView.repostedById} IS NULL) OR 
+          (${postView.repostedById} = ${userId} AND ${postView.replyToId} IS NULL)
         )`;
         conditions.push(userPostsCondition);
       }

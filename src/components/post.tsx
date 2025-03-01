@@ -18,7 +18,7 @@ import { CryptoPriceTag } from "./crypto-price-tag";
 import { ImageLightbox } from "./image-lightbox";
 import { PostActions } from "./post-actions";
 
-type ReplyPostView = Omit<PostView, 'replyTo' | 'replyToId' | 'repost' | 'reposterId' | 'repostCreatedAt'>;
+type ReplyPostView = Omit<PostView, 'replyTo' | 'replyToId' | 'repostedUsername' | 'repostedById' | 'repostedAt'>;
 
 interface PostProps {
   post: PostView | ReplyPostView;
@@ -29,7 +29,7 @@ interface PostProps {
 }
 
 function isFullPost(post: PostView | ReplyPostView): post is PostView {
-  return 'replyTo' in post && 'repost' in post;
+  return 'replyTo' in post && 'repostedUsername' in post;
 }
 
 export function Post({
@@ -105,16 +105,16 @@ export function Post({
           }
         )}
       >
-        {isFullPostView && post.repost && (
+        {isFullPostView && post.repostedUsername && (
           <div className="ml-2 top-[-8px] relative flex items-center gap-1 px-4 pt-2 text-xs text-muted-foreground">
             <Repeat2 className="h-4 w-4" />
             <span>
               <Link
-                href={`/${post.repost.user.username}`}
+                href={`/${post.repostedUsername}`}
                 className="relative z-10 hover:underline"
                 data-no-navigate
               >
-                @{post.repost.user.username}
+                @{post.repostedUsername}
               </Link>
               {" "}reposted
             </span>
