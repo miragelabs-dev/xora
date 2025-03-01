@@ -5,15 +5,15 @@ import { Logo } from "@/components/icons/logo";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetClose, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { cn } from "@/lib/utils";
+import { cn, copyToClipboard } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { LogOut, Menu, MoreHorizontal, PenSquare } from "lucide-react";
+import { CopyIcon, LogOut, Menu, MoreHorizontal, PenSquare } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { toast } from "sonner";
 import { useLogout } from "../hooks/use-logout";
 import { useNavbarMenu } from "../hooks/use-navbar-menu";
 import { UserAvatar } from "./user-avatar";
-
 function LogoutMenuItem({ className }: { className?: string }) {
   const handleLogout = useLogout();
 
@@ -108,7 +108,7 @@ export function Navbar() {
               </motion.div>
 
               <motion.div
-                className="flex flex-col gap-2"
+                className="flex flex-col gap-2 flex-1"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.4, delay: 0.2 }}
@@ -177,6 +177,49 @@ export function Navbar() {
                   </Button>
                 </motion.div>
               </motion.div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="justify-start gap-3 h-auto">
+                    <UserAvatar
+                      src={user.image}
+                      fallback={user.username}
+                      className="h-9 w-9"
+                    />
+                    <div className="text-left space-y-0.5">
+                      <div className="hidden text-base font-semibold leading-5 xl:inline">
+                        {user.username}
+                      </div>
+                      <div className="text-muted-foreground flex items-center gap-2">
+                        <div>
+                          {user.address.slice(0, 6)}...{user.address.slice(-4)}
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-4 w-4"
+                          onPointerDown={(e) => {
+                            e.stopPropagation();
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            copyToClipboard(user.address);
+
+                            toast.success("Address copied to clipboard");
+                          }}
+                        >
+                          <CopyIcon className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-[180px]">
+                  <div>
+
+                  </div>
+                  <LogoutMenuItem />
+                </DropdownMenuContent>
+              </DropdownMenu>
             </nav>
           </div>
         </div>
