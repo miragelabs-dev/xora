@@ -4,9 +4,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { UserAvatar } from "@/components/user-avatar";
 import { VerifiedBadge } from "@/components/verified-badge";
 import { PostView } from "@/lib/db/schema/post-view";
-import { cn } from "@/lib/utils";
+import { cn, convertToLocalTime } from "@/lib/utils";
 import { api } from "@/utils/api";
-import { formatDistanceToNow } from "date-fns";
 import { Loader2, MoreHorizontal, Repeat2, Trash } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -177,7 +176,7 @@ export function Post({
                   <VerifiedBadge className="ml-1 inline-block" />
                 )}
                 <span className="ml-2 text-muted-foreground">· {
-                  formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })
+                  convertToLocalTime(post.createdAt)
                 }</span>
               </div>
 
