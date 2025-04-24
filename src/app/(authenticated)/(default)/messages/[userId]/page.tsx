@@ -9,13 +9,14 @@ export default async function Page({
   params: Params;
 }) {
   const { userId } = await params;
+  const userIdNumber = parseInt(userId);
 
   return (
     <>
       <div className="hidden md:block">
         <ConversationList />
       </div>
-      <ChatArea userId={parseInt(userId)} />
+      <ChatArea userId={userIdNumber} />
     </>
   );
 } 

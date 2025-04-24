@@ -1,5 +1,5 @@
 import { useSession } from "@/app/session-provider";
-import { Bell, Bookmark, Home, Library, MessageCircle, User } from "lucide-react";
+import { Bell, Bookmark, Home, Library, MessageCircle, Trophy, User } from "lucide-react";
 import { useUnreadMessages } from "./use-unread-messages";
 import { useUnreadNotifications } from "./use-unread-notifications";
 
@@ -19,6 +19,11 @@ export function useNavbarMenu() {
       name: "NFT Collections",
       link: "/nft-collections",
       icon: Library,
+    },
+    {
+      name: "Leaderboard",
+      link: "/leaderboard",
+      icon: Trophy,
     },
     {
       name: "Notifications",
