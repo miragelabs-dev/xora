@@ -1,8 +1,8 @@
 'use client';
 
 import { Button } from "@/components/ui/button";
-import { PostView } from "@/lib/db/schema";
 import { cn } from "@/lib/utils";
+import { EnrichedPost, ReplyEnrichedPost } from "@/server/utils/enrich-posts";
 import { api } from "@/utils/api";
 import { Bookmark, Heart, MessageCircle, Repeat2 } from "lucide-react";
 import Link from "next/link";
@@ -10,37 +10,24 @@ import React, { JSX, useState } from "react";
 import { MintNFTModal } from "./mint-nft-modal";
 import { ShareButton } from "./share-button";
 
-interface PostStats {
-  repliesCount: number;
-  repostsCount: number;
-  likesCount: number;
-  savesCount: number;
-}
-
-interface PostInteractions {
-  isLiked: boolean;
-  isReposted: boolean;
-  isSaved: boolean;
-  isOwner: boolean;
-}
-
 interface PostActionsProps {
-  postId: number;
-  nft: PostView['nft'];
-  stats: PostStats;
-  interactions: PostInteractions;
-  authorUsername: string;
+  post: EnrichedPost | ReplyEnrichedPost;
   className?: string;
 }
 
-export function PostActions({ postId, nft, stats, interactions, authorUsername, className }: PostActionsProps) {
+export function PostActions({ post, className }: PostActionsProps) {
   const utils = api.useUtils();
 
-  const [optimisticInteractions, setOptimisticInteractions] = useState(interactions);
+  const [optimisticInteractions, setOptimisticInteractions] = useState({
+    isLiked: post.isLiked,
+    isReposted: post.isReposted,
+    isSaved: post.isSaved,
+    isOwner: post.isOwner,
+  });
   const [optimisticStats, setOptimisticStats] = useState({
-    likesCount: Number(stats.likesCount),
-    repostsCount: Number(stats.repostsCount),
-    savesCount: Number(stats.savesCount),
+    likesCount: Number(post.likeCount),
+    repostsCount: Number(post.repostCount),
+    savesCount: Number(post.saveCount),
   });
   const [loadingStates, setLoadingStates] = useState({
     isLikeLoading: false,
@@ -51,7 +38,7 @@ export function PostActions({ postId, nft, stats, interactions, authorUsername, 
 
   const invalidateQueries = () => {
     utils.post.feed.invalidate();
-    utils.post.getById.invalidate({ postId });
+    utils.post.getById.invalidate({ postId: post.id });
     utils.post.bookmarks.invalidate();
     utils.post.getReplies.invalidate();
   };
@@ -169,11 +156,11 @@ export function PostActions({ postId, nft, stats, interactions, authorUsername, 
         className={cn("mt-2 flex justify-between gap-4 items-center text-muted-foreground", className)}
         data-no-navigate
       >
-        <div className="flex-1 flex justify-between flex-2">
-          <Link href={`/${authorUsername}/status/${postId}`} className="gap-2">
+        <div className="flex-1 flex justify-between max-w-[300px]">
+          <Link href={`/${post.authorUsername}/status/${post.id}`} className="gap-2">
             {renderActionButton(
               <MessageCircle />,
-              stats.repliesCount,
+              Number(post.replyCount),
               false,
               false,
               (e) => e.stopPropagation(),
@@ -189,7 +176,7 @@ export function PostActions({ postId, nft, stats, interactions, authorUsername, 
             (e) => {
               e.preventDefault();
               if (!loadingStates.isRepostLoading) {
-                void (optimisticInteractions.isReposted ? unrepost({ postId }) : repost({ postId }));
+                void (optimisticInteractions.isReposted ? unrepost({ postId: post.id }) : repost({ postId: post.id }));
               }
             },
             "text-green-500"
@@ -203,7 +190,7 @@ export function PostActions({ postId, nft, stats, interactions, authorUsername, 
             (e) => {
               e.preventDefault();
               if (!loadingStates.isLikeLoading) {
-                void (optimisticInteractions.isLiked ? unlike({ postId }) : like({ postId }));
+                void (optimisticInteractions.isLiked ? unlike({ postId: post.id }) : like({ postId: post.id }));
               }
             },
             "text-red-500"
@@ -217,7 +204,7 @@ export function PostActions({ postId, nft, stats, interactions, authorUsername, 
             (e) => {
               e.preventDefault();
               if (!loadingStates.isSaveLoading) {
-                void (optimisticInteractions.isSaved ? unsave({ postId }) : save({ postId }));
+                void (optimisticInteractions.isSaved ? unsave({ postId: post.id }) : save({ postId: post.id }));
               }
             },
             "text-blue-500"
@@ -225,8 +212,8 @@ export function PostActions({ postId, nft, stats, interactions, authorUsername, 
         </div>
 
         <>
-          {nft ? (
-            <Link href={`/nft-collections/${nft?.collectionId}`}>
+          {post.nftTokenId ? (
+            <Link href={`/nft-collections/${post.nftCollectionId}`}>
               <Button
                 variant="ghost"
                 size="sm"
@@ -251,7 +238,7 @@ export function PostActions({ postId, nft, stats, interactions, authorUsername, 
                 </span>
               </Button>
             </Link>
-          ) : interactions.isOwner && (
+          ) : post.isOwner && (
             <Button
               variant="ghost"
               size="sm"
@@ -279,19 +266,19 @@ export function PostActions({ postId, nft, stats, interactions, authorUsername, 
           )}
         </>
         <ShareButton
-          url={`${window.location.origin}/${authorUsername}/status/${postId}`}
+          url={`${window.location.origin}/${post.authorUsername}/status/${post.id}`}
           successMessage="Post URL copied to clipboard"
           className="gap-2 py-0 hover:bg-transparent"
         />
       </div>
 
       <MintNFTModal
-        postId={postId}
+        postId={post.id}
         isOpen={isMintModalOpen}
         onClose={() => setIsMintModalOpen(false)}
         onSuccess={() => {
           utils.post.feed.invalidate();
-          utils.post.getById.invalidate({ postId });
+          utils.post.getById.invalidate({ postId: post.id });
         }}
       />
     </>

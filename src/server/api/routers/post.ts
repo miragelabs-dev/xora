@@ -1,9 +1,10 @@
 import { follows, likes, posts, reposts, saves, users } from "@/lib/db/schema";
-import { postView } from "@/lib/db/schema/post-view";
 import { setUserId } from "@/server/utils/db";
+import { enrichPosts, enrichReplyTo } from "@/server/utils/enrich-posts";
+import { getAllPostQuery } from "@/server/utils/get-all-post-query";
 import { createNotification, deleteNotification } from "@/server/utils/notifications";
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, isNull, lt, sql } from "drizzle-orm";
+import { and, desc, eq, lt, sql } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
@@ -28,24 +29,19 @@ export const postRouter = createTRPCRouter({
       type: z.enum(["for-you", "following", "user", "replies", "interests"]).default("for-you"),
       userId: z.number().optional(),
       limit: z.number().min(1).max(100).default(20),
-      cursor: z.number().nullish(),
+      cursor: z.number().default(0),
     }))
     .query(async ({ ctx, input }) => {
       const { type, limit, cursor, userId } = input;
 
-      await setUserId(ctx.db, ctx.session?.user?.id);
-
-      const baseQuery = ctx.db
-        .select()
-        .from(postView)
-        .orderBy(desc(sql`COALESCE(${postView.repostedAt}, ${postView.createdAt})`));
+      const sessionUserId = ctx.session?.user?.id ?? 0;
 
       const conditions = [];
 
       if (type === 'user' && userId) {
         const userPostsCondition = sql`(
-          (${postView.authorId} = ${userId} AND ${postView.replyToId} IS NULL AND ${postView.repostedById} IS NULL) OR 
-          (${postView.repostedById} = ${userId} AND ${postView.replyToId} IS NULL)
+          (${posts.authorId} = ${userId} AND ${posts.replyToId} IS NULL AND ${reposts.id} IS NULL) OR 
+          (${reposts.userId} = ${userId} AND ${posts.replyToId} IS NULL)
         )`;
         conditions.push(userPostsCondition);
       }
@@ -62,12 +58,12 @@ export const postRouter = createTRPCRouter({
             )
           );
 
-        conditions.push(sql`${postView.authorId} IN (${subquery})`);
+        conditions.push(sql`${posts.authorId} IN (${subquery})`);
       }
 
       if (type === 'replies' && userId) {
-        conditions.push(eq(postView.authorId, userId));
-        conditions.push(sql`${postView.replyToId} IS NOT NULL`);
+        conditions.push(eq(posts.authorId, userId));
+        conditions.push(sql`${posts.replyToId} IS NOT NULL`);
       }
 
       if (type === 'following') {
@@ -82,22 +78,25 @@ export const postRouter = createTRPCRouter({
             )
           );
 
-        conditions.push(sql`${postView.authorId} IN (${subquery})`);
+        conditions.push(sql`${posts.authorId} IN (${subquery})`);
       }
 
-      if (cursor) {
-        conditions.push(lt(postView.id, cursor));
-      }
-
-      const items = await baseQuery
+      const results = await getAllPostQuery()
         .where(and(...conditions))
-        .limit(limit + 1);
+        .orderBy(desc(sql`COALESCE(${reposts.createdAt}, ${posts.createdAt})`))
+        .limit(limit + 1)
+        .offset(cursor);
 
-      let nextCursor: typeof cursor = undefined;
-      if (items.length > limit) {
-        const nextItem = items.pop();
-        nextCursor = nextItem!.id;
+
+      let nextCursor: number | null = null;
+
+      if (results.length > limit) {
+        results.pop();
+        nextCursor = input.cursor + input.limit;
       }
+
+      const enriched = await enrichPosts(results, sessionUserId);
+      const items = await enrichReplyTo(enriched, sessionUserId);
 
       return {
         items,
@@ -232,15 +231,11 @@ export const postRouter = createTRPCRouter({
     .input(z.object({
       postId: z.number(),
     }))
-    .query(async ({ ctx, input }) => {
-      await setUserId(ctx.db, ctx.session?.user?.id);
-
-      const post = await ctx.db.select()
-        .from(postView)
+    .query(async ({ input }) => {
+      const post = await getAllPostQuery()
         .where(
           and(
-            eq(postView.id, input.postId),
-            isNull(postView.repostedById)
+            eq(posts.id, input.postId),
           )
         );
 
@@ -251,7 +246,8 @@ export const postRouter = createTRPCRouter({
         });
       }
 
-      return post[0];
+      const enriched = await enrichPosts([post[0]], 0);
+      return (await enrichReplyTo(enriched, 0))[0];
     }),
 
   save: protectedProcedure
@@ -297,14 +293,20 @@ export const postRouter = createTRPCRouter({
     .query(async ({ ctx }) => {
       await setUserId(ctx.db, ctx.session.user.id);
 
-      const posts = await ctx.db
-        .select()
-        .from(postView)
-        .innerJoin(saves, eq(saves.postId, postView.id))
+      const results = await getAllPostQuery()
+        .innerJoin(saves, eq(saves.postId, posts.id))
         .where(eq(saves.userId, ctx.session.user.id))
-        .orderBy(desc(postView.createdAt));
+        .orderBy(desc(posts.createdAt));
 
-      return posts.map(({ post_view: post }) => post);
+      const enriched = await enrichPosts(results, ctx.session.user.id);
+      const items = await enrichReplyTo(enriched, ctx.session.user.id);
+
+      return items.map(item => ({
+        ...item,
+        repostedUsername: null,
+        repostId: null,
+        repostCount: null
+      }));
     }),
 
   reply: protectedProcedure
@@ -346,27 +348,29 @@ export const postRouter = createTRPCRouter({
     .input(z.object({
       postId: z.number(),
       limit: z.number().min(1).max(100).default(20),
-      cursor: z.number().nullish(),
+      cursor: z.number().default(0),
     }))
     .query(async ({ ctx, input }) => {
       await setUserId(ctx.db, ctx.session?.user?.id);
 
-      const items = await ctx.db
-        .select()
-        .from(postView)
+      const results = await getAllPostQuery()
         .where(
           and(
-            eq(postView.replyToId, input.postId),
-            input.cursor ? lt(postView.id, input.cursor) : undefined
+            eq(posts.replyToId, input.postId),
+            input.cursor ? lt(posts.id, input.cursor) : undefined
           )
         )
-        .orderBy(desc(postView.createdAt))
-        .limit(input.limit + 1);
+        .orderBy(desc(posts.createdAt))
+        .limit(input.limit + 1)
+        .offset(input.cursor);
 
-      let nextCursor: typeof input.cursor = undefined;
+      const enriched = await enrichPosts(results, 0);
+      const items = await enrichReplyTo(enriched, 0);
+      let nextCursor: number | null = null;
+
       if (items.length > input.limit) {
-        const nextItem = items.pop();
-        nextCursor = nextItem!.id;
+        items.pop();
+        nextCursor = input.cursor + input.limit;
       }
 
       return {
@@ -393,7 +397,7 @@ export const postRouter = createTRPCRouter({
         .groupBy(sql`substring(${posts.content} from '#([A-Za-z0-9_]+)')`)
         .having(sql`substring(${posts.content} from '#([A-Za-z0-9_]+)') IS NOT NULL`)
         .orderBy(sql`count(*) DESC`)
-        .limit(input.limit);
+        .limit(input.limit + 1);
 
       return hashtags.map(({ tag, count }) => ({
         tag,
@@ -405,26 +409,29 @@ export const postRouter = createTRPCRouter({
     .input(z.object({
       query: z.string(),
       limit: z.number().min(1).max(100).default(20),
-      cursor: z.number().nullish(),
+      cursor: z.number().default(0),
     }))
     .query(async ({ ctx, input }) => {
       await setUserId(ctx.db, ctx.session.user.id);
 
-      const items = await ctx.db
-        .select()
-        .from(postView)
+      const results = await getAllPostQuery()
         .where(
           input.query.startsWith('#')
-            ? sql`${postView.content} ~* ${input.query.toLowerCase().replace('#', '#[A-Za-z0-9_]*')}`
-            : sql`${postView.content} ~* ${input.query}`
+            ? sql`${posts.content} ~* ${input.query.toLowerCase().replace('#', '#[A-Za-z0-9_]*')}`
+            : sql`${posts.content} ~* ${input.query}`
         )
-        .orderBy(desc(postView.createdAt))
-        .limit(input.limit + 1);
+        .orderBy(desc(posts.createdAt))
+        .limit(input.limit + 1)
+        .offset(input.cursor);
 
-      let nextCursor: typeof input.cursor = undefined;
+      const enriched = await enrichPosts(results, ctx.session.user.id);
+      const items = await enrichReplyTo(enriched, ctx.session.user.id);
+
+      let nextCursor: number | null = null;
+
       if (items.length > input.limit) {
-        const nextItem = items.pop();
-        nextCursor = nextItem!.id;
+        items.pop();
+        nextCursor = input.cursor + input.limit;
       }
 
       return {
