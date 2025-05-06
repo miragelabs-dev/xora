@@ -14,7 +14,7 @@ export const SessionContext = createContext<Session>(
   initialState
 );
 
-const PRIVATE_ROUTES = ['/home', '/messages', '/notifications', '/profile', '/settings'];
+const PRIVATE_ROUTES = ['/messages', '/notifications', '/profile', '/settings'];
 
 export function SessionProvider({ children }: {
   children: React.ReactNode
