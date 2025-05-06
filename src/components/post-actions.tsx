@@ -247,7 +247,7 @@ export function PostActions({ postId, nft, stats, interactions, authorUsername, 
                       d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
                     />
                   </svg>
-                  NFT Minted
+                  <span className="hidden sm:block">NFT Minted</span>
                 </span>
               </Button>
             </Link>
@@ -273,7 +273,7 @@ export function PostActions({ postId, nft, stats, interactions, authorUsername, 
                     d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                   />
                 </svg>
-                Mint NFT
+                <span className="hidden sm:block">Mint NFT</span>
               </span>
             </Button>
           )}
