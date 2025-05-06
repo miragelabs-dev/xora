@@ -15,7 +15,7 @@ export function MentionSuggestions({
   isOpen,
   onClose,
 }: MentionSuggestionsProps) {
-  const { data: users, isLoading } = api.user.search.useQuery(
+  const { data: users } = api.user.search.useQuery(
     { query: query.slice(1), limit: 5 },
     { enabled: isOpen && query.length > 1 }
   );

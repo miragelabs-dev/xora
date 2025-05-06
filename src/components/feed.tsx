@@ -36,7 +36,7 @@ export function Feed({ type = 'for-you', userId, searchQuery }: FeedProps) {
       ? api.post.search.useInfiniteQuery(
         {
           query: searchQuery || '',
-          limit: 20,
+          limit: 10,
         },
         {
           getNextPageParam: (lastPage) => lastPage.nextCursor,
@@ -47,7 +47,7 @@ export function Feed({ type = 'for-you', userId, searchQuery }: FeedProps) {
         {
           type,
           userId,
-          limit: 20,
+          limit: 10,
         },
         {
           getNextPageParam: (lastPage) => lastPage.nextCursor,

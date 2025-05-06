@@ -1,41 +1,43 @@
 'use client';
 
 import { Loading } from "@/components/ui/loading";
-import { User } from "@/lib/db/schema";
 import { Session } from "@/types";
 import { api } from "@/utils/api";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { createContext, useContext, useEffect } from "react";
 
 const initialState = {
-  user: {} as User
+  user: undefined
 }
 
 export const SessionContext = createContext<Session>(
   initialState
 );
 
+const PRIVATE_ROUTES = ['/home', '/messages', '/notifications', '/profile', '/settings'];
+
 export function SessionProvider({ children }: {
   children: React.ReactNode
 }) {
-  const router = useRouter();
+  const { data: user, isLoading } = api.auth.me.useQuery();
 
-  const { data: user, isLoading, isSuccess } = api.auth.me.useQuery();
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
-    if (!isLoading && !isSuccess) {
+    if (!isLoading && !user && PRIVATE_ROUTES.includes(pathname)) {
       // TODO: redirect to login page
       router.push('/?redirected=true');
     }
-  }, [isLoading, isSuccess, router]);
+  }, [isLoading, user, router]);
 
   if (isLoading) {
     return <Loading message="Entering the crypto universe..." />;
   }
 
-  if (!isSuccess) {
-    return <Loading message="Redirecting to login..." />;
-  }
+  // if (!isSuccess) {
+  //   return <Loading message="Redirecting to login..." />;
+  // }
 
   return <SessionContext.Provider value={{
     user,

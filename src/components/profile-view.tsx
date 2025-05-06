@@ -15,6 +15,7 @@ export function ProfileView({
 }: {
   username: string;
 }) {
+  api.user.updateTransactionCount.useQuery({ userUsername: username });
   const [activeTab, setActiveTab] = useState<'posts' | 'replies' | 'nft-collections'>('posts');
 
   const { data: profile, isLoading } = api.user.getProfileByUsername.useQuery({
@@ -25,6 +26,7 @@ export function ProfileView({
     return <ProfileSkeleton />;
   }
 
+  console.log({ profile })
   if (!profile) {
     return notFound();
   }

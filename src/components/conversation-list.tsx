@@ -75,7 +75,7 @@ export function ConversationList() {
         <div className="space-y-2 p-2">
           {conversations.items.map((conversation) => {
             const isActive = params?.userId === conversation.recipient.id.toString();
-            const anotherUser = conversation.recipient.id !== user.id ? conversation.recipient : conversation.initiator;
+            const anotherUser = conversation.recipient.id !== user?.id ? conversation.recipient : conversation.initiator;
 
             return (
               <Link

@@ -4,15 +4,17 @@ import { EditProfileDialog } from "@/components/edit-profile-dialog";
 import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/user-avatar";
 import { VerifiedBadge } from "@/components/verified-badge";
+import { useKeplrWallet } from "@/contexts/keplr-context";
 import { cn } from "@/lib/utils";
 import type { ProfileResponse } from "@/server/api/routers/user";
 import { api } from "@/utils/api";
 import { format } from "date-fns";
-import { CalendarIcon, MessageCircle } from "lucide-react";
+import { BadgeCheckIcon, CalendarIcon, MessageCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 
 interface ProfileHeaderProps {
   profile: ProfileResponse;
@@ -39,15 +41,17 @@ export function ProfileHeader({
     },
   });
 
-  const { mutate: sendMessage } = api.message.sendMessage.useMutation({
-    onSuccess: () => {
-      router.push('/messages');
-    },
-  });
-
   const handleMessageClick = () => {
     router.push(`/messages/${profile.id}`);
   };
+
+  const { connectKeplrWallet } = useKeplrWallet();
+
+  const updateWalletAddress = api.user.updateWalletAddress.useMutation({
+    onSuccess: () => {
+      utils.user.getProfileByUsername.invalidate({ username: profile.username });
+    },
+  });
 
   return (
     <>
@@ -107,6 +111,47 @@ export function ProfileHeader({
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-bold">{`@${profile.username}`}</h1>
+              {profile.walletAddress ? (
+                <TooltipProvider delayDuration={0}>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <div className="flex items-center py-1 gap-1 bg-primary/30 hover:bg-primary/15 transition-colors rounded-full pl-2 pr-2.5 py-0.5">
+                        <BadgeCheckIcon className="size-4 text-primary" />
+                        <span className="text-xs text-muted-foreground">
+                          {profile.transactionsCount ? profile.transactionsCount * 10 : 0} interop score
+                        </span>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent className="space-y-1">
+                      <b>Celestia network</b>
+                      <div>
+                        {profile.walletAddress.slice(0, 6)}...{profile.walletAddress.slice(-4)}
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              ) : profile.isCurrentUser ? (
+                <Button
+                  type="button"
+                  size='sm'
+                  disabled={
+                    updateWalletAddress.isPending
+                  }
+                  className="bg-transparent border border-primary"
+                  onClick={async () => {
+                    try {
+                      const address = await connectKeplrWallet();
+                      await updateWalletAddress.mutateAsync({
+                        walletAddress: address
+                      });
+                    } catch (error) {
+                      console.error(error);
+                    }
+                  }}
+                >
+                  Connect wallet
+                </Button>
+              ) : <></>}
               {profile.isCryptoBot ? (
                 <div className="animate-in zoom-in duration-300 flex items-center">
                   <div className="flex items-center gap-1.5 bg-primary/10 hover:bg-primary/15 transition-colors rounded-full pl-2 pr-2.5 py-0.5">

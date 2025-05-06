@@ -1,5 +1,6 @@
 'use client';
 
+import { useSession } from "@/app/session-provider";
 import { TopCryptoAccounts } from "@/components/top-crypto-accounts";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -60,6 +61,7 @@ export function RightSidebar() {
   const searchRef = useRef<HTMLDivElement>(null);
   const debouncedQuery = useDebounce(searchQuery, 300);
   const router = useRouter();
+  const { user } = useSession();
 
   const { data: searchResults, isLoading: isSearching } = api.user.search.useQuery(
     { query: debouncedQuery, limit: 5 },
@@ -162,30 +164,37 @@ export function RightSidebar() {
           </div>
         </Card>
 
-        <div className="rounded-xl bg-muted/50 p-4">
-          <h2 className="mb-4 text-xl font-bold">Who to follow</h2>
-          <div className="space-y-4">
-            {isSuggestionsLoading ? (
-              <>
-                <UserSuggestionSkeleton />
-                <UserSuggestionSkeleton />
-                <UserSuggestionSkeleton />
-                <UserSuggestionSkeleton />
-                <UserSuggestionSkeleton />
-              </>
-            ) : suggestions?.length === 0 ? (
-              <div className="text-center text-sm text-muted-foreground">
-                No suggestions available
-              </div>
-            ) : (
-              suggestions?.map((user) => (
-                <UserSuggestion key={user.id} user={user} />
-              ))
-            )}
-          </div>
-        </div>
+        {
+          user && (
+            <>
 
-        <TopCryptoAccounts />
+              <div className="rounded-xl bg-muted/50 p-4">
+                <h2 className="mb-4 text-xl font-bold">Who to follow</h2>
+                <div className="space-y-4">
+                  {isSuggestionsLoading ? (
+                    <>
+                      <UserSuggestionSkeleton />
+                      <UserSuggestionSkeleton />
+                      <UserSuggestionSkeleton />
+                      <UserSuggestionSkeleton />
+                      <UserSuggestionSkeleton />
+                    </>
+                  ) : suggestions?.length === 0 ? (
+                    <div className="text-center text-sm text-muted-foreground">
+                      No suggestions available
+                    </div>
+                  ) : (
+                    suggestions?.map((user) => (
+                      <UserSuggestion key={user.id} user={user} />
+                    ))
+                  )}
+                </div>
+              </div>
+              <TopCryptoAccounts />
+            </>
+          )
+        }
+
       </div>
     </aside>
   );

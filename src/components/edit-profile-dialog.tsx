@@ -153,7 +153,7 @@ export function EditProfileDialog({
       username: data.username,
       bio: data.bio || null,
       image: data.image || null,
-      cover: data.cover || null
+      cover: data.cover || null,
     });
   };
 
@@ -279,7 +279,7 @@ export function EditProfileDialog({
             <DialogFooter>
               <Button
                 type="submit"
-                disabled={isPending || isUploading || isUploadingCover || !form.formState.isDirty}
+                disabled={isPending || isUploading || isUploadingCover}
               >
                 {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Save changes

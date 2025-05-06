@@ -1,3 +1,4 @@
+import { getCelestiaTransactionCount } from "@/lib/celestia";
 import { follows, likes, posts, reposts, saves, users } from "@/lib/db/schema";
 import { createNotification, deleteNotification } from "@/server/utils/notifications";
 import { TRPCError } from "@trpc/server";
@@ -175,7 +176,6 @@ export const userRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        // Check if username is already taken
         const existingUser = await ctx.db.query.users.findFirst({
           where: and(
             eq(users.username, input.username),
@@ -220,7 +220,42 @@ export const userRouter = createTRPCRouter({
       }
     }),
 
-  getProfileByUsername: protectedProcedure
+  updateWalletAddress: protectedProcedure
+    .input(
+      z.object({
+        walletAddress: z.string().nullable(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const updatedUser = await ctx.db
+          .update(users)
+          .set({
+            walletAddress: input.walletAddress,
+          })
+          .where(eq(users.id, ctx.session.user.id))
+          .returning();
+
+        if (!updatedUser[0]) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "User not found"
+          });
+        }
+
+        return updatedUser[0];
+      } catch (error) {
+        if (error instanceof TRPCError) throw error;
+
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Something went wrong. Please try again later"
+        });
+      }
+    }),
+
+
+  getProfileByUsername: publicProcedure
     .input(z.object({
       username: z.string(),
     }))
@@ -248,19 +283,25 @@ export const userRouter = createTRPCRouter({
         .from(follows)
         .where(eq(follows.followerId, user.id));
 
-      const isFollowing = await ctx.db.query.follows.findFirst({
-        where: and(
-          eq(follows.followerId, ctx.session.user.id),
-          eq(follows.followingId, user.id)
-        ),
-      });
+      let isFollowing: boolean | undefined;
+
+      if (ctx.session?.user?.id) {
+        const following = await ctx.db.query.follows.findFirst({
+          where: and(
+            eq(follows.followerId, ctx.session.user.id),
+            eq(follows.followingId, user.id)
+          ),
+        });
+
+        isFollowing = !!following;
+      }
 
       return {
         ...user,
         followersCount: followersCount[0].value,
         followingCount: followingCount[0].value,
         postsCount: postsCountResult[0].value,
-        isCurrentUser: user.address === ctx.session.user.address,
+        isCurrentUser: user.address === ctx.session?.user?.address,
         isFollowing: !!isFollowing,
       };
     }),
@@ -349,7 +390,7 @@ export const userRouter = createTRPCRouter({
       };
     }),
 
-  getTopCryptoAccounts: protectedProcedure
+  getTopCryptoAccounts: publicProcedure
     .query(async ({ ctx }) => {
       if (!ctx.session?.user?.id) {
         throw new TRPCError({
@@ -401,5 +442,38 @@ export const userRouter = createTRPCRouter({
       }
 
       return user;
+    }),
+
+  updateTransactionCount: publicProcedure
+    .input(z.object({
+      userUsername: z.string(),
+    }))
+    .query(async ({ ctx, input }) => {
+      const user = await ctx.db.query.users.findFirst({
+        where: eq(users.username, input.userUsername),
+      });
+
+      if (!user) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      if (!user.walletAddress) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "User has no wallet address"
+        });
+      }
+
+      const transactionCount = await getCelestiaTransactionCount(user.walletAddress);
+
+      await ctx.db
+        .update(users)
+        .set({
+          transactionsCount: transactionCount,
+          updatedAt: new Date(),
+        })
+        .where(eq(users.id, user.id));
+
+      return { success: true };
     }),
 }); 

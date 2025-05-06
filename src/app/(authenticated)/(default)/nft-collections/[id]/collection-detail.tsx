@@ -104,7 +104,7 @@ export function CollectionDetail({ collectionId }: CollectionDetailProps) {
     }
   );
 
-  const isOwner = useSession().user.id === collection?.creator.id;
+  const isOwner = useSession().user?.id === collection?.creator.id;
 
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {

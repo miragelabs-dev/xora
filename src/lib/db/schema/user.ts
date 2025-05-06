@@ -11,6 +11,8 @@ export const users = pgTable("users", {
   cover: varchar("cover"),
   isVerified: boolean("is_verified").default(false).notNull(),
   isCryptoBot: boolean("is_crypto_bot").default(false).notNull(),
+  walletAddress: text("wallet_address"),
+  transactionsCount: integer("transactions_count").default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

@@ -142,84 +142,88 @@ export function Navbar() {
                   </motion.div>
                 ))}
 
-                <DropdownMenu>
+                {user && <>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className={cn(
+                        "flex w-full items-center gap-3 rounded p-[10px] transition-colors xl:justify-start hover:bg-muted",
+                      )}>
+                        <MoreHorizontal size={24} />
+                        <span className="hidden text-base font-semibold leading-5 xl:inline">
+                          More
+                        </span>
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent side="right" align="start" className="w-[180px]">
+                      <LogoutMenuItem />
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.5 }}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                  >
+                    <Button
+                      asChild
+                      size='lg'
+                      className="mt-4 w-full rounded-full"
+                    >
+                      <Link href="/compose/post">
+                        <PenSquare className="size-5" />
+                        <span className="hidden xl:inline">Post</span>
+                      </Link>
+                    </Button>
+                  </motion.div>
+                </>}
+              </motion.div>
+              {
+                user && <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className={cn(
-                      "flex w-full items-center gap-3 rounded p-[10px] transition-colors xl:justify-start hover:bg-muted",
-                    )}>
-                      <MoreHorizontal size={24} />
-                      <span className="hidden text-base font-semibold leading-5 xl:inline">
-                        More
-                      </span>
-                    </button>
+                    <Button variant="ghost" className="justify-start gap-3 h-auto">
+                      <UserAvatar
+                        src={user.image}
+                        fallback={user.username}
+                        className="h-9 w-9"
+                      />
+                      <div className="text-left space-y-0.5">
+                        <div className="hidden text-base font-semibold leading-5 xl:inline">
+                          {user.username}
+                        </div>
+                        <div className="text-muted-foreground flex items-center gap-2">
+                          <div>
+                            {user.address.slice(0, 6)}...{user.address.slice(-4)}
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-4 w-4"
+                            onPointerDown={(e) => {
+                              e.stopPropagation();
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              copyToClipboard(user.address);
+
+                              toast.success("Address copied to clipboard");
+                            }}
+                          >
+                            <CopyIcon className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent side="right" align="start" className="w-[180px]">
+                  <DropdownMenuContent className="w-[180px]">
+                    <div>
+
+                    </div>
                     <LogoutMenuItem />
                   </DropdownMenuContent>
                 </DropdownMenu>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.5 }}
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                >
-                  <Button
-                    asChild
-                    size='lg'
-                    className="mt-4 w-full rounded-full"
-                  >
-                    <Link href="/compose/post">
-                      <PenSquare className="size-5" />
-                      <span className="hidden xl:inline">Post</span>
-                    </Link>
-                  </Button>
-                </motion.div>
-              </motion.div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="justify-start gap-3 h-auto">
-                    <UserAvatar
-                      src={user.image}
-                      fallback={user.username}
-                      className="h-9 w-9"
-                    />
-                    <div className="text-left space-y-0.5">
-                      <div className="hidden text-base font-semibold leading-5 xl:inline">
-                        {user.username}
-                      </div>
-                      <div className="text-muted-foreground flex items-center gap-2">
-                        <div>
-                          {user.address.slice(0, 6)}...{user.address.slice(-4)}
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-4 w-4"
-                          onPointerDown={(e) => {
-                            e.stopPropagation();
-                          }}
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            copyToClipboard(user.address);
-
-                            toast.success("Address copied to clipboard");
-                          }}
-                        >
-                          <CopyIcon className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-[180px]">
-                  <div>
-
-                  </div>
-                  <LogoutMenuItem />
-                </DropdownMenuContent>
-              </DropdownMenu>
+              }
             </nav>
           </div>
         </div>
@@ -247,15 +251,18 @@ export function Navbar() {
             </div>
           </Link>
         ))}
-        <Link
-          href="/compose/post"
-          className={cn(
-            "flex flex-1 items-center justify-center transition-colors hover:bg-muted/50",
-            pathname === '/compose/post' ? "text-primary" : "text-muted-foreground"
-          )}
-        >
-          <PenSquare size={20} />
-        </Link>
+
+        {
+          user && <Link
+            href="/compose/post"
+            className={cn(
+              "flex flex-1 items-center justify-center transition-colors hover:bg-muted/50",
+              pathname === '/compose/post' ? "text-primary" : "text-muted-foreground"
+            )}
+          >
+            <PenSquare size={20} />
+          </Link>
+        }
       </nav>
     </>
   );

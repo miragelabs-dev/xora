@@ -124,10 +124,10 @@ export function ChatArea({ userId }: ChatAreaProps) {
             messages.items.map((message) => (
               <div
                 key={message.id}
-                className={`flex ${message.sender.id === user.id ? "justify-end" : "justify-start"}`}
+                className={`flex ${message.sender.id === user?.id ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`relative max-w-[85%] space-y-1 rounded-2xl px-4 py-2.5 ${message.sender.id === user.id
+                  className={`relative max-w-[85%] space-y-1 rounded-2xl px-4 py-2.5 ${message.sender.id === user?.id
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted"
                     }`}
