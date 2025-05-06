@@ -1,5 +1,6 @@
 'use client';
 
+import { useSession } from "@/app/session-provider";
 import { Compose } from "@/components/compose";
 import { Feed } from "@/components/feed";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,6 +8,7 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 
 export function HomeView() {
+  const { user } = useSession();
   const [activeTab, setActiveTab] = useState<'for-you' | 'following' | 'interests'>('for-you');
 
   return (
@@ -21,9 +23,11 @@ export function HomeView() {
             <TabsTrigger value="for-you" className="flex-1">
               For You
             </TabsTrigger>
-            <TabsTrigger value="following" className="flex-1">
-              Following
-            </TabsTrigger>
+            {user && (
+              <TabsTrigger value="following" className="flex-1">
+                Following
+              </TabsTrigger>
+            )}
             <TabsTrigger value="interests" className="flex-1">
               Interests
             </TabsTrigger>

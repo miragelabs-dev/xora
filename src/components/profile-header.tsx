@@ -130,7 +130,7 @@ export function ProfileHeader({
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
-              ) : (
+              ) : profile.isCurrentUser ? (
                 <Button
                   type="button"
                   size='sm'
@@ -151,7 +151,7 @@ export function ProfileHeader({
                 >
                   Connect wallet
                 </Button>
-              )}
+              ) : <></>}
               {profile.isCryptoBot ? (
                 <div className="animate-in zoom-in duration-300 flex items-center">
                   <div className="flex items-center gap-1.5 bg-primary/10 hover:bg-primary/15 transition-colors rounded-full pl-2 pr-2.5 py-0.5">

@@ -269,18 +269,20 @@ export function Post({
 
       {showReplies && (
         <div className="border-t border-b border-border p-4">
-          <ComposeForm
-            user={user}
-            onSubmit={({ content, image }) => {
-              reply({
-                content,
-                image,
-                replyToId: post.id,
-              });
-            }}
-            placeholder="Tweet your reply"
-            submitLabel="Reply"
-          />
+          {user && (
+            <ComposeForm
+              user={user}
+              onSubmit={({ content, image }) => {
+                reply({
+                  content,
+                  image,
+                  replyToId: post.id,
+                });
+              }}
+              placeholder="Tweet your reply"
+              submitLabel="Reply"
+            />
+          )}
         </div>
       )}
 

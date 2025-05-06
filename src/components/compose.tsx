@@ -15,6 +15,10 @@ export function Compose({ onSuccess }: { onSuccess?: () => void }) {
     },
   });
 
+  if (!user) {
+    return null;
+  }
+
   return (
     <div className="p-3 sm:p-4 border-b">
       <ComposeForm

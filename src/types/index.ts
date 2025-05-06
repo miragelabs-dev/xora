@@ -1,7 +1,7 @@
 import { User } from "@/lib/db/schema";
 
 export type Session = {
-  user: User
+  user: User | undefined
 };
 
 export type NotificationType =

@@ -14,6 +14,8 @@ export const SessionContext = createContext<Session>(
   initialState
 );
 
+const PRIVATE_ROUTES = ['/home', '/messages', '/notifications', '/profile', '/settings'];
+
 export function SessionProvider({ children }: {
   children: React.ReactNode
 }) {
@@ -21,8 +23,6 @@ export function SessionProvider({ children }: {
 
   const router = useRouter();
   const pathname = usePathname();
-
-  const PRIVATE_ROUTES = ['/home', '/messages', '/notifications', '/profile', '/settings'];
 
   useEffect(() => {
     if (!isLoading && !user && PRIVATE_ROUTES.includes(pathname)) {

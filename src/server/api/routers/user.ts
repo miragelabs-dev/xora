@@ -255,7 +255,7 @@ export const userRouter = createTRPCRouter({
     }),
 
 
-  getProfileByUsername: protectedProcedure
+  getProfileByUsername: publicProcedure
     .input(z.object({
       username: z.string(),
     }))
@@ -283,19 +283,25 @@ export const userRouter = createTRPCRouter({
         .from(follows)
         .where(eq(follows.followerId, user.id));
 
-      const isFollowing = await ctx.db.query.follows.findFirst({
-        where: and(
-          eq(follows.followerId, ctx.session.user.id),
-          eq(follows.followingId, user.id)
-        ),
-      });
+      let isFollowing: boolean | undefined;
+
+      if (ctx.session?.user?.id) {
+        const following = await ctx.db.query.follows.findFirst({
+          where: and(
+            eq(follows.followerId, ctx.session.user.id),
+            eq(follows.followingId, user.id)
+          ),
+        });
+
+        isFollowing = !!following;
+      }
 
       return {
         ...user,
         followersCount: followersCount[0].value,
         followingCount: followingCount[0].value,
         postsCount: postsCountResult[0].value,
-        isCurrentUser: user.address === ctx.session.user.address,
+        isCurrentUser: user.address === ctx.session?.user?.address,
         isFollowing: !!isFollowing,
       };
     }),
@@ -384,7 +390,7 @@ export const userRouter = createTRPCRouter({
       };
     }),
 
-  getTopCryptoAccounts: protectedProcedure
+  getTopCryptoAccounts: publicProcedure
     .query(async ({ ctx }) => {
       if (!ctx.session?.user?.id) {
         throw new TRPCError({
@@ -438,7 +444,7 @@ export const userRouter = createTRPCRouter({
       return user;
     }),
 
-  updateTransactionCount: protectedProcedure
+  updateTransactionCount: publicProcedure
     .input(z.object({
       userUsername: z.string(),
     }))

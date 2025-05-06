@@ -5,7 +5,7 @@ import { createNotification, deleteNotification } from "@/server/utils/notificat
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, isNull, lt, sql } from "drizzle-orm";
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 export const postRouter = createTRPCRouter({
   create: protectedProcedure
@@ -23,7 +23,7 @@ export const postRouter = createTRPCRouter({
       return result;
     }),
 
-  feed: protectedProcedure
+  feed: publicProcedure
     .input(z.object({
       type: z.enum(["for-you", "following", "user", "replies", "interests"]).default("for-you"),
       userId: z.number().optional(),
@@ -33,7 +33,7 @@ export const postRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const { type, limit, cursor, userId } = input;
 
-      await setUserId(ctx.db, ctx.session.user.id);
+      await setUserId(ctx.db, ctx.session?.user?.id);
 
       const baseQuery = ctx.db
         .select()
@@ -58,7 +58,7 @@ export const postRouter = createTRPCRouter({
           .where(
             and(
               eq(users.isCryptoBot, true),
-              userId ? eq(follows.followerId, userId) : eq(follows.followerId, ctx.session.user.id)
+              userId ? eq(follows.followerId, userId) : ctx.session?.user?.id ? eq(follows.followerId, ctx.session.user.id) : undefined
             )
           );
 
@@ -77,7 +77,7 @@ export const postRouter = createTRPCRouter({
           .leftJoin(users, eq(follows.followingId, users.id))
           .where(
             and(
-              eq(follows.followerId, ctx.session.user.id),
+              ctx.session?.user?.id ? eq(follows.followerId, ctx.session.user.id) : undefined,
               eq(users.isCryptoBot, false)
             )
           );
@@ -228,12 +228,12 @@ export const postRouter = createTRPCRouter({
       });
     }),
 
-  getById: protectedProcedure
+  getById: publicProcedure
     .input(z.object({
       postId: z.number(),
     }))
     .query(async ({ ctx, input }) => {
-      await setUserId(ctx.db, ctx.session.user.id);
+      await setUserId(ctx.db, ctx.session?.user?.id);
 
       const post = await ctx.db.select()
         .from(postView)
@@ -342,14 +342,14 @@ export const postRouter = createTRPCRouter({
       return post;
     }),
 
-  getReplies: protectedProcedure
+  getReplies: publicProcedure
     .input(z.object({
       postId: z.number(),
       limit: z.number().min(1).max(100).default(20),
       cursor: z.number().nullish(),
     }))
     .query(async ({ ctx, input }) => {
-      await setUserId(ctx.db, ctx.session.user.id);
+      await setUserId(ctx.db, ctx.session?.user?.id);
 
       const items = await ctx.db
         .select()
@@ -375,7 +375,7 @@ export const postRouter = createTRPCRouter({
       };
     }),
 
-  getTrendingHashtags: protectedProcedure
+  getTrendingHashtags: publicProcedure
     .input(z.object({
       limit: z.number().min(1).max(10).default(5),
     }))
