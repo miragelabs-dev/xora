@@ -64,7 +64,7 @@ export const userRouter = createTRPCRouter({
       });
     }),
 
-  getFollowers: protectedProcedure
+  getFollowers: publicProcedure
     .input(z.object({
       username: z.string(),
       limit: z.number().min(1).max(100).default(50),
@@ -111,7 +111,7 @@ export const userRouter = createTRPCRouter({
       };
     }),
 
-  getFollowing: protectedProcedure
+  getFollowing: publicProcedure
     .input(z.object({
       username: z.string(),
       limit: z.number().min(1).max(100).default(50),
