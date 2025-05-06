@@ -1,6 +1,7 @@
 'use client';
 
 import { EditProfileDialog } from "@/components/edit-profile-dialog";
+import { ShareButton } from "@/components/share-button";
 import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/user-avatar";
 import { VerifiedBadge } from "@/components/verified-badge";
@@ -74,38 +75,45 @@ export function ProfileHeader({
               fallback={profile.username[0]}
             />
 
-            {profile.isCurrentUser ? (
-              <Button
-                variant="outline"
-                onClick={() => setIsEditProfileOpen(true)}
-              >
-                Edit Profile
-              </Button>
-            ) : (
-              <div className="flex gap-2">
-                <Button
-                  variant={profile.isFollowing ? "dark" : "light"}
-                  onClick={() => {
-                    if (profile.isFollowing) {
-                      unfollow({ userId: profile.id });
-                    } else {
-                      follow({ userId: profile.id });
-                    }
-                  }}
-                  disabled={isFollowPending || isUnfollowPending}
-                >
-                  {profile.isFollowing ? "Following" : "Follow"}
-                </Button>
+            <div className="flex items-center gap-2">
+              <ShareButton
+                url={`${window.location.origin}/${profile.username}`}
+                successMessage="Profile URL copied to clipboard"
+              />
+              {profile.isCurrentUser ? (
                 <Button
                   variant="outline"
-                  size="icon"
                   className="rounded-full"
-                  onClick={handleMessageClick}
+                  onClick={() => setIsEditProfileOpen(true)}
                 >
-                  <MessageCircle className="h-4 w-4" />
+                  Edit Profile
                 </Button>
-              </div>
-            )}
+              ) : (
+                <div className="flex gap-2">
+                  <Button
+                    variant={profile.isFollowing ? "dark" : "light"}
+                    onClick={() => {
+                      if (profile.isFollowing) {
+                        unfollow({ userId: profile.id });
+                      } else {
+                        follow({ userId: profile.id });
+                      }
+                    }}
+                    disabled={isFollowPending || isUnfollowPending}
+                  >
+                    {profile.isFollowing ? "Following" : "Follow"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="rounded-full"
+                    onClick={handleMessageClick}
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="space-y-1">

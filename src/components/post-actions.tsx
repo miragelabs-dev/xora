@@ -8,6 +8,7 @@ import { Bookmark, Heart, MessageCircle, Repeat2 } from "lucide-react";
 import Link from "next/link";
 import React, { JSX, useState } from "react";
 import { MintNFTModal } from "./mint-nft-modal";
+import { ShareButton } from "./share-button";
 
 interface PostStats {
   repliesCount: number;
@@ -165,61 +166,63 @@ export function PostActions({ postId, nft, stats, interactions, authorUsername, 
   return (
     <>
       <div
-        className={cn("mt-2 flex justify-between text-muted-foreground", className)}
+        className={cn("mt-2 flex justify-between gap-4 items-center text-muted-foreground", className)}
         data-no-navigate
       >
-        <Link href={`/${authorUsername}/status/${postId}`} className="gap-2">
+        <div className="flex-1 flex justify-between flex-2">
+          <Link href={`/${authorUsername}/status/${postId}`} className="gap-2">
+            {renderActionButton(
+              <MessageCircle />,
+              stats.repliesCount,
+              false,
+              false,
+              (e) => e.stopPropagation(),
+              ""
+            )}
+          </Link>
+
           {renderActionButton(
-            <MessageCircle />,
-            stats.repliesCount,
-            false,
-            false,
-            (e) => e.stopPropagation(),
-            ""
+            <Repeat2 />,
+            optimisticStats.repostsCount,
+            optimisticInteractions.isReposted,
+            loadingStates.isRepostLoading,
+            (e) => {
+              e.preventDefault();
+              if (!loadingStates.isRepostLoading) {
+                void (optimisticInteractions.isReposted ? unrepost({ postId }) : repost({ postId }));
+              }
+            },
+            "text-green-500"
           )}
-        </Link>
 
-        {renderActionButton(
-          <Repeat2 />,
-          optimisticStats.repostsCount,
-          optimisticInteractions.isReposted,
-          loadingStates.isRepostLoading,
-          (e) => {
-            e.preventDefault();
-            if (!loadingStates.isRepostLoading) {
-              void (optimisticInteractions.isReposted ? unrepost({ postId }) : repost({ postId }));
-            }
-          },
-          "text-green-500"
-        )}
+          {renderActionButton(
+            <Heart />,
+            optimisticStats.likesCount,
+            optimisticInteractions.isLiked,
+            loadingStates.isLikeLoading,
+            (e) => {
+              e.preventDefault();
+              if (!loadingStates.isLikeLoading) {
+                void (optimisticInteractions.isLiked ? unlike({ postId }) : like({ postId }));
+              }
+            },
+            "text-red-500"
+          )}
 
-        {renderActionButton(
-          <Heart />,
-          optimisticStats.likesCount,
-          optimisticInteractions.isLiked,
-          loadingStates.isLikeLoading,
-          (e) => {
-            e.preventDefault();
-            if (!loadingStates.isLikeLoading) {
-              void (optimisticInteractions.isLiked ? unlike({ postId }) : like({ postId }));
-            }
-          },
-          "text-red-500"
-        )}
-
-        {renderActionButton(
-          <Bookmark />,
-          optimisticStats.savesCount,
-          optimisticInteractions.isSaved,
-          loadingStates.isSaveLoading,
-          (e) => {
-            e.preventDefault();
-            if (!loadingStates.isSaveLoading) {
-              void (optimisticInteractions.isSaved ? unsave({ postId }) : save({ postId }));
-            }
-          },
-          "text-blue-500"
-        )}
+          {renderActionButton(
+            <Bookmark />,
+            optimisticStats.savesCount,
+            optimisticInteractions.isSaved,
+            loadingStates.isSaveLoading,
+            (e) => {
+              e.preventDefault();
+              if (!loadingStates.isSaveLoading) {
+                void (optimisticInteractions.isSaved ? unsave({ postId }) : save({ postId }));
+              }
+            },
+            "text-blue-500"
+          )}
+        </div>
 
         <>
           {nft ? (
@@ -275,6 +278,11 @@ export function PostActions({ postId, nft, stats, interactions, authorUsername, 
             </Button>
           )}
         </>
+        <ShareButton
+          url={`${window.location.origin}/${authorUsername}/status/${postId}`}
+          successMessage="Post URL copied to clipboard"
+          className="gap-2 py-0 hover:bg-transparent"
+        />
       </div>
 
       <MintNFTModal
