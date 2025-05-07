@@ -81,7 +81,7 @@ export const postRouter = createTRPCRouter({
         conditions.push(sql`${posts.authorId} IN (${subquery})`);
       }
 
-      const results = await getAllPostQuery()
+      const results = await getAllPostQuery({ userId })
         .where(and(...conditions))
         .orderBy(desc(sql`COALESCE(${reposts.createdAt}, ${posts.createdAt})`))
         .limit(limit + 1)
@@ -232,7 +232,7 @@ export const postRouter = createTRPCRouter({
       postId: z.number(),
     }))
     .query(async ({ input }) => {
-      const post = await getAllPostQuery()
+      const post = await getAllPostQuery({})
         .where(
           and(
             eq(posts.id, input.postId),
@@ -293,7 +293,7 @@ export const postRouter = createTRPCRouter({
     .query(async ({ ctx }) => {
       await setUserId(ctx.db, ctx.session.user.id);
 
-      const results = await getAllPostQuery()
+      const results = await getAllPostQuery({})
         .innerJoin(saves, eq(saves.postId, posts.id))
         .where(eq(saves.userId, ctx.session.user.id))
         .orderBy(desc(posts.createdAt));
@@ -353,7 +353,7 @@ export const postRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       await setUserId(ctx.db, ctx.session?.user?.id);
 
-      const results = await getAllPostQuery()
+      const results = await getAllPostQuery({})
         .where(
           and(
             eq(posts.replyToId, input.postId),
@@ -414,7 +414,7 @@ export const postRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       await setUserId(ctx.db, ctx.session.user.id);
 
-      const results = await getAllPostQuery()
+      const results = await getAllPostQuery({})
         .where(
           input.query.startsWith('#')
             ? sql`${posts.content} ~* ${input.query.toLowerCase().replace('#', '#[A-Za-z0-9_]*')}`

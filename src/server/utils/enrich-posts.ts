@@ -47,7 +47,7 @@ export async function enrichReplyTo(enrichedPosts: BaseEnrichedPost[], sessionUs
     let parentMap = new Map<string, BaseEnrichedPost>();
 
     if (replyToIds.length > 0) {
-        const parentRaw = await getAllPostQuery().where(inArray(posts.id, replyToIds.filter(id => id !== null)));
+        const parentRaw = await getAllPostQuery({}).where(inArray(posts.id, replyToIds.filter(id => id !== null)));
         const enrichedParents = await enrichPosts(parentRaw, sessionUserId);
         parentMap = new Map(enrichedParents.map(p => [p.id.toString(), p]));
     }

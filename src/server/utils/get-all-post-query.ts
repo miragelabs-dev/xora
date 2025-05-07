@@ -2,10 +2,12 @@ import { db } from "@/lib/db";
 import { nfts } from "@/lib/db/schema/nft";
 import { likes, posts, reposts, saves } from "@/lib/db/schema/post";
 import { users } from "@/lib/db/schema/user";
-import { eq, isNotNull, sql } from "drizzle-orm";
+import { and, eq, isNotNull, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 
-export function getAllPostQuery() {
+export function getAllPostQuery({ userId }: {
+    userId?: number;
+}) {
     const replies = alias(posts, 'replies');
     const repostUser = alias(users, 'repostUser');
     const nftAlias = alias(nfts, 'nft');
@@ -49,7 +51,7 @@ export function getAllPostQuery() {
         .groupBy(saves.postId)
         .as('save_counts');
 
-    return db
+    const query = db
         .select({
             id: posts.id,
             replyToId: posts.replyToId,
@@ -74,7 +76,10 @@ export function getAllPostQuery() {
         })
         .from(posts)
         .leftJoin(users, eq(users.id, posts.authorId))
-        .leftJoin(reposts, eq(reposts.postId, posts.id))
+        .leftJoin(reposts, userId ? and(
+            eq(reposts.postId, posts.id),
+            eq(reposts.userId, userId)
+        ) : eq(reposts.postId, posts.id))
         .leftJoin(repostUser, eq(repostUser.id, reposts.userId))
         .leftJoin(nftAlias, eq(nftAlias.postId, posts.id))
         .leftJoin(
@@ -93,4 +98,6 @@ export function getAllPostQuery() {
             saveCountsQuery,
             sql`${saveCountsQuery.postId} = ${posts.id}`
         )
+
+    return query;
 }
