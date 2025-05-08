@@ -74,24 +74,44 @@ export function Post({
     );
 
   const renderContent = (content: string) => {
-    const parts = content.split(/([@＠][a-zA-Z0-9_]+)/g);
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = content.split(urlRegex);
 
     return parts.map((part, index) => {
-      if (part.match(/^[@＠][a-zA-Z0-9_]+$/)) {
-        const username = part.slice(1);
+      if (part.match(/^https?:\/\/[^\s]+$/)) {
         return (
-          <Link
+          <a
             key={index}
-            href={`/${username}`}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer nofollow"
             className="text-blue-500 hover:underline"
             onClick={(e) => e.stopPropagation()}
             data-no-navigate
           >
             {part}
-          </Link>
+          </a>
         );
       }
-      return <Fragment key={index}>{part}</Fragment>;
+
+      const usernameParts = part.split(/([@＠][a-zA-Z0-9_]+)/g);
+      return usernameParts.map((usernamePart, usernameIndex) => {
+        if (usernamePart.match(/^[@＠][a-zA-Z0-9_]+$/)) {
+          const username = usernamePart.slice(1);
+          return (
+            <Link
+              key={`${index}-${usernameIndex}`}
+              href={`/${username}`}
+              className="text-blue-500 hover:underline"
+              onClick={(e) => e.stopPropagation()}
+              data-no-navigate
+            >
+              {usernamePart}
+            </Link>
+          );
+        }
+        return <Fragment key={`${index}-${usernameIndex}`}>{usernamePart}</Fragment>;
+      });
     });
   };
 
