@@ -220,7 +220,7 @@ export function Post({
             </div>
 
             <div className="text-sm mt-2 select-text space-y-4">
-              <p className="whitespace-pre-wrap">{renderContent(post.content)}</p>
+              <p className="whitespace-pre-wrap break-all">{renderContent(post.content)}</p>
               {post.content.match(/\$[A-Za-z]{2,5}/g) && (
                 <div className="border-t border-border pt-3">
                   <div className="flex flex-col gap-2" data-no-navigate>
