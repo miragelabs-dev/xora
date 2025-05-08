@@ -259,7 +259,7 @@ export function Post({
             {post.image && (
               <>
                 <div
-                  className="relative mt-5 aspect-[16/9] overflow-hidden rounded-xl cursor-zoom-in"
+                  className="relative mt-5 overflow-hidden rounded-xl cursor-zoom-in"
                   onClick={(e) => {
                     e.stopPropagation();
                     setIsImageLightboxOpen(true);
@@ -270,9 +270,8 @@ export function Post({
                     src={post.image}
                     alt="Post image"
                     fill
-                    className="object-cover"
+                    className='!relative'
                     data-no-navigate
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />
                 </div>
                 <ImageLightbox
