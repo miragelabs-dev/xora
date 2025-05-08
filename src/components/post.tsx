@@ -3,31 +3,31 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { UserAvatar } from "@/components/user-avatar";
 import { VerifiedBadge } from "@/components/verified-badge";
-import { PostView } from "@/lib/db/schema/post-view";
-import { cn, convertToLocalTime } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { api } from "@/utils/api";
 import { Loader2, MoreHorizontal, Repeat2, Trash } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 
+import { EnrichedPost, ReplyEnrichedPost } from "@/server/utils/enrich-posts";
+import { formatDistanceToNow } from "date-fns";
+import { useInView } from "react-intersection-observer";
 import { ComposeForm } from "./compose-form";
 import { CryptoPriceTag } from "./crypto-price-tag";
 import { ImageLightbox } from "./image-lightbox";
 import { PostActions } from "./post-actions";
 
-type ReplyPostView = Omit<PostView, 'replyTo' | 'replyToId' | 'repostedUsername' | 'repostedById' | 'repostedAt'>;
-
 interface PostProps {
-  post: PostView | ReplyPostView;
+  post: EnrichedPost | ReplyEnrichedPost;
   hideReplyTo?: boolean;
   showReplies?: boolean;
   className?: string;
   hideBorder?: boolean;
 }
 
-function isFullPost(post: PostView | ReplyPostView): post is PostView {
+function isFullPost(post: EnrichedPost | ReplyEnrichedPost): post is EnrichedPost {
   return 'replyTo' in post && 'repostedUsername' in post;
 }
 
@@ -95,9 +95,17 @@ export function Post({
     });
   };
 
+  const { ref, inView } = useInView();
+
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
   return (
     <div className={cn("group relative block", !hideBorder && "border-b border-border")}>
-      {isFullPostView && post.replyTo && !hideReplyTo && (
+      {isFullPostView && post?.replyTo && !hideReplyTo && (
         <>
           <div className="relative">
             <div className="absolute left-[34px] top-[16px] h-full w-0.5 bg-border" />
@@ -116,13 +124,13 @@ export function Post({
             (!selection || selection.toString().length === 0);
 
           if (shouldNavigate) {
-            router.push(`/${post.author.username}/status/${post.id}`);
+            router.push(`/${post.authorUsername}/status/${post.id}`);
           }
         }}
         className={cn(
           "relative px-4 py-3 hover:bg-muted/20 transition-colors duration-200 cursor-pointer",
           {
-            "bg-gradient-to-r from-primary/5 to-primary/10": !!post.nft,
+            "bg-gradient-to-r from-primary/5 to-primary/10": !!post.nftTokenId,
           }
         )}
       >
@@ -143,10 +151,10 @@ export function Post({
         )}
 
         <article className="flex gap-4">
-          <Link href={`/${post.author.username}`} data-no-navigate>
+          <Link href={`/${post.authorUsername}`} data-no-navigate>
             <UserAvatar
-              src={post.author.image}
-              fallback={post.author.username[0]}
+              src={post.authorImage}
+              fallback={post.authorUsername?.[0]}
               className="h-10 w-10"
               data-no-navigate
             />
@@ -156,13 +164,13 @@ export function Post({
             <div className="flex items-center justify-between gap-2">
               <div className="text-sm">
                 <Link
-                  href={`/${post.author.username}`}
+                  href={`/${post.authorUsername}`}
                   className="relative z-10 font-bold hover:underline"
                   data-no-navigate
                 >
-                  {`@${post.author.username}`}
+                  {`@${post.authorUsername}`}
                 </Link>
-                {post.author.isCryptoBot ? (
+                {post.authorIsCryptoBot ? (
                   <div className="inline-flex items-center ml-2">
                     <div className="flex items-center gap-1.5 bg-primary/10 hover:bg-primary/15 transition-colors rounded-full pl-2 pr-2.5 py-0.5">
                       <div className="size-2 rounded-full bg-primary animate-pulse" />
@@ -172,11 +180,11 @@ export function Post({
                       <VerifiedBadge className="h-4 w-4 text-primary" />
                     </div>
                   </div>
-                ) : post.author.isVerified && (
+                ) : post.authorIsVerified && (
                   <VerifiedBadge className="ml-1 inline-block" />
                 )}
                 <span className="ml-2 text-muted-foreground">· {
-                  convertToLocalTime(post.createdAt)
+                  formatDistanceToNow(post.postCreatedAt)
                 }</span>
               </div>
 
@@ -256,11 +264,7 @@ export function Post({
             )}
 
             <PostActions
-              nft={post.nft}
-              stats={post.stats}
-              interactions={post.viewer}
-              postId={post.id}
-              authorUsername={post.author.username}
+              post={post}
               className="relative z-10 mt-2"
             />
           </div>
@@ -295,18 +299,14 @@ export function Post({
       ))}
 
       {hasNextPage && (
-        <Button
-          variant="ghost"
-          className="mt-4 w-full"
-          onClick={() => fetchNextPage()}
-          disabled={isFetchingNextPage}
+        <div
+          className="flex justify-center p-4"
+          ref={ref}
         >
-          {isFetchingNextPage ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            "Load more replies"
+          {isFetchingNextPage && (
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
           )}
-        </Button>
+        </div>
       )}
     </div>
   );

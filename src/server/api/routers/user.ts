@@ -178,7 +178,7 @@ export const userRouter = createTRPCRouter({
       try {
         const existingUser = await ctx.db.query.users.findFirst({
           where: and(
-            eq(users.username, input.username),
+            sql`LOWER(${users.username}) = LOWER(${input.username})`,
             sql`${users.id} != ${ctx.session.user.id}`
           ),
         });
@@ -261,7 +261,7 @@ export const userRouter = createTRPCRouter({
     }))
     .query(async ({ ctx, input }): Promise<ProfileResponse> => {
       const user = await ctx.db.query.users.findFirst({
-        where: eq(users.username, input.username),
+        where: sql`LOWER(${users.username}) = LOWER(${input.username})`
       });
 
       if (!user) {

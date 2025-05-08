@@ -26,7 +26,6 @@ export function ProfileView({
     return <ProfileSkeleton />;
   }
 
-  console.log({ profile })
   if (!profile) {
     return notFound();
   }
