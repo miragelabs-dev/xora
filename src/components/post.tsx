@@ -9,10 +9,11 @@ import { Loader2, MoreHorizontal, Repeat2, Trash } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 
 import { EnrichedPost, ReplyEnrichedPost } from "@/server/utils/enrich-posts";
 import { formatDistanceToNow } from "date-fns";
+import { useInView } from "react-intersection-observer";
 import { ComposeForm } from "./compose-form";
 import { CryptoPriceTag } from "./crypto-price-tag";
 import { ImageLightbox } from "./image-lightbox";
@@ -93,6 +94,14 @@ export function Post({
       return <Fragment key={index}>{part}</Fragment>;
     });
   };
+
+  const { ref, inView } = useInView();
+
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
     <div className={cn("group relative block", !hideBorder && "border-b border-border")}>
@@ -290,18 +299,14 @@ export function Post({
       ))}
 
       {hasNextPage && (
-        <Button
-          variant="ghost"
-          className="mt-4 w-full"
-          onClick={() => fetchNextPage()}
-          disabled={isFetchingNextPage}
+        <div
+          className="flex justify-center p-4"
+          ref={ref}
         >
-          {isFetchingNextPage ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            "Load more replies"
+          {isFetchingNextPage && (
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
           )}
-        </Button>
+        </div>
       )}
     </div>
   );

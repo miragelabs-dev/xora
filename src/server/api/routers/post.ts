@@ -4,7 +4,7 @@ import { enrichPosts, enrichReplyTo } from "@/server/utils/enrich-posts";
 import { getAllPostQuery } from "@/server/utils/get-all-post-query";
 import { createNotification, deleteNotification } from "@/server/utils/notifications";
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, lt, sql } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
@@ -351,13 +351,13 @@ export const postRouter = createTRPCRouter({
       cursor: z.number().default(0),
     }))
     .query(async ({ ctx, input }) => {
+      console.log("getReplies", input);
       await setUserId(ctx.db, ctx.session?.user?.id);
 
       const results = await getAllPostQuery({})
         .where(
           and(
             eq(posts.replyToId, input.postId),
-            input.cursor ? lt(posts.id, input.cursor) : undefined
           )
         )
         .orderBy(desc(posts.createdAt))
