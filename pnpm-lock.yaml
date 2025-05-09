@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@chopinframework/next':
-        specifier: 1.1.3
-        version: 1.1.3(arctic@2.3.4)(hono@4.7.2)(next@15.3.2(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(server-only@0.0.1)(typescript@5.7.3)
+        specifier: 1.1.7
+        version: 1.1.7(arctic@2.3.4)(hono@4.7.2)(next@15.3.2(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(server-only@0.0.1)(typescript@5.7.3)(zod@3.24.2)
       '@chopinframework/react':
         specifier: ^0.1.1
         version: 0.1.1(react@19.0.0)
@@ -190,8 +190,8 @@ packages:
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
 
-  '@chopinframework/next@1.1.3':
-    resolution: {integrity: sha512-DysfuVhQT+97lPsT7LMXCTHOe1S4hBSaCvZ6qQw+6IPmmrxlb4+dnd/6ptuYuSrk05ACfDhbrZt6KN1DvPWzBA==}
+  '@chopinframework/next@1.1.7':
+    resolution: {integrity: sha512-6QHLMO1G32q7yELR4RqNMKM5Klk6id0xEzlNvAPyDrOZHuxrMoNxqm47P1Ut8cIAyOZ5lcczDN+EDc4wCrlZ3g==}
     peerDependencies:
       next: ^14 || ^15
       server-only: ^0.0.1
@@ -200,6 +200,16 @@ packages:
     resolution: {integrity: sha512-xUE1izBkkmCal5GMvCVXKZozElJhGs2B4Ai+6pzG4+FI18zcowkvdESns2PFY8Q5SvQJWAOjVQhpq2LyMsVzJQ==}
     peerDependencies:
       react: ^18 || ^19
+
+  '@chopinframework/sdk@0.2.1':
+    resolution: {integrity: sha512-lYohzi/xUOHSCrptnkMTMdFhETC8jt4G6MZZFwq4JuabtsQNDq9cX2D4j/BLGOYtssR+bBhX3l9bO/pQcgnTOQ==}
+    hasBin: true
+    peerDependencies:
+      '@modelcontextprotocol/sdk': ^1.5.0
+      zod: '>= 3'
+    peerDependenciesMeta:
+      '@modelcontextprotocol/sdk':
+        optional: true
 
   '@drizzle-team/brocli@0.10.2':
     resolution: {integrity: sha512-z33Il7l5dKjUgGULTqBsQBQwckHh5AbIuxhdsIxDDiZAzBOrZO6q9ogcWC65kU382AfynTfgNumVcNIjuIua6w==}
@@ -3450,20 +3460,27 @@ snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
 
-  '@chopinframework/next@1.1.3(arctic@2.3.4)(hono@4.7.2)(next@15.3.2(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(server-only@0.0.1)(typescript@5.7.3)':
+  '@chopinframework/next@1.1.7(arctic@2.3.4)(hono@4.7.2)(next@15.3.2(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(server-only@0.0.1)(typescript@5.7.3)(zod@3.24.2)':
     dependencies:
+      '@chopinframework/sdk': 0.2.1(zod@3.24.2)
       '@openauthjs/openauth': 0.3.9(arctic@2.3.4)(hono@4.7.2)
       next: 15.3.2(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       server-only: 0.0.1
       valibot: 1.0.0-rc.1(typescript@5.7.3)
     transitivePeerDependencies:
+      - '@modelcontextprotocol/sdk'
       - arctic
       - hono
       - typescript
+      - zod
 
   '@chopinframework/react@0.1.1(react@19.0.0)':
     dependencies:
       react: 19.0.0
+
+  '@chopinframework/sdk@0.2.1(zod@3.24.2)':
+    dependencies:
+      zod: 3.24.2
 
   '@drizzle-team/brocli@0.10.2': {}
 
