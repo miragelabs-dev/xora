@@ -11,7 +11,7 @@ export async function createNotification(db: Db, {
 }: {
   userId: number;
   actorId: number;
-  type: 'follow' | 'like' | 'repost' | 'comment' | 'save';
+  type: 'follow' | 'like' | 'repost' | 'comment' | 'save' | 'mention';
   targetId?: number;
   targetType?: 'post' | 'profile';
 }) {
@@ -31,7 +31,7 @@ export async function deleteNotification(db: Db, {
   targetType,
 }: {
   actorId: number;
-  type: 'follow' | 'like' | 'repost' | 'comment' | 'save';
+  type: 'follow' | 'like' | 'repost' | 'comment' | 'save' | 'mention';
   targetId: number;
   targetType: 'post' | 'profile';
 }) {

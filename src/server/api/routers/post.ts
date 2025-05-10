@@ -1,12 +1,38 @@
+import { db } from "@/lib/db";
 import { follows, likes, posts, reposts, saves, users } from "@/lib/db/schema";
 import { setUserId } from "@/server/utils/db";
 import { enrichPosts, enrichReplyTo } from "@/server/utils/enrich-posts";
 import { getAllPostQuery } from "@/server/utils/get-all-post-query";
 import { createNotification, deleteNotification } from "@/server/utils/notifications";
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+
+async function handleMentions(
+  content: string,
+  actorId: number,
+  targetId: number,
+  targetType: "post"
+) {
+  const mentions = content.match(/@(\w+)/g)?.map(mention => mention.slice(1)) || [];
+
+  if (mentions.length > 0) {
+    const mentionedUsers = await db.query.users.findMany({
+      where: inArray(users.username, mentions),
+    });
+
+    for (const user of mentionedUsers) {
+      await createNotification(db, {
+        userId: user.id,
+        actorId,
+        type: "mention",
+        targetId,
+        targetType,
+      });
+    }
+  }
+}
 
 export const postRouter = createTRPCRouter({
   create: protectedProcedure
@@ -20,6 +46,8 @@ export const postRouter = createTRPCRouter({
         authorId: ctx.session.user.id,
         image: input.image || null,
       }).returning();
+
+      await handleMentions(input.content, ctx.session.user.id, result.id, "post");
 
       return result;
     }),
@@ -330,6 +358,8 @@ export const postRouter = createTRPCRouter({
         image: input.image || null,
         replyToId: input.replyToId,
       }).returning();
+
+      await handleMentions(input.content, ctx.session.user.id, post.id, "post");
 
       if (parentPost.authorId !== ctx.session.user.id) {
         await createNotification(ctx.db, {

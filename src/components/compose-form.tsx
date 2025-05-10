@@ -3,7 +3,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { UserAvatar } from "@/components/user-avatar";
 import { ImageIcon, Loader2, SmileIcon, X } from "lucide-react";
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { EmojiPicker } from "./emoji-picker";
 import { MentionSuggestions } from "./mention-suggestions";
@@ -37,6 +37,7 @@ export function ComposeForm({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [mentionQuery, setMentionQuery] = useState("");
   const [showMentions, setShowMentions] = useState(false);
+  const mentionTimeoutRef = useRef<NodeJS.Timeout>(null);
 
   const adjustTextareaHeight = () => {
     const textarea = textareaRef.current;
@@ -53,12 +54,26 @@ export function ComposeForm({
 
     const lastWord = newContent.split(/\s/).pop() || "";
     if (lastWord.startsWith("@") && lastWord.length > 1) {
-      setMentionQuery(lastWord);
-      setShowMentions(true);
+      if (mentionTimeoutRef.current) {
+        clearTimeout(mentionTimeoutRef.current);
+      }
+
+      mentionTimeoutRef.current = setTimeout(() => {
+        setMentionQuery(lastWord);
+        setShowMentions(true);
+      }, 300);
     } else {
       setShowMentions(false);
     }
   };
+
+  useEffect(() => {
+    return () => {
+      if (mentionTimeoutRef.current) {
+        clearTimeout(mentionTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleFileUpload = async (file: File) => {
     try {

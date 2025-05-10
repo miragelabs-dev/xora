@@ -79,6 +79,8 @@ export function NotificationsView() {
         return 'reposted your post';
       case 'reply':
         return 'replied to your post';
+      case 'mention':
+        return 'mentioned you in a post';
       default:
         return 'interacted with you';
     }
