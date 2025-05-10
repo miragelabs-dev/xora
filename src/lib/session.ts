@@ -55,7 +55,13 @@ export async function validateRequest() {
   try {
     const token = (await cookies()).get("access_token")?.value;
 
+    if (token) {
+      console.log("Token found", token);
+    }
+
     if (!token) {
+      console.log("No token found");
+
       return null;
     }
 
@@ -98,6 +104,7 @@ export async function validateRequest() {
     if (error instanceof Error) {
       throw new Error(`Authentication failed: ${error.message}`);
     }
+
     throw new Error('Authentication failed');
   }
 }
