@@ -22,6 +22,12 @@ export function TRPCProvider({ children }: { children: React.ReactNode }) {
         httpLink({
           url: '/api/trpc',
           transformer: superjson,
+          fetch: (url, options) => {
+            return fetch(url, {
+              ...options,
+              credentials: 'include',
+            });
+          }
         }),
       ],
     })

@@ -54,6 +54,8 @@ function generateRandomUsername(): string {
 export async function validateRequest() {
   try {
     const token = (await cookies()).get("access_token")?.value;
+    const allCookies = await cookies();
+    console.log("All cookies", allCookies);
 
     if (token) {
       console.log("Token found", token);
