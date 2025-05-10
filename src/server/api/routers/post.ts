@@ -23,13 +23,15 @@ async function handleMentions(
     });
 
     for (const user of mentionedUsers) {
-      await createNotification(db, {
-        userId: user.id,
-        actorId,
-        type: "mention",
-        targetId,
-        targetType,
-      });
+      if (user.id !== actorId) {
+        await createNotification(db, {
+          userId: user.id,
+          actorId,
+          type: "mention",
+          targetId,
+          targetType,
+        });
+      }
     }
   }
 }

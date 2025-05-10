@@ -148,6 +148,11 @@ export function NotificationsView() {
                     addSuffix: true,
                   })}
                 </span>
+                {notification.postContent && (
+                  <div className="mt-2 text-sm text-muted-foreground border-l-2 border-muted">
+                    {notification.postContent}
+                  </div>
+                )}
               </div>
             </motion.div>
           ))}

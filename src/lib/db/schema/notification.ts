@@ -1,5 +1,6 @@
 import { eq, relations, sql } from "drizzle-orm";
 import { alias, boolean, integer, pgTable, pgView, serial, text, timestamp } from "drizzle-orm/pg-core";
+import { posts } from "./post";
 import { users } from "./user";
 
 export const notifications = pgTable("notifications", {
@@ -31,6 +32,7 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
 export const notificationView = pgView("notification_view").as((qb) => {
   const actorAlias = alias(users, "actor");
   const userAlias = alias(users, "user");
+  const postAlias = alias(posts, "post");
 
   return qb
     .select({
@@ -45,10 +47,18 @@ export const notificationView = pgView("notification_view").as((qb) => {
       createdAt: notifications.createdAt,
       targetId: notifications.targetId,
       targetType: notifications.targetType,
+      postContent: sql<string>`${postAlias.content}`.as('post_content'),
     })
     .from(notifications)
     .innerJoin(actorAlias, eq(notifications.actorId, actorAlias.id))
-    .innerJoin(userAlias, eq(notifications.userId, userAlias.id));
+    .innerJoin(userAlias, eq(notifications.userId, userAlias.id))
+    .leftJoin(postAlias, eq(notifications.targetId, postAlias.id))
+    .where(
+      sql`(
+        (${notifications.targetType} = 'post' AND ${postAlias.id} IS NOT NULL) OR
+        (${notifications.targetType} != 'post')
+      )`
+    );
 });
 
 export type Notification = typeof notifications.$inferSelect;
