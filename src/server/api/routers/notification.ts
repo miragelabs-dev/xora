@@ -1,33 +1,69 @@
-import { notifications, notificationView } from "@/lib/db/schema/notification";
-import { and, desc, eq, lt, sql } from "drizzle-orm";
+import { posts } from "@/lib/db/schema";
+import { notifications } from "@/lib/db/schema/notification";
+import { users } from "@/lib/db/schema/user";
+import { inferRouterOutputs } from "@trpc/server";
+import { and, desc, eq, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { z } from "zod";
+import { AppRouter } from ".";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const notificationRouter = createTRPCRouter({
   list: protectedProcedure
     .input(z.object({
       limit: z.number().min(1).max(100).default(50),
-      cursor: z.number().nullish(),
+      cursor: z.number().default(0),
     }))
     .query(async ({ ctx, input }) => {
       const { limit, cursor } = input;
 
+      const actorAlias = alias(users, "actor");
+      const userAlias = alias(users, "user");
+      const postAlias = alias(posts, "post");
+
       const items = await ctx.db
-        .select()
-        .from(notificationView)
+        .select({
+          id: notifications.id,
+          userId: notifications.userId,
+          userUsername: userAlias.username,
+          actorId: notifications.actorId,
+          actorUsername: actorAlias.username,
+          actorImage: actorAlias.image,
+          type: notifications.type,
+          read: notifications.read,
+          createdAt: notifications.createdAt,
+          targetId: notifications.targetId,
+          targetType: notifications.targetType,
+          postContent: sql<string>`
+            CASE
+              WHEN ${notifications.targetType} = 'post' THEN ${postAlias.content}
+              WHEN ${notifications.targetType} = 'user' THEN 'user'
+              ELSE ''
+            END
+          `.as('post_content'),
+        })
+        .from(notifications)
+        .innerJoin(actorAlias, eq(notifications.actorId, actorAlias.id))
+        .innerJoin(userAlias, eq(notifications.userId, userAlias.id))
+        .leftJoin(postAlias, eq(notifications.targetId, postAlias.id))
         .where(
           and(
-            eq(notificationView.userId, ctx.session.user.id),
-            cursor ? lt(notificationView.id, cursor) : undefined
+            eq(notifications.userId, ctx.session.user.id),
+            sql`(
+              (${notifications.targetType} = 'post' AND ${postAlias.id} IS NOT NULL) OR
+              (${notifications.targetType} != 'post')
+            )`
           )
         )
-        .orderBy(desc(notificationView.createdAt))
+        .orderBy(desc(notifications.createdAt))
+        .offset(cursor)
         .limit(limit + 1);
 
-      let nextCursor: typeof cursor = undefined;
-      if (items.length > limit) {
-        const nextItem = items.pop();
-        nextCursor = nextItem!.id;
+      let nextCursor: number | null = null;
+
+      if (items.length > input.limit) {
+        items.pop();
+        nextCursor = input.cursor + input.limit;
       }
 
       return {
@@ -74,4 +110,6 @@ export const notificationRouter = createTRPCRouter({
 
       return result.count;
     }),
-}); 
+});
+
+export type Notification = inferRouterOutputs<AppRouter>["notification"]["list"]["items"][number];

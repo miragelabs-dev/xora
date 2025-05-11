@@ -47,7 +47,13 @@ export const notificationView = pgView("notification_view").as((qb) => {
       createdAt: notifications.createdAt,
       targetId: notifications.targetId,
       targetType: notifications.targetType,
-      postContent: sql<string>`${postAlias.content}`.as('post_content'),
+      postContent: sql<string>`
+        CASE
+          WHEN ${notifications.targetType} = 'post' THEN ${postAlias.content}
+          WHEN ${notifications.targetType} = 'user' THEN 'user'
+          ELSE ''
+        END
+      `.as('post_content'),
     })
     .from(notifications)
     .innerJoin(actorAlias, eq(notifications.actorId, actorAlias.id))

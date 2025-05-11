@@ -56,8 +56,6 @@ export async function validateRequest(req: Request) {
       .find(c => c.trim().startsWith("access_token="))
       ?.split("=")[1];
 
-    console.log(req);
-
     if (!token) {
       console.log("No token found");
 
