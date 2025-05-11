@@ -1,5 +1,4 @@
 import { jwtVerify } from 'jose';
-import { cookies } from "next/headers";
 import { db } from "./db";
 import { users } from "./db/schema";
 
@@ -51,11 +50,17 @@ function generateRandomUsername(): string {
     .join('');
 }
 
-export async function validateRequest() {
+export async function validateRequest(req: Request) {
   try {
-    const token = (await cookies()).get("access_token")?.value;
+    const token = req.headers.get("cookie")?.split(";")
+      .find(c => c.trim().startsWith("access_token="))
+      ?.split("=")[1];
+
+    console.log(req);
 
     if (!token) {
+      console.log("No token found");
+
       return null;
     }
 

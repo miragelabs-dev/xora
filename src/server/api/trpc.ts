@@ -3,8 +3,8 @@ import { validateRequest } from "@/lib/session";
 import { TRPCError, initTRPC } from "@trpc/server";
 import superjson from 'superjson';
 
-export const createTRPCContext = async () => {
-  const session = await validateRequest();
+export const createTRPCContext = async (req: Request) => {
+  const session = await validateRequest(req);
 
   return {
     session,
