@@ -320,23 +320,40 @@ export const postRouter = createTRPCRouter({
     }),
 
   bookmarks: protectedProcedure
-    .query(async ({ ctx }) => {
+    .input(z.object({
+      limit: z.number().min(1).max(100).default(20),
+      cursor: z.number().default(0),
+    }))
+    .query(async ({ ctx, input }) => {
       await setUserId(ctx.db, ctx.session.user.id);
 
       const results = await getAllPostQuery({})
         .innerJoin(saves, eq(saves.postId, posts.id))
         .where(eq(saves.userId, ctx.session.user.id))
-        .orderBy(desc(posts.createdAt));
+        .orderBy(desc(posts.createdAt))
+        .limit(input.limit + 1)
+        .offset(input.cursor);
+
+      let nextCursor: number | null = null;
+
+      if (results.length > input.limit) {
+        results.pop();
+        nextCursor = input.cursor + input.limit;
+      }
 
       const enriched = await enrichPosts(results, ctx.session.user.id);
-      const items = await enrichReplyTo(enriched, ctx.session.user.id);
-
-      return items.map(item => ({
+      const enrichedWithReplyTo = await enrichReplyTo(enriched, ctx.session.user.id);
+      const items = enrichedWithReplyTo.map(item => ({
         ...item,
         repostedUsername: null,
         repostId: null,
         repostCount: null
       }));
+
+      return {
+        items,
+        nextCursor,
+      };
     }),
 
   reply: protectedProcedure
@@ -363,15 +380,13 @@ export const postRouter = createTRPCRouter({
 
       await handleMentions(input.content, ctx.session.user.id, post.id, "post");
 
-      if (parentPost.authorId !== ctx.session.user.id) {
-        await createNotification(ctx.db, {
-          userId: parentPost.authorId,
-          actorId: ctx.session.user.id,
-          type: "comment",
-          targetId: input.replyToId,
-          targetType: "post",
-        });
-      }
+      await createNotification(ctx.db, {
+        userId: parentPost.authorId,
+        actorId: ctx.session.user.id,
+        type: "comment",
+        targetId: post.id,
+        targetType: "post",
+      });
 
       return post;
     }),
@@ -383,7 +398,6 @@ export const postRouter = createTRPCRouter({
       cursor: z.number().default(0),
     }))
     .query(async ({ ctx, input }) => {
-      console.log("getReplies", input);
       await setUserId(ctx.db, ctx.session?.user?.id);
 
       const results = await getAllPostQuery({})
