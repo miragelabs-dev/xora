@@ -13,6 +13,7 @@ import { usePathname } from "next/navigation";
 import { toast } from "sonner";
 import { useLogout } from "../hooks/use-logout";
 import { useNavbarMenu } from "../hooks/use-navbar-menu";
+import { ThemeToggle } from "./theme-toggle";
 import { UserAvatar } from "./user-avatar";
 function LogoutMenuItem({ className }: { className?: string }) {
   const handleLogout = useLogout();
@@ -89,7 +90,7 @@ export function Navbar() {
             <Logo className="h-6 w-6" />
           </Link>
 
-          <div className="w-9" />
+          <ThemeToggle />
         </header>
       )}
 
@@ -101,10 +102,12 @@ export function Navbar() {
                 initial={{ scale: 0.5, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.3 }}
+                className="flex items-center justify-between w-full"
               >
                 <Link href="/home" className="flex size-10 items-center justify-center text-primary">
                   <Logo className="size-10" />
                 </Link>
+                <ThemeToggle />
               </motion.div>
 
               <motion.div
