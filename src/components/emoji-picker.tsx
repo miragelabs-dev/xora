@@ -24,6 +24,7 @@ export const EmojiPicker = ({ onEmojiSelect, children }: EmojiPickerProps) => {
     "--epr-search-text-color": "hsl(var(--foreground))",
     "--epr-search-placeholder-color": "hsl(var(--muted-foreground))",
     "--epr-search-input-bg-color": "hsl(var(--secondary))",
+    '--epr-search-input-bg-color-active': 'hsl(var(--background))',
 
 
   } as React.CSSProperties;

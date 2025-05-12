@@ -244,7 +244,7 @@ export function PostActions({ post, className }: PostActionsProps) {
               size="sm"
               onClick={() => setIsMintModalOpen(true)}
               data-no-navigate
-              className="bg-primary/10 hover:bg-primary/20 text-primary-foreground border border-primary/30 hover:border-primary/50 transition-all duration-200"
+              className="bg-primary/10 hover:bg-primary/20 dark:text-primary-foreground border border-primary/30 hover:border-primary/50 transition-all duration-200"
             >
               <span className="flex items-center gap-2">
                 <svg

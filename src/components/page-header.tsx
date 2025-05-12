@@ -15,7 +15,7 @@ export function PageHeader({ title, subtitle, toolbar, children }: PageHeaderPro
   const router = useRouter();
 
   return (
-    <div className="sticky top-0 z-[25] border-b border-border bg-background/80 backdrop-blur">
+    <div className="sticky top-0 z-[25] border-b border-border dark:bg-background/80 backdrop-blur">
       <div className="flex h-[60px] items-center gap-4 px-4">
         <Button
           variant="ghost"

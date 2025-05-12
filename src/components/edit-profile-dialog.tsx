@@ -17,6 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { UserAvatar } from "@/components/user-avatar";
+import { useDefaultBanner } from "@/hooks/use-default-banner";
 import { User } from "@/lib/db/schema";
 import { api } from "@/utils/api";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -169,6 +170,8 @@ export function EditProfileDialog({
     </div>
   );
 
+  const defaultBanner = useDefaultBanner()
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
@@ -195,7 +198,7 @@ export function EditProfileDialog({
                   <>
                     {cover ? (
                       <Image
-                        src={cover || '/defaults/banner.jpeg'}
+                        src={cover || defaultBanner}
                         alt="Cover"
                         fill
                         className="h-full w-full object-cover transition-opacity group-hover:opacity-80"

@@ -5,6 +5,7 @@ import { ShareButton } from "@/components/share-button";
 import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/user-avatar";
 import { VerifiedBadge } from "@/components/verified-badge";
+import { useDefaultBanner } from "@/hooks/use-default-banner";
 import { cn } from "@/lib/utils";
 import type { ProfileResponse } from "@/server/api/routers/user";
 import { api } from "@/utils/api";
@@ -54,12 +55,14 @@ export function ProfileHeader({
   //   },
   // });
 
+  const defaultBanner = useDefaultBanner()
+
   return (
     <>
       <div className={cn("relative", className)}>
         <div className="relative h-32 border-b w-full overflow-hidden sm:h-48">
           <Image
-            src={profile.cover || '/defaults/banner.jpeg'}
+            src={profile.cover || defaultBanner}
             alt={`${profile.username}'s cover`}
             className="object-cover"
             fill
