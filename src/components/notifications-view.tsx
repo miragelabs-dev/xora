@@ -157,11 +157,16 @@ export function NotificationsView() {
               >
                 {
                   notification.actorUsername && (
-                    <UserAvatar
-                      src={notification.actorImage}
-                      fallback={notification.actorUsername[0]}
-                      className="h-10 w-10"
-                    />
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <UserAvatar
+                        src={notification.actorImage}
+                        fallback={notification.actorUsername[0]}
+                        className="h-10 w-10"
+                        onClick={() => {
+                          router.push(`/${notification.actorUsername}`);
+                        }}
+                      />
+                    </div>
                   )
                 }
                 <div className="flex flex-col gap-1">
