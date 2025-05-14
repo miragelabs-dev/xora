@@ -1,48 +1,6 @@
+import { getAddress } from '@chopinframework/next';
 import { db } from "./db";
 import { users } from "./db/schema";
-import { getAddress } from '@chopinframework/next';
-
-interface JWTPayload {
-  mode: string;
-  type: string;
-  properties: {
-    id: string;
-  };
-  aud: string;
-  iss: string;
-  sub: string;
-  exp: number;
-}
-
-const JWKS_URL = 'https://prealpha-login.chopin.sh/.well-known/jwks.json';
-const ISSUER = 'https://prealpha-login.chopin.sh';
-const AUDIENCE = 'prealpha';
-
-async function getPublicKey(kid: string): Promise<CryptoKey> {
-  const jwksResponse = await fetch(JWKS_URL);
-
-  if (!jwksResponse.ok) {
-    throw new Error(`Failed to fetch JWKS: ${jwksResponse.statusText}`);
-  }
-
-  const jwks = await jwksResponse.json();
-  const key = jwks.keys.find((k: { kid: string }) => k.kid === kid);
-
-  if (!key) {
-    throw new Error('Public key not found');
-  }
-
-  return await crypto.subtle.importKey(
-    'jwk',
-    key,
-    {
-      name: 'ECDSA',
-      namedCurve: 'P-256'
-    },
-    true,
-    ['verify']
-  );
-}
 
 function generateRandomUsername(): string {
   return Array.from(crypto.getRandomValues(new Uint8Array(6)))
@@ -50,12 +8,12 @@ function generateRandomUsername(): string {
     .join('');
 }
 
-export async function validateRequest(req: Request) {
+export async function validateRequest() {
   try {
     const address = await getAddress();
 
     if (!address) {
-      throw new Error("User not authenticated");
+      return null;
     }
 
     const [user] = await db

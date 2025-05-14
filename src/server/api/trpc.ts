@@ -4,7 +4,7 @@ import { TRPCError, initTRPC } from "@trpc/server";
 import superjson from 'superjson';
 
 export const createTRPCContext = async (req: Request) => {
-  const session = await validateRequest(req);
+  const session = await validateRequest();
 
   return {
     session,
@@ -24,6 +24,7 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
   if (!ctx.session) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
+
   return next({
     ctx: {
       ...ctx,
