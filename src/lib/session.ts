@@ -1,6 +1,6 @@
-import { jwtVerify } from 'jose';
 import { db } from "./db";
 import { users } from "./db/schema";
+import { getAddress } from '@chopinframework/next';
 
 interface JWTPayload {
   mode: string;
@@ -52,31 +52,11 @@ function generateRandomUsername(): string {
 
 export async function validateRequest(req: Request) {
   try {
-    const token = req.headers.get("cookie")?.split(";")
-      .find(c => c.trim().startsWith("access_token="))
-      ?.split("=")[1];
+    const address = await getAddress();
 
-    if (!token) {
-      console.log("No token found");
-
-      return null;
+    if (!address) {
+      throw new Error("User not authenticated");
     }
-
-    const [headerB64] = token.split('.');
-
-    if (!headerB64) {
-      throw new Error('Invalid token format');
-    }
-
-    const header = JSON.parse(atob(headerB64));
-    const publicKey = await getPublicKey(header.kid);
-
-    const { payload } = await jwtVerify(token, publicKey, {
-      issuer: ISSUER,
-      audience: AUDIENCE
-    }) as { payload: JWTPayload };
-
-    const address = payload.properties.id;
 
     const [user] = await db
       .insert(users)
