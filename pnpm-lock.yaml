@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@chopinframework/next':
-        specifier: 1.1.7
-        version: 1.1.7(arctic@2.3.4)(hono@4.7.2)(next@15.3.2(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(server-only@0.0.1)(typescript@5.7.3)(zod@3.24.2)
+        specifier: 1.1.8
+        version: 1.1.8(arctic@2.3.4)(hono@4.7.2)(next@15.3.2(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(server-only@0.0.1)(typescript@5.7.3)(zod@3.24.2)
       '@chopinframework/react':
         specifier: ^0.1.1
         version: 0.1.1(react@19.0.0)
@@ -190,8 +190,8 @@ packages:
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
 
-  '@chopinframework/next@1.1.7':
-    resolution: {integrity: sha512-6QHLMO1G32q7yELR4RqNMKM5Klk6id0xEzlNvAPyDrOZHuxrMoNxqm47P1Ut8cIAyOZ5lcczDN+EDc4wCrlZ3g==}
+  '@chopinframework/next@1.1.8':
+    resolution: {integrity: sha512-v0TgpqaAppORgPHWP/xgAqywzZMzzrq7TudBfjmNU2FIthmSPnIEGxfUk0S9nmmqSn4L9VzTaVKSfdGVJuXTsA==}
     peerDependencies:
       next: ^14 || ^15
       server-only: ^0.0.1
@@ -3460,7 +3460,7 @@ snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
 
-  '@chopinframework/next@1.1.7(arctic@2.3.4)(hono@4.7.2)(next@15.3.2(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(server-only@0.0.1)(typescript@5.7.3)(zod@3.24.2)':
+  '@chopinframework/next@1.1.8(arctic@2.3.4)(hono@4.7.2)(next@15.3.2(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(server-only@0.0.1)(typescript@5.7.3)(zod@3.24.2)':
     dependencies:
       '@chopinframework/sdk': 0.2.1(zod@3.24.2)
       '@openauthjs/openauth': 0.3.9(arctic@2.3.4)(hono@4.7.2)
