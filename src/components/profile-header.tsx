@@ -41,8 +41,14 @@ export function ProfileHeader({
     },
   });
 
+  const createConversation = api.message.createConversation.useMutation({
+    onSuccess: (data) => {
+      router.push(`/messages/${data.id}`);
+    },
+  });
+
   const handleMessageClick = () => {
-    router.push(`/messages/${profile.id}`);
+    createConversation.mutate({ userIds: [profile.id] });
   };
 
   // TODO: Add wallet address and interop score
@@ -111,6 +117,7 @@ export function ProfileHeader({
                     size="icon"
                     className="rounded-full"
                     onClick={handleMessageClick}
+                    disabled={createConversation.isPending}
                   >
                     <MessageCircle className="h-4 w-4" />
                   </Button>

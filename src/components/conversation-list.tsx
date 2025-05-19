@@ -1,15 +1,14 @@
 "use client";
 
-import { useSession } from "@/app/session-provider";
 import { cn } from "@/lib/utils";
 import { api } from "@/utils/api";
 import { formatDistanceToNow } from "date-fns";
 import { MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { ConversationMemberAvatar } from "./conversation-avatars";
 import { Card } from "./ui/card";
 import { ScrollArea } from "./ui/scroll-area";
-import { UserAvatar } from "./user-avatar";
 
 export function ConversationList() {
   const params = useParams();
@@ -28,8 +27,6 @@ export function ConversationList() {
   const handleConversationClick = (conversationId: number) => {
     markAsRead({ conversationId });
   };
-
-  const { user } = useSession();
 
   if (isLoading) {
     return (
@@ -72,39 +69,47 @@ export function ConversationList() {
   return (
     <div className="h-full border-r">
       <ScrollArea className="h-full">
-        <div className="space-y-2 p-2">
+        <div className="divide-y">
           {conversations.items.map((conversation) => {
-            const isActive = params?.userId === conversation.recipient.id.toString();
-            const anotherUser = conversation.recipient.id !== user?.id ? conversation.recipient : conversation.initiator;
+            const isActive = params?.conversationId === conversation.id.toString();
 
             return (
               <Link
                 className="block"
-                href={`/messages/${anotherUser.id}`}
+                href={`/messages/${conversation.id}`}
                 key={conversation.id}
                 onClick={() => handleConversationClick(conversation.id)}
               >
-                <Card
-                  className={`border-0 relative transition-colors hover:bg-muted/50 ${isActive ? "bg-muted" : ""
-                    }`}
+                <div
+                  className={
+                    cn(
+                      `border-0 relative transition-colors hover:bg-muted/50`,
+                      isActive && "bg-muted"
+                    )
+                  }
                 >
                   <div className="flex items-start gap-4 p-4">
-                    <UserAvatar
-                      src={anotherUser.image}
-                      fallback={anotherUser.username?.[0] ?? "U"}
-                      className="h-12 w-12"
-                    />
+                    <div className="relative">
+                      <ConversationMemberAvatar member={conversation.members[0]} />
+                      {
+                        conversation.members.length > 1 && (
+                          <div className="absolute font-bold -bottom-[2px] -right-[2px] text-[10px] text-center px-1 min-h-4 min-w-4 rounded-full border bg-background">
+                            {conversation.members.length}
+                          </div>
+                        )
+                      }
+                    </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2">
                         <p className="font-medium truncate">
-                          @{anotherUser.username}
+                          {conversation.members.map((member) => member.username).join(", ")}
                         </p>
-                        <p className="text-xs text-muted-foreground whitespace-nowrap">
+                        {conversation.lastMessage && <p className="text-xs text-muted-foreground whitespace-nowrap">
                           {formatDistanceToNow(new Date(conversation.lastMessageAt), {
                             addSuffix: true,
                             includeSeconds: true
                           })}
-                        </p>
+                        </p>}
                       </div>
                       {conversation.lastMessage && (
                         <p className={cn(
@@ -121,7 +126,7 @@ export function ConversationList() {
                       )}
                     </div>
                   </div>
-                </Card>
+                </div>
               </Link>
             );
           })}

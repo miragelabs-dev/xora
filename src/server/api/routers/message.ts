@@ -1,6 +1,6 @@
-import { conversations, messages, users } from "@/lib/db/schema";
-import { and, asc, desc, eq, lt, not, or, sql } from "drizzle-orm";
-import { alias } from "drizzle-orm/pg-core";
+import { db } from "@/lib/db";
+import { conversationMember, conversations, Message, messages, User, users } from "@/lib/db/schema";
+import { and, asc, eq, inArray, lt, not, sql } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
@@ -11,61 +11,9 @@ export const messageRouter = createTRPCRouter({
       cursor: z.number().nullish(),
     }))
     .query(async ({ ctx, input }) => {
-      const recipientUser = alias(users, "recipientUser");
-      const initiatorUser = alias(users, "initiatorUser");
-      const lastMessage = alias(messages, "lastMessage");
-
-      const items = await ctx.db
-        .select({
-          id: conversations.id,
-          lastMessageAt: conversations.lastMessageAt,
-          recipient: {
-            id: conversations.recipientId,
-            username: recipientUser.username,
-            image: recipientUser.image,
-          },
-          initiator: {
-            id: conversations.initiatorId,
-            username: initiatorUser.username,
-            image: initiatorUser.image,
-          },
-          lastMessage: {
-            id: lastMessage.id,
-            content: lastMessage.content,
-            createdAt: lastMessage.createdAt,
-            read: lastMessage.read,
-            sender: sql<{ id: number }>`json_build_object(
-              'id', ${lastMessage.senderId}
-            )`,
-          },
-          unreadCount: sql<number>`(
-            SELECT count(*)::int 
-            FROM ${messages} m 
-            WHERE m.conversation_id = ${conversations.id} 
-            AND m.read = false 
-            AND m.sender_id != ${ctx.session.user.id}
-          )`,
-        })
-        .from(conversations)
-        .where(
-          or(
-            eq(conversations.initiatorId, ctx.session.user.id),
-            eq(conversations.recipientId, ctx.session.user.id)
-          )
-        )
-        .leftJoin(recipientUser, eq(conversations.recipientId, recipientUser.id))
-        .leftJoin(initiatorUser, eq(conversations.initiatorId, initiatorUser.id))
-        .leftJoin(
-          lastMessage,
-          and(
-            eq(lastMessage.conversationId, conversations.id),
-            eq(
-              lastMessage.id,
-              sql`(SELECT id FROM messages WHERE conversation_id = ${conversations.id} ORDER BY created_at DESC LIMIT 1)`
-            )
-          )
-        )
-        .orderBy(desc(conversations.lastMessageAt))
+      const items = await getConversationsQuery(ctx.session.user.id)
+        // .where(hasOtherMembersExpr(ctx.session.user.id))
+        .groupBy(conversations.id)
         .limit(input.limit + 1);
 
       let nextCursor: typeof input.cursor = undefined;
@@ -78,6 +26,52 @@ export const messageRouter = createTRPCRouter({
         items,
         nextCursor,
       };
+    }),
+
+  createConversation: protectedProcedure
+    .input(z.object({
+      userIds: z.array(z.number()),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const allUserIds = Array.from(new Set([...input.userIds, ctx.session.user.id])).sort((a, b) => a - b);
+
+      const candidateConversationIds = await ctx.db
+        .selectDistinct({ conversationId: conversationMember.conversationId })
+        .from(conversationMember)
+        .where(inArray(conversationMember.userId, allUserIds));
+
+      for (const { conversationId } of candidateConversationIds) {
+        const members = await ctx.db.query.conversationMember.findMany({
+          where: eq(conversationMember.conversationId, conversationId),
+          columns: { userId: true },
+        });
+
+        const memberIds = members.map(m => m.userId).sort((a, b) => a - b);
+        const isExactMatch = memberIds.length === allUserIds.length &&
+          memberIds.every((id, i) => id === allUserIds[i]);
+
+        if (isExactMatch) {
+          const conversation = await ctx.db.query.conversations.findFirst({
+            where: eq(conversations.id, conversationId),
+          });
+          if (conversation) return conversation;
+        }
+      }
+
+      return await ctx.db.transaction(async (tx) => {
+        const [conversation] = await tx.insert(conversations).values({
+          createdAt: new Date(),
+        }).returning();
+
+        const members = allUserIds.map(userId => ({
+          conversationId: conversation.id,
+          userId,
+        }));
+
+        await tx.insert(conversationMember).values(members);
+
+        return conversation;
+      });
     }),
 
   getMessages: protectedProcedure
@@ -123,27 +117,17 @@ export const messageRouter = createTRPCRouter({
 
   sendMessage: protectedProcedure
     .input(z.object({
-      recipientId: z.number(),
+      conversationId: z.number(),
       content: z.string().min(1).max(500),
     }))
     .mutation(async ({ ctx, input }) => {
       let conversation = await ctx.db.query.conversations.findFirst({
-        where: or(
-          and(
-            eq(conversations.initiatorId, ctx.session.user.id),
-            eq(conversations.recipientId, input.recipientId)
-          ),
-          and(
-            eq(conversations.initiatorId, input.recipientId),
-            eq(conversations.recipientId, ctx.session.user.id)
-          )
-        ),
+        where: eq(conversations.id, input.conversationId),
       });
 
       if (!conversation) {
         [conversation] = await ctx.db.insert(conversations).values({
-          initiatorId: ctx.session.user.id,
-          recipientId: input.recipientId,
+          id: input.conversationId,
         }).returning();
       }
 
@@ -153,33 +137,24 @@ export const messageRouter = createTRPCRouter({
         content: input.content,
       }).returning();
 
-      await ctx.db
-        .update(conversations)
-        .set({ lastMessageAt: message.createdAt })
-        .where(eq(conversations.id, conversation.id));
-
       return message;
     }),
 
   getConversation: protectedProcedure
     .input(z.object({
-      userId: z.number(),
+      conversationId: z.number(),
     }))
     .query(async ({ ctx, input }) => {
-      const conversation = await ctx.db.query.conversations.findFirst({
-        where: or(
+      const [result] = await getConversationsQuery(ctx.session.user.id)
+        .where(
           and(
-            eq(conversations.initiatorId, ctx.session.user.id),
-            eq(conversations.recipientId, input.userId)
-          ),
-          and(
-            eq(conversations.initiatorId, input.userId),
-            eq(conversations.recipientId, ctx.session.user.id)
+            eq(conversations.id, input.conversationId),
+            // hasOtherMembersExpr(ctx.session.user.id)
           )
-        ),
-      });
+        )
+        .limit(1);
 
-      return conversation;
+      return result;
     }),
 
   getUnreadCount: protectedProcedure
@@ -191,11 +166,7 @@ export const messageRouter = createTRPCRouter({
         .where(
           and(
             eq(messages.read, false),
-            not(eq(messages.senderId, ctx.session.user.id)),
-            or(
-              eq(conversations.recipientId, ctx.session.user.id),
-              eq(conversations.initiatorId, ctx.session.user.id)
-            )
+            not(eq(messages.senderId, ctx.session.user.id))
           )
         );
 
@@ -218,4 +189,64 @@ export const messageRouter = createTRPCRouter({
           )
         );
     }),
-}); 
+});
+
+export type GetConversationsItem = NonNullable<Awaited<ReturnType<typeof messageRouter.getConversations>>["items"]>[number];
+
+function hasOtherMembersExpr(userId: number) {
+  return sql`
+    SELECT COUNT(*) 
+    FROM conversation_member cm
+    WHERE cm.conversation_id = ${conversations.id}
+      AND cm.user_id != ${userId}
+    ) > 0
+  `
+}
+
+function getConversationsQuery(userId: number) {
+  return db
+    .select({
+      id: conversations.id,
+      createdAt: conversations.createdAt,
+      lastMessageAt: sql<Date>`(
+    SELECT MAX(${messages.createdAt} AT TIME ZONE 'UTC')
+    FROM ${messages}
+    WHERE ${messages.conversationId} = ${conversations.id}
+  )`.as("last_message_at"),
+      lastMessage: sql<Message>`
+  (
+    SELECT json_build_object(
+      'id', m.id,
+      'content', m.content,
+      'createdAt', m.created_at,
+      'senderId', m.sender_id
+    )
+    FROM ${messages} m
+    WHERE m.conversation_id = ${conversations.id}
+    ORDER BY m.created_at DESC
+    LIMIT 1
+  )
+`.as("lastMessage"),
+      members: sql<User[]>`
+    (
+      SELECT json_agg(json_build_object(
+        'id', u.id,
+        'username', u.username,
+        'image', u.image
+      ))
+      FROM conversation_member cm
+      JOIN users u ON u.id = cm.user_id
+      WHERE cm.conversation_id = ${conversations.id} AND cm.user_id != ${userId}
+    )
+  `.as("members"),
+      unreadCount: sql<number>`
+    (
+      SELECT COUNT(*)
+      FROM ${messages} m
+      WHERE m.conversation_id = ${conversations.id} AND m.read = false
+    )
+    `.as("unreadCount"),
+    })
+    .from(conversations)
+    .leftJoin(conversationMember, eq(conversations.id, conversationMember.conversationId));
+}
