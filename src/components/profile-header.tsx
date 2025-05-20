@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import type { ProfileResponse } from "@/server/api/routers/user";
 import { api } from "@/utils/api";
 import { format } from "date-fns";
-import { CalendarIcon, MessageCircle } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -41,9 +41,9 @@ export function ProfileHeader({
     },
   });
 
-  const handleMessageClick = () => {
-    router.push(`/messages/${profile.id}`);
-  };
+  // const handleMessageClick = () => {
+  //   router.push(`/messages/${profile.id}`);
+  // };
 
   // TODO: Add wallet address and interop score
 
@@ -106,14 +106,14 @@ export function ProfileHeader({
                   >
                     {profile.isFollowing ? "Following" : "Follow"}
                   </Button>
-                  <Button
+                  {/* <Button
                     variant="outline"
                     size="icon"
                     className="rounded-full"
                     onClick={handleMessageClick}
                   >
                     <MessageCircle className="h-4 w-4" />
-                  </Button>
+                  </Button> */}
                 </div>
               )}
             </div>

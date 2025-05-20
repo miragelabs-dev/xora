@@ -1,5 +1,5 @@
 import { useSession } from "@/app/session-provider";
-import { Bell, Bookmark, Home, Library, LogIn, MessageCircle, User } from "lucide-react";
+import { Bell, Bookmark, Home, Library, LogIn, User } from "lucide-react";
 import { useUnreadMessages } from "./use-unread-messages";
 import { useUnreadNotifications } from "./use-unread-notifications";
 
@@ -41,12 +41,12 @@ export function useNavbarMenu() {
       icon: Bell,
       unreadCount: unreadNotifications,
     },
-    {
-      name: "Messages",
-      link: "/messages",
-      icon: MessageCircle,
-      unreadCount: unreadMessages,
-    },
+    // {
+    //   name: "Messages",
+    //   link: "/messages",
+    //   icon: MessageCircle,
+    //   unreadCount: unreadMessages,
+    // },
     {
       name: "Bookmarks",
       link: "/bookmarks",
