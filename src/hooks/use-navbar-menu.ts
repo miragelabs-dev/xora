@@ -13,7 +13,7 @@ export function useNavbarMenu() {
     return [
       {
         name: "Login",
-        link: "/",
+        link: "/?redirected=true",
         icon: LogIn,
       },
     ];
