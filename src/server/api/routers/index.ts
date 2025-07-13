@@ -1,5 +1,6 @@
 import { createTRPCRouter } from "../trpc";
 import { authRouter } from "./auth";
+import { discordRouter } from "./discord";
 import { leaderboardRouter } from "./leaderboard";
 import { messageRouter } from "./message";
 import { nftRouter } from "./nft";
@@ -15,6 +16,7 @@ export const appRouter = createTRPCRouter({
   nft: nftRouter,
   message: messageRouter,
   leaderboard: leaderboardRouter,
+  discord: discordRouter,
 });
 
 export type AppRouter = typeof appRouter;

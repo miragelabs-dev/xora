@@ -13,6 +13,11 @@ export const users = pgTable("users", {
   isCryptoBot: boolean("is_crypto_bot").default(false).notNull(),
   walletAddress: text("wallet_address"),
   transactionsCount: integer("transactions_count").default(0),
+
+  discordId: text("discord_id").unique(),
+  discordUsername: text("discord_username"),
+  discordAvatar: text("discord_avatar"),
+
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

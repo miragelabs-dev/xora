@@ -7,7 +7,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Sheet, SheetClose, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn, copyToClipboard } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { CopyIcon, LogOut, Menu, MoreHorizontal, PenSquare } from "lucide-react";
+import { CopyIcon, LogOut, Menu, MoreHorizontal, PenSquare, SettingsIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { toast } from "sonner";
@@ -15,6 +15,7 @@ import { useLogout } from "../hooks/use-logout";
 import { useNavbarMenu } from "../hooks/use-navbar-menu";
 import { ThemeToggle } from "./theme-toggle";
 import { UserAvatar } from "./user-avatar";
+
 function LogoutMenuItem({ className }: { className?: string }) {
   const handleLogout = useLogout();
 
@@ -26,6 +27,19 @@ function LogoutMenuItem({ className }: { className?: string }) {
       <LogOut className="mr-2 h-4 w-4" />
       <span>Logout</span>
     </DropdownMenuItem>
+  );
+}
+
+function SettingsMenuItem({ className }: { className?: string }) {
+  return (
+    <Link href="/settings">
+      <DropdownMenuItem
+        className={cn("cursor-pointer")}
+      >
+        <SettingsIcon className="mr-2 h-4 w-4" />
+        <span>Settings</span>
+      </DropdownMenuItem>
+    </Link>
   );
 }
 
@@ -158,6 +172,7 @@ export function Navbar() {
                       </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent side="right" align="start" className="w-[180px]">
+                      <SettingsMenuItem />
                       <LogoutMenuItem />
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -220,9 +235,7 @@ export function Navbar() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-[180px]">
-                    <div>
-
-                    </div>
+                    <SettingsMenuItem />
                     <LogoutMenuItem />
                   </DropdownMenuContent>
                 </DropdownMenu>
