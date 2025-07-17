@@ -1,4 +1,5 @@
 import { getAddress } from '@chopinframework/next';
+import { eq } from "drizzle-orm";
 import { db } from "./db";
 import { users } from "./db/schema";
 
@@ -15,6 +16,10 @@ export async function validateRequest() {
     if (!address) {
       return null;
     }
+
+    const existingUser = await db.query.users.findFirst({
+      where: eq(users.address, address),
+    });
 
     const [user] = await db
       .insert(users)

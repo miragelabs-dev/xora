@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { follows, likes, posts, reposts, saves, users } from "@/lib/db/schema";
+import { badges, follows, likes, posts, reposts, saves, userActivities, userBadges, users } from "@/lib/db/schema";
 import { setUserId } from "@/server/utils/db";
 import { enrichPosts, enrichReplyTo } from "@/server/utils/enrich-posts";
 import { getAllPostQuery } from "@/server/utils/get-all-post-query";
@@ -50,6 +50,26 @@ export const postRouter = createTRPCRouter({
       }).returning();
 
       await handleMentions(input.content, ctx.session.user.id, result.id, "post");
+
+      await ctx.db.insert(userActivities).values({
+        userId: ctx.session.user.id,
+        activityType: "post",
+        points: 5,
+        metadata: JSON.stringify({ postId: result.id }),
+      });
+
+      const postsCount = await ctx.db
+        .select({ count: sql<number>`count(*)` })
+        .from(userActivities)
+        .where(
+          and(
+            eq(userActivities.userId, ctx.session.user.id),
+            eq(userActivities.activityType, "post")
+          )
+        );
+
+      const totalPosts = postsCount[0]?.count || 0;
+      await checkAndAwardBadges(ctx.db, ctx.session.user.id, "posts", totalPosts);
 
       return result;
     }),
@@ -151,6 +171,26 @@ export const postRouter = createTRPCRouter({
         postId: input.postId,
         userId: ctx.session.user.id,
       });
+
+      await ctx.db.insert(userActivities).values({
+        userId: ctx.session.user.id,
+        activityType: "like",
+        points: 1,
+        metadata: JSON.stringify({ postId: input.postId, postAuthor: post.authorId }),
+      });
+
+      const likesCount = await ctx.db
+        .select({ count: sql<number>`count(*)` })
+        .from(userActivities)
+        .where(
+          and(
+            eq(userActivities.userId, ctx.session.user.id),
+            eq(userActivities.activityType, "like")
+          )
+        );
+
+      const totalLikes = likesCount[0]?.count || 0;
+      await checkAndAwardBadges(ctx.db, ctx.session.user.id, "likes", totalLikes);
 
       if (post.authorId !== ctx.session.user.id) {
         await createNotification(ctx.db, {
@@ -485,4 +525,40 @@ export const postRouter = createTRPCRouter({
         nextCursor,
       };
     }),
-}); 
+});
+
+async function checkAndAwardBadges(db: any, userId: number, badgeType: string, currentValue: number) {
+  const eligibleBadges = await db.query.badges.findMany({
+    where: eq(badges.requirementType, badgeType),
+  });
+
+  for (const badge of eligibleBadges) {
+    if (currentValue >= badge.requirementValue) {
+      const existingBadge = await db.query.userBadges.findFirst({
+        where: and(
+          eq(userBadges.userId, userId),
+          eq(userBadges.badgeId, badge.id)
+        ),
+      });
+
+      if (!existingBadge) {
+        await db.insert(userBadges).values({
+          userId,
+          badgeId: badge.id,
+        });
+
+        await db.insert(userActivities).values({
+          userId,
+          activityType: "badge",
+          points: 50,
+          metadata: JSON.stringify({
+            badgeId: badge.id,
+            badgeName: badge.name,
+            requirementType: badge.requirementType,
+            requirementValue: badge.requirementValue
+          }),
+        });
+      }
+    }
+  }
+}

@@ -1,3 +1,4 @@
+import { ReferralHandler } from "@/components/referral-handler";
 import { Toaster } from "@/components/ui/sonner";
 import { CryptoProvider } from "@/contexts/crypto-context";
 import { GoogleAnalytics } from '@next/third-parties/google';
@@ -42,6 +43,7 @@ export default async function RootLayout({
           <Toaster />
           <TRPCProvider>
             <CryptoProvider>
+              <ReferralHandler />
               {children}
             </CryptoProvider>
           </TRPCProvider>

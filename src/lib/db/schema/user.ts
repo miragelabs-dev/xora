@@ -18,6 +18,8 @@ export const users = pgTable("users", {
   discordUsername: text("discord_username"),
   discordAvatar: text("discord_avatar"),
 
+  referralCode: text("referral_code"),
+
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
