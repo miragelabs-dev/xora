@@ -3,7 +3,6 @@
 import { useSession } from "@/app/session-provider";
 import { TopCryptoAccounts } from "@/components/top-crypto-accounts";
 import { Card } from "@/components/ui/card";
-import { DailyStreakCard } from "@/components/ui/daily-streak-card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UserSuggestion } from "@/components/user-suggestion";
@@ -168,7 +167,7 @@ export function RightSidebar() {
         {
           user && (
             <>
-              <DailyStreakCard />
+              {/* <DailyStreakCard /> */}
 
               <div className="rounded-xl bg-muted/50 p-4">
                 <h2 className="mb-4 text-xl font-bold">Who to follow</h2>
