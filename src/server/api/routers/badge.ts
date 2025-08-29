@@ -1,14 +1,14 @@
+import { badges, userActivities, userBadges, users, userStreaks } from "@/lib/db/schema";
 import { TRPCError } from "@trpc/server";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
-import { badges, userBadges, userActivities, users } from "@/lib/db/schema";
-import { eq, and, sql, desc } from "drizzle-orm";
 
 export const badgeRouter = createTRPCRouter({
   getUserBadges: protectedProcedure
     .query(async ({ ctx }) => {
       const userId = ctx.session.user.id;
-      
+
       const userBadgesList = await ctx.db
         .select({
           id: userBadges.id,
@@ -45,7 +45,7 @@ export const badgeRouter = createTRPCRouter({
           message: "User not found"
         });
       }
-      
+
       const userBadgesList = await ctx.db
         .select({
           id: userBadges.id,
@@ -80,7 +80,7 @@ export const badgeRouter = createTRPCRouter({
   getBadgeProgress: protectedProcedure
     .query(async ({ ctx }) => {
       const userId = ctx.session.user.id;
-      
+
       const allBadges = await ctx.db
         .select()
         .from(badges)
@@ -103,12 +103,11 @@ export const badgeRouter = createTRPCRouter({
               case "streak":
                 const streakQuery = await ctx.db
                   .select({ longestStreak: sql<number>`max(longest_streak)` })
-                  .from(ctx.db.query.userStreaks.findFirst({
-                    where: eq(ctx.db.query.userStreaks.userId, userId),
-                  }));
+                  .from(userStreaks)
+                  .where(eq(userStreaks.userId, userId));
                 currentProgress = streakQuery[0]?.longestStreak || 0;
                 break;
-              
+
               case "likes":
                 const likesQuery = await ctx.db
                   .select({ count: sql<number>`count(*)` })
@@ -121,7 +120,7 @@ export const badgeRouter = createTRPCRouter({
                   );
                 currentProgress = likesQuery[0]?.count || 0;
                 break;
-              
+
               case "posts":
                 const postsQuery = await ctx.db
                   .select({ count: sql<number>`count(*)` })
@@ -134,7 +133,7 @@ export const badgeRouter = createTRPCRouter({
                   );
                 currentProgress = postsQuery[0]?.count || 0;
                 break;
-              
+
               case "points":
                 const pointsQuery = await ctx.db
                   .select({ total: sql<number>`sum(points)` })
@@ -164,7 +163,7 @@ export const badgeRouter = createTRPCRouter({
     }))
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      
+
       const eligibleBadges = await ctx.db
         .select()
         .from(badges)
@@ -191,8 +190,8 @@ export const badgeRouter = createTRPCRouter({
               userId,
               activityType: "badge",
               points: 50,
-              metadata: JSON.stringify({ 
-                badgeId: badge.id, 
+              metadata: JSON.stringify({
+                badgeId: badge.id,
                 badgeName: badge.name,
                 requirementType: badge.requirementType,
                 requirementValue: badge.requirementValue
@@ -210,14 +209,14 @@ export const badgeRouter = createTRPCRouter({
   getBadgeStats: protectedProcedure
     .query(async ({ ctx }) => {
       const userId = ctx.session.user.id;
-      
+
       const stats = await ctx.db
         .select({
           totalBadges: sql<number>`count(*)`,
           totalBadgePoints: sql<number>`sum(${userActivities.points})`,
         })
         .from(userBadges)
-        .leftJoin(userActivities, 
+        .leftJoin(userActivities,
           and(
             eq(userActivities.userId, userBadges.userId),
             eq(userActivities.activityType, "badge")
