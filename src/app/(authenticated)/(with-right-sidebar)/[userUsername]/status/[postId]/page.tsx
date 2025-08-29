@@ -43,6 +43,9 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
       month: 'short',
       day: 'numeric'
     }),
+    likes: String(post.likesCount || 0),
+    replies: String(post.repliesCount || 0),
+    reposts: String(post.repostsCount || 0),
   });
 
   const ogImage = post.image || `${baseUrl}/api/og?${ogImageParams.toString()}`;
