@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { EnrichedPost, ReplyEnrichedPost } from "@/server/utils/enrich-posts";
 import { api } from "@/utils/api";
+import confetti from "canvas-confetti";
 import { Bookmark, Heart, MessageCircle, Repeat2 } from "lucide-react";
 import Link from "next/link";
 import React, { JSX, useState } from "react";
+import { Logo } from "./icons/logo";
 import { MintNFTModal } from "./mint-nft-modal";
 import { ShareButton } from "./share-button";
 
@@ -183,17 +185,53 @@ export function PostActions({ post, className }: PostActionsProps) {
           )}
 
           {renderActionButton(
-            <Heart />,
+            post.content.toLowerCase().includes('xora') ? <Logo className="h-5 w-5" /> : <Heart />,
             optimisticStats.likesCount,
             optimisticInteractions.isLiked,
             loadingStates.isLikeLoading,
-            (e) => {
+            async (e) => {
               e.preventDefault();
               if (!loadingStates.isLikeLoading) {
                 void (optimisticInteractions.isLiked ? unlike({ postId: post.id }) : like({ postId: post.id }));
               }
+
+              if (post.content.toLowerCase().includes('xora')) {
+
+                const scalar = 4;
+                const unicorn = confetti.shapeFromText({ text: "🦄", scalar });
+                const defaults = {
+                  spread: 180,
+                  ticks: 100,
+                  gravity: 0.2,
+                  decay: 0.93,
+                  startVelocity: 25,
+                  shapes: [unicorn],
+                  scalar,
+                  origin: { x: 0.5, y: 0.3 },
+                };
+                const shoot = () => {
+                  confetti({
+                    ...defaults,
+                    particleCount: 20,
+                  });
+                  confetti({
+                    ...defaults,
+                    particleCount: 3,
+                  });
+                  confetti({
+                    ...defaults,
+                    particleCount: 10,
+                    scalar: scalar / 1.5,
+                    shapes: ["circle"],
+                  });
+                };
+                setTimeout(shoot, 0);
+                setTimeout(shoot, 200);
+                setTimeout(shoot, 400);
+                setTimeout(shoot, 600);
+              }
             },
-            "text-red-500"
+            post.content.toLowerCase().includes('xora') ? "text-blue-500" : "text-red-500"
           )}
 
           {renderActionButton(

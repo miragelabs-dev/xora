@@ -32,7 +32,7 @@ export function DailyStreakModal({ isOpen, onClose }: DailyStreakModalProps) {
 
   const updateStreakMutation = api.streak.updateStreak.useMutation({
     onSuccess: () => {
-      toast.success("Daily streak updated! 🔥");
+      toast.success("GM Streak updated! 🔥");
       refetchStreak();
       setIsUpdating(false);
     },
@@ -86,7 +86,7 @@ export function DailyStreakModal({ isOpen, onClose }: DailyStreakModalProps) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Trophy className="h-5 w-5 text-orange-500" />
-            Daily Streak
+            GM Streak
           </DialogTitle>
           <DialogDescription>
             Keep your daily activity streak alive and earn points!

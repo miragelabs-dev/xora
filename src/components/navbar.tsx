@@ -172,7 +172,7 @@ export function Navbar() {
                       </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent side="right" align="start" className="w-[180px]">
-                      {/* <SettingsMenuItem /> */}
+                      <SettingsMenuItem />
                       <LogoutMenuItem />
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -235,7 +235,7 @@ export function Navbar() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-[180px]">
-                    {/* <SettingsMenuItem /> */}
+                    <SettingsMenuItem />
                     <LogoutMenuItem />
                   </DropdownMenuContent>
                 </DropdownMenu>

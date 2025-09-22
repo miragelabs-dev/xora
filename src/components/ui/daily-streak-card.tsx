@@ -12,18 +12,6 @@ export function DailyStreakCard() {
   const { data: streakData } = api.streak.getStreak.useQuery();
   const { data: pointsStats } = api.points.getPointsStats.useQuery();
 
-  const getStreakEmoji = () => {
-    if (!streakData) return "🔥";
-
-    const { currentStreak } = streakData;
-
-    if (currentStreak === 0) return "🚀";
-    if (currentStreak <= 3) return "🌟";
-    if (currentStreak <= 7) return "🔥";
-    if (currentStreak <= 30) return "⚡";
-    return "👑";
-  };
-
   return (
     <>
       <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setIsModalOpen(true)}>
@@ -31,9 +19,11 @@ export function DailyStreakCard() {
           <CardTitle className="flex items-center justify-between text-lg">
             <span className="flex items-center gap-2">
               <Trophy className="h-5 w-5 text-orange-500" />
-              Daily Streak
+              GM Streak
             </span>
-            <span className="text-2xl">{getStreakEmoji()}</span>
+            <span className="inline-flex items-center justify-center min-w-[60px] px-3 py-1 text-sm font-black text-primary-foreground border-primary rounded-lg shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200 border text-primary tracking-[3px]">
+              GM
+            </span>
           </CardTitle>
           <CardDescription className="text-sm">
             Keep your daily activity going

@@ -12,6 +12,7 @@ import { Loader2, Search } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { DailyStreakCard } from "./ui/daily-streak-card";
 
 function UserSuggestionSkeleton() {
   return (
@@ -167,7 +168,7 @@ export function RightSidebar() {
         {
           user && (
             <>
-              {/* <DailyStreakCard /> */}
+              <DailyStreakCard />
 
               <div className="rounded-xl bg-muted/50 p-4">
                 <h2 className="mb-4 text-xl font-bold">Who to follow</h2>

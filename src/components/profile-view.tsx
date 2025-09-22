@@ -9,6 +9,7 @@ import { api } from "@/utils/api";
 import { notFound } from "next/navigation";
 import { useState } from "react";
 import { Skeleton } from "./ui/skeleton";
+import { UserBadges } from "./user-badges";
 
 export function ProfileView({
   username
@@ -63,9 +64,9 @@ export function ProfileView({
               <TabsTrigger value="interests" className="flex-1">
                 Interests
               </TabsTrigger>
-              {/* <TabsTrigger value="badges" className="flex-1">
+              <TabsTrigger value="badges" className="flex-1">
                 Badges
-              </TabsTrigger> */}
+              </TabsTrigger>
               <TabsTrigger value="nft-collections" className="flex-1">
                 NFT Collections
               </TabsTrigger>
@@ -78,10 +79,10 @@ export function ProfileView({
         <Feed type="user" userId={profile.id} />
       ) : activeTab === 'replies' ? (
         <Feed type="replies" userId={profile.id} />
-        // ) : activeTab === 'badges' ? (
-        //   <div className="p-4">
-        //     <UserBadges username={profile.username} />
-        //   </div>
+      ) : activeTab === 'badges' ? (
+        <div className="p-4">
+          <UserBadges username={profile.username} />
+        </div>
       ) : activeTab === 'nft-collections' ? (
         <UserCollectionsView userId={profile.id} />
       ) : (
