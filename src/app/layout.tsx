@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     template: '%s | Xora',
     default: 'Xora',
   },
-  description: 'Welcome to our Decentralized Twitter Clone built with Chopin Framework and Celestia!',
+  description: 'Welcome to our Unstoppable Social Network!',
   metadataBase: new URL('https://xora.social'),
 };
 
