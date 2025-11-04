@@ -1,4 +1,5 @@
 export * from "./conversation";
+export * from "./community";
 export * from "./message";
 export * from "./nft";
 export * from "./notification";
@@ -8,4 +9,3 @@ export * from "./streak";
 export * from "./user";
 
 export * from "./message-view";
-

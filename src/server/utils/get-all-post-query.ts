@@ -58,6 +58,7 @@ export function getAllPostQuery({ userId }: {
             repostId: reposts.id,
             content: posts.content,
             image: posts.image,
+            communityId: posts.communityId,
             authorId: posts.authorId,
             authorUsername: users.username,
             authorImage: users.image,

@@ -1,5 +1,6 @@
 import { relations } from "drizzle-orm";
 import { foreignKey, integer, pgTable, serial, text, timestamp, unique, varchar } from "drizzle-orm/pg-core";
+import { communities } from "./community";
 import { users } from "./user";
 
 export const posts = pgTable("posts", {
@@ -11,6 +12,8 @@ export const posts = pgTable("posts", {
   authorId: integer("author_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
+  communityId: integer("community_id")
+    .references(() => communities.id, { onDelete: "set null" }),
   replyToId: integer("reply_to_id"),
 }, (table): [ReturnType<typeof foreignKey>] => [
   foreignKey({
@@ -25,6 +28,11 @@ export const postsRelations = relations(posts, ({ one, many }) => ({
     relationName: "posts_author",
     fields: [posts.authorId],
     references: [users.id],
+  }),
+  community: one(communities, {
+    relationName: "posts_community",
+    fields: [posts.communityId],
+    references: [communities.id],
   }),
   replyTo: one(posts, {
     relationName: "posts_reply_to",

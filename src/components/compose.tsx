@@ -23,9 +23,9 @@ export function Compose({ onSuccess }: { onSuccess?: () => void }) {
     <div className="p-3 sm:p-4 border-b">
       <ComposeForm
         user={user}
-        onSubmit={({ content, image }) => createPost({ content, image })}
+        onSubmit={({ content, image, communityId }) => createPost({ content, image, communityId })}
         isSubmitting={isPending}
       />
     </div>
   );
-} 
+}

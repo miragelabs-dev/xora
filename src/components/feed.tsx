@@ -8,9 +8,10 @@ import { useInView } from "react-intersection-observer";
 import { PostSkeleton } from "./post-skeleton";
 
 interface FeedProps {
-  type?: 'for-you' | 'following' | 'user' | 'replies' | 'interests' | 'search';
+  type?: 'for-you' | 'following' | 'user' | 'replies' | 'interests' | 'search' | 'community';
   userId?: number;
   searchQuery?: string;
+  communityId?: number;
 }
 
 export function FeedSkeleton() {
@@ -23,7 +24,7 @@ export function FeedSkeleton() {
   );
 }
 
-export function Feed({ type = 'for-you', userId, searchQuery }: FeedProps) {
+export function Feed({ type = 'for-you', userId, searchQuery, communityId }: FeedProps) {
   const { ref, inView } = useInView();
 
   const {
@@ -47,10 +48,12 @@ export function Feed({ type = 'for-you', userId, searchQuery }: FeedProps) {
         {
           type,
           userId,
+          communityId,
           limit: 10,
         },
         {
           getNextPageParam: (lastPage) => lastPage.nextCursor,
+          enabled: type !== 'community' || !!communityId,
         }
       );
 

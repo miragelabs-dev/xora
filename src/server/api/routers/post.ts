@@ -1,11 +1,11 @@
 import { db } from "@/lib/db";
-import { badges, follows, likes, posts, reposts, saves, userActivities, userBadges, users } from "@/lib/db/schema";
+import { badges, communities, communityMembers, follows, likes, posts, reposts, saves, userActivities, userBadges, users } from "@/lib/db/schema";
 import { setUserId } from "@/server/utils/db";
 import { enrichPosts, enrichReplyTo } from "@/server/utils/enrich-posts";
 import { getAllPostQuery } from "@/server/utils/get-all-post-query";
 import { createNotification, deleteNotification } from "@/server/utils/notifications";
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
@@ -41,12 +41,38 @@ export const postRouter = createTRPCRouter({
     .input(z.object({
       content: z.string().min(1).max(280),
       image: z.string().nullable().optional(),
+      communityId: z.number().optional().nullable(),
     }))
     .mutation(async ({ ctx, input }) => {
+      const communityId: number | null = input.communityId ?? null;
+
+      if (communityId !== null) {
+        const community = await ctx.db.query.communities.findFirst({
+          where: eq(communities.id, communityId),
+        });
+
+        if (!community) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Community not found" });
+        }
+
+        const membership = await ctx.db.query.communityMembers.findFirst({
+          where: and(
+            eq(communityMembers.communityId, communityId),
+            eq(communityMembers.userId, ctx.session.user.id),
+            eq(communityMembers.isApproved, true),
+          ),
+        });
+
+        if (!membership && community.createdById !== ctx.session.user.id) {
+          throw new TRPCError({ code: "FORBIDDEN", message: "You are not a member of this community" });
+        }
+      }
+
       const [result] = await ctx.db.insert(posts).values({
         content: input.content,
         authorId: ctx.session.user.id,
         image: input.image || null,
+        communityId,
       }).returning();
 
       await handleMentions(input.content, ctx.session.user.id, result.id, "post");
@@ -76,13 +102,14 @@ export const postRouter = createTRPCRouter({
 
   feed: publicProcedure
     .input(z.object({
-      type: z.enum(["for-you", "following", "user", "replies", "interests"]).default("for-you"),
+      type: z.enum(["for-you", "following", "user", "replies", "interests", "community"]).default("for-you"),
       userId: z.number().optional(),
+      communityId: z.number().optional(),
       limit: z.number().min(1).max(100).default(20),
       cursor: z.number().default(0),
     }))
     .query(async ({ ctx, input }) => {
-      const { type, limit, cursor, userId } = input;
+      const { type, limit, cursor, userId, communityId } = input;
 
       const sessionUserId = ctx.session?.user?.id ?? 0;
 
@@ -129,6 +156,17 @@ export const postRouter = createTRPCRouter({
           );
 
         conditions.push(sql`${posts.authorId} IN (${subquery})`);
+      }
+
+      if (type === 'community') {
+        if (!communityId) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Community id is required" });
+        }
+
+        conditions.push(eq(posts.communityId, communityId));
+      }
+      if (type === 'for-you' || type === 'following' || type === 'interests') {
+        conditions.push(isNull(posts.communityId));
       }
 
       const results = await getAllPostQuery({ userId })
@@ -411,11 +449,26 @@ export const postRouter = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 
+      if (parentPost.communityId) {
+        const membership = await ctx.db.query.communityMembers.findFirst({
+          where: and(
+            eq(communityMembers.communityId, parentPost.communityId),
+            eq(communityMembers.userId, ctx.session.user.id),
+            eq(communityMembers.isApproved, true),
+          ),
+        });
+
+        if (!membership) {
+          throw new TRPCError({ code: "FORBIDDEN", message: "You are not a member of this community" });
+        }
+      }
+
       const [post] = await ctx.db.insert(posts).values({
         content: input.content,
         authorId: ctx.session.user.id,
         image: input.image || null,
         replyToId: input.replyToId,
+        communityId: parentPost.communityId,
       }).returning();
 
       await handleMentions(input.content, ctx.session.user.id, post.id, "post");

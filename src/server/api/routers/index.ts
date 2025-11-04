@@ -1,6 +1,7 @@
 import { createTRPCRouter } from "../trpc";
 import { authRouter } from "./auth";
 import { badgeRouter } from "./badge";
+import { communityRouter } from "./community";
 import { discordRouter } from "./discord";
 import { messageRouter } from "./message";
 import { nftRouter } from "./nft";
@@ -14,6 +15,7 @@ import { userRouter } from "./user";
 export const appRouter = createTRPCRouter({
   auth: authRouter,
   badge: badgeRouter,
+  community: communityRouter,
   post: postRouter,
   notification: notificationRouter,
   points: pointsRouter,

@@ -304,6 +304,8 @@ export function Post({
               }}
               placeholder="Tweet your reply"
               submitLabel="Reply"
+              showAudienceSelector={false}
+              initialCommunityId={post.communityId ?? null}
             />
           )}
         </div>
