@@ -4,7 +4,7 @@ import { TRPCError, initTRPC } from "@trpc/server";
 import superjson from 'superjson';
 
 export const createTRPCContext = async (req: Request) => {
-  const session = await validateRequest();
+  const session = await validateRequest(req);
 
   return {
     session,
