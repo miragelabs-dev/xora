@@ -61,6 +61,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@next/eslint-plugin-next": "^15.2.0",
+    "@types/canvas-confetti": "^1.9.0",
     "@types/jsonwebtoken": "^9.0.8",
     "@types/node": "^20",
     "@types/pg": "^8.11.11",
