@@ -167,39 +167,54 @@ export const postRouter = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 
-      await ctx.db.insert(likes).values({
-        postId: input.postId,
-        userId: ctx.session.user.id,
+      const existingLike = await ctx.db.query.likes.findFirst({
+        where: and(
+          eq(likes.postId, input.postId),
+          eq(likes.userId, ctx.session.user.id)
+        ),
       });
 
-      await ctx.db.insert(userActivities).values({
-        userId: ctx.session.user.id,
-        activityType: "like",
-        points: 1,
-        metadata: JSON.stringify({ postId: input.postId, postAuthor: post.authorId }),
-      });
-
-      const likesCount = await ctx.db
-        .select({ count: sql<number>`count(*)` })
-        .from(userActivities)
-        .where(
-          and(
-            eq(userActivities.userId, ctx.session.user.id),
-            eq(userActivities.activityType, "like")
-          )
-        );
-
-      const totalLikes = likesCount[0]?.count || 0;
-      await checkAndAwardBadges(ctx.db, ctx.session.user.id, "likes", totalLikes);
-
-      if (post.authorId !== ctx.session.user.id) {
-        await createNotification(ctx.db, {
-          userId: post.authorId,
-          actorId: ctx.session.user.id,
-          type: "like",
-          targetId: input.postId,
-          targetType: "post",
+      if (existingLike) {
+        await ctx.db.delete(likes).where(and(
+          eq(likes.postId, input.postId),
+          eq(likes.userId, ctx.session.user.id)
+        ));
+      }else{
+        await ctx.db.insert(likes).values({
+          postId: input.postId,
+          userId: ctx.session.user.id,
         });
+  
+        await ctx.db.insert(userActivities).values({
+          userId: ctx.session.user.id,
+          activityType: "like",
+          points: 1,
+          metadata: JSON.stringify({ postId: input.postId, postAuthor: post.authorId }),
+        });
+  
+        const likesCount = await ctx.db
+          .select({ count: sql<number>`count(*)` })
+          .from(userActivities)
+          .where(
+            and(
+              eq(userActivities.userId, ctx.session.user.id),
+              eq(userActivities.activityType, "like")
+            )
+          );
+  
+        const totalLikes = likesCount[0]?.count || 0;
+        await checkAndAwardBadges(ctx.db, ctx.session.user.id, "likes", totalLikes);
+  
+        if (post.authorId !== ctx.session.user.id) {
+          await createNotification(ctx.db, {
+            userId: post.authorId,
+            actorId: ctx.session.user.id,
+            type: "like",
+            targetId: input.postId,
+            targetType: "post",
+          });
+        }
+
       }
     }),
 
