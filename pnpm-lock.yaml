@@ -23,6 +23,9 @@ importers:
       '@next/third-parties':
         specifier: ^15.3.2
         version: 15.3.2(next@16.1.6(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)
+      '@openauthjs/openauth':
+        specifier: ^0.4.3
+        version: 0.4.3(arctic@2.3.4)(hono@4.7.2
       '@radix-ui/react-avatar':
         specifier: ^1.1.3
         version: 1.1.3(@types/react-dom@19.0.4(@types/react@19.0.10))(@types/react@19.0.10)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -143,6 +146,9 @@ importers:
       tailwindcss-animate:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.4.17)
+      valibot:
+        specifier: ^1.2.0
+        version: 1.2.0(typescript@5.7.3)
       zod:
         specifier: ^3.24.2
         version: 3.24.2
@@ -843,6 +849,12 @@ packages:
 
   '@openauthjs/openauth@0.3.9':
     resolution: {integrity: sha512-a8UGz9iLQnB8TmY4bMDkCvMEWLHPEtDlXGnYNoFbEOxO13cCPu1pSS0DcUvKzHBAhXWnAMU01sSDMNZQr+aKWg==}
+    peerDependencies:
+      arctic: ^2.2.2
+      hono: ^4.0.0
+
+  '@openauthjs/openauth@0.4.3':
+    resolution: {integrity: sha512-RlnjqvHzqcbFVymEwhlUEuac4utA5h4nhSK/i2szZuQmxTIqbGUxZ+nM+avM+VV4Ing+/ZaNLKILoXS3yrkOOw==}
     peerDependencies:
       arctic: ^2.2.2
       hono: ^4.0.0
@@ -3459,6 +3471,14 @@ packages:
       typescript:
         optional: true
 
+  valibot@1.2.0:
+    resolution: {integrity: sha512-mm1rxUsmOxzrwnX5arGS+U4T25RdvpPjPN4yR0u9pUBov9+zGVtO84tif1eY4r6zWxVxu3KzIyknJy3rxfRZZg==}
+    peerDependencies:
+      typescript: '>=5'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
   webidl-conversions@3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
 
@@ -3885,8 +3905,7 @@ snapshots:
     optional: true
 
   '@img/sharp-win32-ia32@0.34.5':
-    optional: true
-
+    optional: truemain
   '@img/sharp-win32-x64@0.34.5':
     optional: true
 
@@ -3989,6 +4008,14 @@ snapshots:
   '@nolyfill/is-core-module@1.0.39': {}
 
   '@openauthjs/openauth@0.3.9(arctic@2.3.4)(hono@4.7.2)':
+    dependencies:
+      '@standard-schema/spec': 1.0.0-beta.3
+      arctic: 2.3.4
+      aws4fetch: 1.0.20
+      hono: 4.7.2
+      jose: 5.9.6
+
+  '@openauthjs/openauth@0.4.3(arctic@2.3.4)(hono@4.7.2)':
     dependencies:
       '@standard-schema/spec': 1.0.0-beta.3
       arctic: 2.3.4
@@ -6751,6 +6778,10 @@ snapshots:
   util-deprecate@1.0.2: {}
 
   valibot@1.0.0-rc.1(typescript@5.7.3):
+    optionalDependencies:
+      typescript: 5.7.3
+
+  valibot@1.2.0(typescript@5.7.3):
     optionalDependencies:
       typescript: 5.7.3
 

@@ -62,7 +62,16 @@ const uploadFile = async (file: File): Promise<string> => {
   });
 
   const data = await response.json();
-  return data.secure_url;
+  if (!response.ok) {
+    throw new Error(data.error || "Upload failed");
+  }
+
+  const imageUrl = data.url ?? data.secure_url;
+  if (typeof imageUrl !== "string") {
+    throw new Error("Upload response missing URL");
+  }
+
+  return imageUrl;
 };
 
 export function EditProfileDialog({

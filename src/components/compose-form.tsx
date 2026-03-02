@@ -92,7 +92,12 @@ export function ComposeForm({
         throw new Error(data.error || 'Upload failed');
       }
 
-      setImage(data.secure_url);
+      const imageUrl = data.url ?? data.secure_url;
+      if (typeof imageUrl !== "string") {
+        throw new Error("Upload response missing URL");
+      }
+
+      setImage(imageUrl);
     } catch (error) {
       toast.error('Image upload failed. Please try again.');
       console.error('Upload error:', error);

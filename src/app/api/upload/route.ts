@@ -18,7 +18,7 @@ export async function POST(req: Request) {
     const formData = await req.formData();
     const file = formData.get("file");
 
-    if (!file || typeof file !== "object" || !("type" in file) || !("size" in file)) {
+    if (!(file instanceof File)) {
       return NextResponse.json(
         { error: "No file uploaded" },
         { status: 400 }
@@ -60,7 +60,14 @@ export async function POST(req: Request) {
       );
     }
 
-    return NextResponse.json(data);
+    if (typeof data?.secure_url !== "string") {
+      return NextResponse.json(
+        { error: "Upload response did not include a URL" },
+        { status: 502 }
+      );
+    }
+
+    return NextResponse.json({ url: data.secure_url });
 
   } catch (error) {
     console.error("Upload error:", error);

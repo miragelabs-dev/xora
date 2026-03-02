@@ -1,5 +1,5 @@
-import { getAddress } from '@chopinframework/next';
-import { eq } from "drizzle-orm";
+import { getAddress } from "@chopinframework/next";
+import { resolveAddress } from "./chopin-auth";
 import { db } from "./db";
 import { users } from "./db/schema";
 
@@ -9,17 +9,13 @@ function generateRandomUsername(): string {
     .join('');
 }
 
-export async function validateRequest() {
+export async function validateRequest(req?: Request) {
   try {
-    const address = await getAddress();
+    const address = (await resolveAddress(req)) ?? (await getAddress());
 
     if (!address) {
       return null;
     }
-
-    const existingUser = await db.query.users.findFirst({
-      where: eq(users.address, address),
-    });
 
     const [user] = await db
       .insert(users)
