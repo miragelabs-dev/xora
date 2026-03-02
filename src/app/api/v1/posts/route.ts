@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 
 import { appRouter } from "@/server/api/routers";
 import { createTRPCContext } from "@/server/api/trpc";
@@ -40,63 +41,18 @@ export async function GET(req: NextRequest) {
   }
 }
 
-import { TRPCError } from "@trpc/server";
-
-// TODO: kendi storage'ına göre doldur
-async function uploadImageToStorage(file: File): Promise<string> {
-  // güvenlik: type/size kontrolü
-  const maxBytes = 5 * 1024 * 1024;
-  if (!file.type.startsWith("image/")) {
-    throw new TRPCError({ code: "BAD_REQUEST", message: "image must be an image file" });
-  }
-  if (file.size > maxBytes) {
-    throw new TRPCError({ code: "BAD_REQUEST", message: "image too large" });
-  }
-
-  // File -> Buffer
-  const arrayBuffer = await file.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
-
-  // burada buffer'ı S3/MinIO/Cloudinary'ye upload edip public URL döndür
-  // return uploadedUrl;
-
-  throw new Error("uploadImageToStorage not implemented");
-}
-
 export async function POST(req: NextRequest) {
   try {
     const contentType = req.headers.get("content-type") ?? "";
-
-    let payload: { content: string; image?: string | null };
-
-    if (contentType.includes("multipart/form-data")) {
-      const fd = await req.formData();
-
-      const content = String(fd.get("content") ?? "");
-      const imageField = fd.get("image");
-
-      let imageUrl: string | null = null;
-
-      // image alanı File ise upload et
-      if (imageField && imageField instanceof File && imageField.size > 0) {
-        imageUrl = await uploadImageToStorage(imageField);
-      } else if (typeof imageField === "string") {
-        // bazı client’lar URL string gönderebilir
-        imageUrl = imageField || null;
-      }
-
-      payload = { content, image: imageUrl };
-    } else if (contentType.includes("application/json")) {
-      const json = await req.json();
-      payload = json;
-    } else {
+    if (!contentType.includes("application/json")) {
       throw new TRPCError({
         code: "BAD_REQUEST",
         message: `Unsupported Content-Type: ${contentType}`,
       });
     }
 
-    const input = CreateBody.parse(payload);
+    const json = await req.json();
+    const input = CreateBody.parse(json);
 
     const ctx = await createTRPCContext(req);
     const caller = appRouter.createCaller(ctx);

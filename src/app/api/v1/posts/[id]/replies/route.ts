@@ -37,6 +37,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       postId: id,
       ...query,
     });
+
     return NextResponse.json(data, { status: 200 });
   } catch (err) {
     const { status, body } = toHttpError(err);
